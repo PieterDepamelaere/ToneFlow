@@ -1,0 +1,38 @@
+#:kivy 1.11.1
+
+#:import img_dir src.main.img_dir
+
+<ContentNavigationDrawer@MDNavigationDrawer>:
+
+    drawer_logo: f"{img_dir}ToneFlow_DrawerLogo.png"
+    #drawer_title: "Menu:"
+
+    NavigationDrawerSubheader:
+        text: "Menu:"
+
+    #NavigationDrawerSubheader:
+    #    text: "Second:"
+
+
+NavigationLayout:
+    id: nav_layout
+
+    ContentNavigationDrawer:
+        id: nav_drawer
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        MDToolbar:
+            id: toolbar
+            title: app.title
+            md_bg_color: app.theme_cls.primary_color
+            background_palette: 'Primary'
+            background_hue: '500'
+            elevation: 10
+            left_action_items:
+                [['menu', lambda x: app.root.toggle_nav_drawer()]]
+            right_action_items:
+                [['dots-vertical', lambda x: app.root.toggle_nav_drawer()]]
+
+        Widget:
