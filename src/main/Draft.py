@@ -1,75 +1,67 @@
-import os
-import sys
-import pathlib as pl
-root_directory = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, root_directory)
-sys.path.insert(0, str(pl.Path(root_directory).parents[1]))
-sys.path.insert(0, str(pl.Path(root_directory).parents[2]))
-
-# Below statement if you want to use the video player, do this before the kivy import!
-os.environ['KIVY_VIDEO']='ffpyplayer'
-
-import kivy
-kivy.require('1.11.1') # replace with your current kivy version !
-
-from kivy.lang import Builder
-Builder.load_file(str(pl.Path(root_directory) / "Pong.kv"))
-
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.factory import Factory
+from kivy.utils import get_hex_from_color
 
-from kivymd.uix.navigationdrawer import NavigationDrawerIconButton
+from kivymd.uix.dialog import MDInputDialog, MDDialog
 from kivymd.theming import ThemeManager
-from kivymd.toast import toast
-
-main_kv = """
-<ContentNavigationDrawer@MDNavigationDrawer>:
-    drawer_logo: 'demos/kitchen_sink/assets/drawer_logo.png'
-
-    NavigationDrawerSubheader:
-        text: "Menu:"
 
 
-NavigationLayout:
-    id: nav_layout
+Builder.load_string('''
+<ExampleDialogs@BoxLayout>
+    orientation: 'vertical'
+    spacing: dp(5)
 
-    ContentNavigationDrawer:
-        id: nav_drawer
+    MDToolbar:
+        id: toolbar
+        title: app.title
+        left_action_items: [['menu', lambda x: None]]
+        elevation: 10
+        md_bg_color: app.theme_cls.primary_color
 
-    BoxLayout:
-        orientation: 'vertical'
+    FloatLayout:
+        MDRectangleFlatButton:
+            text: "Open input dialog"
+            pos_hint: {'center_x': .5, 'center_y': .7}
+            opposite_colors: True
+            on_release: app.show_example_input_dialog()
 
-        MDToolbar:
-            id: toolbar
-            title: 'KivyMD Kitchen Sink'
-            md_bg_color: app.theme_cls.primary_color
-            background_palette: 'Primary'
-            background_hue: '500'
-            elevation: 10
-            left_action_items:
-                [['dots-vertical', lambda x: app.root.toggle_nav_drawer()]]
-
-        Widget:
-"""
+        MDRectangleFlatButton:
+            text: "Open Ok Cancel dialog"
+            pos_hint: {'center_x': .5, 'center_y': .5}
+            opposite_colors: True
+            on_release: app.show_example_okcancel_dialog()
+''')
 
 
-class ToneFlowApp(App):
+class Example(App):
     theme_cls = ThemeManager()
-    theme_cls.primary_palette = 'Red'
+    theme_cls.primary_palette = 'Teal'
+    title = "Dialogs"
 
     def build(self):
-        self.main_widget = Builder.load_string(main_kv)
-        return self.main_widget
+        return Factory.ExampleDialogs()
 
-    def callback(self, instance, value):
-        toast("Pressed item menu %d" % value)
+    def callback_for_menu_items(self, *args):
+        from kivymd.toast.kivytoast import toast
+        toast(args[0])
 
-    def on_start(self):
-        for i in range(15):
-            self.main_widget.ids.nav_drawer.add_widget(
-                NavigationDrawerIconButton(
-                    icon='checkbox-blank-circle', text="Item menu %d" % i,
-                    on_release=lambda x, y=i: self.callback(x, y)))
+    def show_example_input_dialog(self):
+        dialog = MDInputDialog(
+            title='Title', hint_text='Hint text', size_hint=(.8, .4),
+            text_button_ok='Yes',
+            events_callback=self.callback_for_menu_items)
+        dialog.open()
+
+    def show_example_okcancel_dialog(self):
+        dialog = MDDialog(
+            title='Title', size_hint=(.8, .3), text_button_ok='Yes',
+            text="Your [color=%s][b]text[/b][/color] dialog" % get_hex_from_color(
+                self.theme_cls.primary_color),
+            text_button_cancel='Cancel',
+            events_callback=self.callback_for_menu_items)
+        dialog.open()
+
 
 if __name__ == "__main__":
-    ToneFlowApp().run()
+    Example().run()
