@@ -26,7 +26,7 @@ from kivymd.theming import ThemeManager
 from kivymd.toast import toast
 
 
-from src.main import Main
+from src.main import MainApp
 
 
 # In theory, an update of the minor version alone shouldn't induce breaking changes.
@@ -51,6 +51,7 @@ class MainApp(App):
 
     def build(self):
         self.main_widget = Builder.load_file(str(curr_file.with_suffix(".kv")))
+        # self.Window.bind(on_request_close= lambda x:self.on_stop())
         return self.main_widget
 
 
@@ -98,15 +99,18 @@ class MainApp(App):
 
     def decide_stop_or_not(self, *args):
         if args[0] is not None:
-            if (MainApp.safe_cast(args[0],"string","")).lower() == "yes":
+            # print(f"args0 {str(args[0])}")
+            if (MainApp.safe_cast(args[0], str, "")).lower() == "yes":
                 self.stop()
             else:
                 toast("Not quitting")
+        else:
+            toast("Not quitting")
 
     def show_cancel_dialog(self, title, text, text_button_ok="Ok", text_button_cancel="Cancel", callback=None):
         ok_cancel_dialog = MDDialog(
                 title=title,
-                size_hint=(0.8, 0.4),
+                size_hint=(0.5, 0.3),
                 text=text,
                 text_button_ok=text_button_ok,
                 text_button_cancel=text_button_cancel,
