@@ -113,6 +113,6 @@ class MainApp(App):
 
 if __name__ == "__main__":
     mapp = MainApp()
-    # TODO PDP: Make this work
+    # TODO: Make this work
     # tfa.set_title_toolbar("TEstje")
     mapp.run()
