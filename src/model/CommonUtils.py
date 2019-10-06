@@ -3,7 +3,7 @@
 
 class CommonUtils:
 
-
+    tf_workspace = None
 
     @staticmethod
     def safe_cast(val, to_type, default=None):

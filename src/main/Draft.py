@@ -42,14 +42,22 @@ class Example(App):
     def build(self):
         return Factory.ExampleDialogs()
 
+    def on_start(self):
+        self.icon = "/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/ToneFlow/img/ToneFlow_Logo_Filled.png"
+        print("its me " +  str(self.get_application_icon()))
+        self.show_example_input_dialog()
+
+    def on_title(self, instance, title):
+        self.title = "owksy"
+
     def callback_for_menu_items(self, *args):
         from kivymd.toast.kivytoast import toast
         toast(args[0])
 
     def show_example_input_dialog(self):
         dialog = MDInputDialog(
-            title='Title', hint_text='Hint text', size_hint=(.8, .4),
-            text_button_ok='Yes',
+            title='Enter path to workspace folder', hint_text="Where is the hint text", size_hint=(.8, .4),
+            text_button_ok='Confirm',
             events_callback=self.callback_for_menu_items)
         dialog.open()
 
@@ -64,4 +72,9 @@ class Example(App):
 
 
 if __name__ == "__main__":
-    Example().run()
+    # a = InputDiagTest()
+    # a.show_example_input_dialog()
+    a = Example()
+    # a.show_example_input_dialog()
+    a.run()
+
