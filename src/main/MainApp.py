@@ -26,8 +26,8 @@ from kivymd.theming import ThemeManager
 from kivymd.toast import toast
 
 
-from src.main import MainApp
-
+# from src.main import MainApp
+from src.model.CommonUtils import CommonUtils as CU
 
 # In theory, an update of the minor version alone shouldn't induce breaking changes.
 MAJOR_MINOR_VERSION = "0.1"
@@ -45,7 +45,6 @@ class MainApp(App):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
         # self.Window = Window
 
 
@@ -82,13 +81,6 @@ class MainApp(App):
 
         # original icons: checkbox-blank-circle
 
-    @staticmethod
-    def safe_cast(val, to_type, default=None):
-        try:
-            return to_type(val)
-        except (ValueError, TypeError):
-            return default
-
 
     def set_title_toolbar(self, title):
         """Set string title in MDToolbar for the whole application."""
@@ -100,7 +92,7 @@ class MainApp(App):
     def decide_stop_or_not(self, *args):
         if args[0] is not None:
             # print(f"args0 {str(args[0])}")
-            if (MainApp.safe_cast(args[0], str, "")).lower() == "yes":
+            if (CU.safe_cast(args[0], str, "")).lower() == "yes":
                 self.stop()
             else:
                 toast("Not quitting")
