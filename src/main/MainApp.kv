@@ -1,10 +1,12 @@
 #:kivy 1.11.1
 
-#:import img_dir src.main.img_dir
+#:import os os
+#:import CommonUtils src.model.CommonUtils.CommonUtils
+
 
 <ContentNavigationDrawer@MDNavigationDrawer>:
 
-    drawer_logo: f"{img_dir}ToneFlow_DrawerLogo.png"
+    drawer_logo: f"{CommonUtils.tfs.dic['IMG_DIR'].value}{os.sep}ToneFlow_DrawerLogo.png"
     #drawer_title: "Menu:"
 
     NavigationDrawerSubheader:

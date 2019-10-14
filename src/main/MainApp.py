@@ -2,12 +2,11 @@ import os
 import sys
 import pathlib as pl
 curr_file = pl.Path(os.path.realpath(__file__))
-curr_file_dir = curr_file.parents[0]
+# curr_file_dir = curr_file.parents[0]
 
 sys.path.insert(0, str(curr_file.parents[0]))
 sys.path.insert(0, str(curr_file.parents[1]))
 sys.path.insert(0, str(curr_file.parents[2]))
-img_dir = pl.Path(curr_file.parents[2] / "img")
 
 # Below statement if you want to use the video player, do this before the kivy import!
 os.environ['KIVY_VIDEO']='ffpyplayer'
@@ -30,28 +29,30 @@ from kivymd.toast import toast
 
 # from src.main import MainApp
 from src.model.CommonUtils import CommonUtils as CU
+from src.model.TFSettings import TFSettings
 
 # In theory, an update of the minor version alone shouldn't induce breaking changes.
 MAJOR_MINOR_VERSION = "0.1"
-APP_NAME = str("ToneFlow " + u"\u00a9")
+APP_NAME = str("ToneFlow" + u"\u00AE")
 
 class MainApp(App):
     """
 
     """
     theme_cls = ThemeManager()
-    theme_cls.primary_palette = 'Purple'
-    theme_cls.accent_palette = "Green"
+    theme_cls.primary_palette = "Brown"
+    theme_cls.accent_palette = "LightGreen"
     title = APP_NAME + " - v" + MAJOR_MINOR_VERSION
     theme_cls.theme_style = "Light"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        CU.tfs = TFSettings()
         # self.Window = Window
 
 
     def build(self):
-        self.icon = str(pl.Path(img_dir / "ToneFlow_Logo_Filled.png"))
+        self.icon = str(pl.Path(CU.tfs.dic['IMG_DIR'].value) / "ToneFlow_Logo_Filled.png")
         self.main_widget = Builder.load_file(str(curr_file.with_suffix(".kv")))
         # self.Window.bind(on_request_close= lambda x:self.on_stop())
         return self.main_widget
@@ -61,6 +62,7 @@ class MainApp(App):
         toast(f"Pressed item menu {value}")
 
     def on_start(self):
+
         playlists_ndib = NavigationDrawerIconButton(
             icon="playlist-music", text="Playlists",
             on_release=lambda x, y="Playlists Screen": self.callback(x, y))
@@ -84,18 +86,14 @@ class MainApp(App):
 
         # original icons: checkbox-blank-circle
 
-        # Copy path_proposal to clipboard:
-        path_proposal = pl.Path(curr_file.parents[3] / "Workspace_TF")
-        pyperclip.copy(str(path_proposal))
-        self.show_example_input_dialog(title="Enter Path to TF Workspace Folder", hint_text="Please specify path on external device like USB", text="/home/pieter", size_hint=(.8, .4), text_button_ok="Confirm", callback=lambda text_button, instance: toast(str(instance.text_field.text)))
-
-        # TODO: Make this below into a callback
-        # # Without whitespace the length of ans_user should be bigger than 0 to return it:
-        # if (ans_user.strip().__len__() > 0):
-        #     return pl.Path(ans_user)
-        # else:
-        #     # In case of trivial ans_user, the original proposal is returned:
-        #     return pl.Path(path_proposal)
+        # As a proposal, the actual (default)value of the tf_workspace-param is copied to the clipboard:
+        workspace_path_proposal = CU.tfs.dic['tf_workspace'].value
+        pyperclip.copy(str(workspace_path_proposal))
+        self.show_example_input_dialog(title=f"Enter Path to \"{CU.tfs.dic['WORKSPACE_NAME'].value}\"-Folder or its Parent Folder",
+                                       hint_text=f"{CU.tfs.dic['tf_workspace'].description}",
+                                       text=f"{CU.tfs.dic['tf_workspace'].description}",
+                                       size_hint=(.8, .3), text_button_ok="Load/Create",
+                                       callback=lambda text_button, instance: {CU.tfs.create_load_tf_workspace(instance.text_field.text, workspace_path_proposal), toast(str(CU.tfs.dic['tf_workspace'].value))})
 
     def set_title_toolbar(self, title):
         """Set string title in MDToolbar for the whole application."""
@@ -129,10 +127,10 @@ class MainApp(App):
         dialog = MDInputDialog(
             title=title,
             hint_text=hint_text,
-            #text=text,
             size_hint=size_hint,
             text_button_ok=text_button_ok,
             events_callback=callback)
+        dialog.text_field.text = text
         dialog.open()
 
 if __name__ == "__main__":
