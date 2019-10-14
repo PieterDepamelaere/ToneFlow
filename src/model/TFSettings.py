@@ -15,6 +15,8 @@ class TFSettings:
         self.dic = dict()
 
         # Add new TFSetting-objects to dic (_name, _value, _default_value, _description="", _is_editable=False))
+        self.dic['APP_NAME'] = TFSetting("Name of Application", None, str("ToneFlow" + u"\u00AE"), None, False)
+        self.dic['MAJOR_MINOR_VERSION'] = TFSetting(f"{self.dic['APP_NAME'].value} Version MAJOR.MINOR", None, "0.1", None, False)
         self.dic['IMG_DIR'] = TFSetting("Internal Directory of Images", None, str(curr_file.parents[2]) + f"{os.sep}img{os.sep}", None, False)
         self.dic['WORKSPACE_NAME'] = TFSetting("Name of Workspace", None, "Workspace_TF", None, False)
         self.dic['IMAGES_VIDEOS_DIR_NAME'] = TFSetting("Name of Images_Videos Folder in Workspace", None, "Images_Videos", None, False)

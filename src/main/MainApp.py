@@ -52,7 +52,7 @@ class MainApp(App):
 
 
     def build(self):
-        self.icon = str(pl.Path(CU.tfs.dic['IMG_DIR'].value) / "ToneFlow_Logo_Filled.png")
+        self.icon = str(pl.Path(CU.tfs.dic['IMG_DIR'].value) / "ToneFlow_Logo_TaskBarIcon.png")
         self.main_widget = Builder.load_file(str(curr_file.with_suffix(".kv")))
         # self.Window.bind(on_request_close= lambda x:self.on_stop())
         return self.main_widget
