@@ -26,14 +26,8 @@ from kivymd.uix.dialog import MDDialog, MDInputDialog
 from kivymd.theming import ThemeManager
 from kivymd.toast import toast
 
-
-# from src.main import MainApp
+from src.main import *
 from src.model.CommonUtils import CommonUtils as CU
-from src.model.TFSettings import TFSettings
-
-# In theory, an update of the minor version alone shouldn't induce breaking changes.
-MAJOR_MINOR_VERSION = "0.1"
-APP_NAME = str("ToneFlow" + u"\u00AE")
 
 class MainApp(App):
     """
@@ -42,12 +36,11 @@ class MainApp(App):
     theme_cls = ThemeManager()
     theme_cls.primary_palette = "Brown"
     theme_cls.accent_palette = "LightGreen"
-    title = APP_NAME + " - v" + MAJOR_MINOR_VERSION
+    title = CU.tfs.dic['APP_NAME'].value + " - v" + CU.tfs.dic['MAJOR_MINOR_VERSION'].value
     theme_cls.theme_style = "Light"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        CU.tfs = TFSettings()
         # self.Window = Window
 
 
@@ -95,12 +88,11 @@ class MainApp(App):
                                        size_hint=(.8, .3), text_button_ok="Load/Create",
                                        callback=lambda text_button, instance: {CU.tfs.create_load_tf_workspace(instance.text_field.text, workspace_path_proposal), toast(str(CU.tfs.dic['tf_workspace'].value))})
 
-    def set_title_toolbar(self, title):
-        """Set string title in MDToolbar for the whole application."""
-        self.main_widget.ids.toolbar.title = title
+    def on_pause(self):
+        return True
 
     def on_stop(self, *kwargs):
-        self.show_cancel_dialog(title="Confirmation dialog", text=f"Are you sure you want to [color={get_hex_from_color(self.theme_cls.primary_color)}][b]quit[/b][/color] {APP_NAME}?", size_hint=(0.5, 0.3), text_button_ok="Yes", text_button_cancel="No", callback=self.decide_stop_or_not)
+        self.show_cancel_dialog(title="Confirmation dialog", text=f"Are you sure you want to [color={get_hex_from_color(self.theme_cls.primary_color)}][b]quit[/b][/color] {CU.tfs.dic['APP_NAME'].value}?", size_hint=(0.5, 0.3), text_button_ok="Yes", text_button_cancel="No", callback=self.decide_stop_or_not)
 
     def decide_stop_or_not(self, *args):
         if args[0] is not None:
@@ -111,6 +103,10 @@ class MainApp(App):
                 toast("Not quitting")
         else:
             toast("Not quitting")
+
+    def set_title_toolbar(self, title):
+        """Set string title in MDToolbar for the whole application."""
+        self.main_widget.ids.toolbar.title = title
 
     def show_cancel_dialog(self, title, text, size_hint=(.8, .4), text_button_ok="Ok", text_button_cancel="Cancel", callback=None):
         ok_cancel_dialog = MDDialog(
@@ -135,6 +131,5 @@ class MainApp(App):
 
 if __name__ == "__main__":
     mapp = MainApp()
-    # TODO: Make this work
-    # tfa.set_title_toolbar("TEstje")
+    CU.tfs.export_tf_settings_to_config()
     mapp.run()

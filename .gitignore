@@ -301,3 +301,6 @@ dmypy.json
 .pyre/
 
 # End of https://www.gitignore.io/api/python,pycharm
+
+# Specific to ToneFlow
+Config_TF.json

@@ -47,13 +47,23 @@ class TFSetting:
         description = CU.safe_cast(description, str, "")
         self._description = description
 
+    def get_is_editable(self):
+        return self._is_editable
+
     name = property(get_name, set_name)
     value = property(get_value, set_value)
     description = property(get_description, set_description)
+    is_editable = property(get_is_editable)
 
     def restore_factory_setting(self):
         self._value = self._default_value
 
-    @classmethod
-    def from_json(cls, json_data: dict):
-        return cls(**json_data)
+    def to_json(self):
+        if (self._is_editable):
+            converted_value = self.value
+            if (isinstance(self.value, pl.Path)):
+                # The TFSetting indicates a Path-obj:
+                converted_value = "/FILE_SEP/".join(self.value.parts)
+            return dict(value=converted_value)
+        else:
+            return None

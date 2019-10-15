@@ -16,7 +16,8 @@ class TFSettings:
 
         # Add new TFSetting-objects to dic (_name, _value, _default_value, _description="", _is_editable=False))
         self.dic['APP_NAME'] = TFSetting("Name of Application", None, str("ToneFlow" + u"\u00AE"), None, False)
-        self.dic['MAJOR_MINOR_VERSION'] = TFSetting(f"{self.dic['APP_NAME'].value} Version MAJOR.MINOR", None, "0.1", None, False)
+        self.dic['MAJOR_MINOR_VERSION'] = TFSetting(f"{self.dic['APP_NAME'].value} Version MAJOR.MINOR", None, "0.1", "In theory, an update of the minor version alone shouldn't induce breaking changes.", False)
+        self.dic['CONFIG_FILE_PATH'] = TFSetting("Path to Config File", None, curr_file.parents[2] / "Config_TF.json", None, True)
         self.dic['IMG_DIR'] = TFSetting("Internal Directory of Images", None, str(curr_file.parents[2]) + f"{os.sep}img{os.sep}", None, False)
         self.dic['WORKSPACE_NAME'] = TFSetting("Name of Workspace", None, "Workspace_TF", None, False)
         self.dic['IMAGES_VIDEOS_DIR_NAME'] = TFSetting("Name of Images_Videos Folder in Workspace", None, "Images_Videos", None, False)
@@ -38,7 +39,14 @@ class TFSettings:
         # tone_flow_direction
         # _overall_mute_play_along
 
-    def load_tf_settings_from_config(self):
+    def export_tf_settings_to_config(self):
+
+        with open(f"{self.dic['CONFIG_FILE_PATH'].value}", 'w') as file:
+            # Only dump editable properties
+            json.dump({k: v for k, v in self.dic.items() if v.is_editable}, fp=file, default=lambda s: s.to_json(), indent=4,
+                   sort_keys=True)
+
+    def import_tf_settings_from_config(self):
         pass
 
         # TODO: Implement properly
