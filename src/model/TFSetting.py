@@ -36,9 +36,16 @@ class TFSetting:
         return self._value
 
     def set_value(self, value):
-        # if (value < 18):
-        #     raise ValueError("Sorry you age is below eligibility criteria")
+        # Check if the type of the new value matches with the type of the default value, try safe_casting:
+        if (isinstance(self._default_value, pl.Path)):
+            # When it's a pl.Path, then the exportable FILE_SEP_TEXT should be replaced:
+            value = str(value).replace(f"{CU.tfs.dic['FILE_SEP_TEXT'].value}",f"{os.sep}")
+
+        value = CU.safe_cast(value, type(self._default_value), "")
         self._value = value
+
+    def get_default_value(self):
+        return self._default_value
 
     def get_description(self):
         return self._description
@@ -52,6 +59,7 @@ class TFSetting:
 
     name = property(get_name, set_name)
     value = property(get_value, set_value)
+    default_value = property(get_default_value)
     description = property(get_description, set_description)
     is_editable = property(get_is_editable)
 

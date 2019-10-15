@@ -50,23 +50,19 @@ class MainApp(App):
         # self.Window.bind(on_request_close= lambda x:self.on_stop())
         return self.main_widget
 
-
-    def callback(self, instance, value):
-        toast(f"Pressed item menu {value}")
-
     def on_start(self):
 
         playlists_ndib = NavigationDrawerIconButton(
             icon="playlist-music", text="Playlists",
-            on_release=lambda x, y="Playlists Screen": self.callback(x, y))
+            on_release=lambda x, y="Playlists Screen": toast(y))
 
         songs_ndib = NavigationDrawerIconButton(
             icon="music-note", text="Songs",
-            on_release=lambda x, y="Songs Screen": self.callback(x, y))
+            on_release=lambda x, y="Songs Screen": toast(y))
 
         settings_ndib = NavigationDrawerIconButton(
             icon="settings", text="Settings",
-            on_release=lambda x, y="Settings Screen": self.callback(x, y))
+            on_release=lambda x, y="Settings Screen": toast(y))
 
         shut_down_ndib = NavigationDrawerIconButton(
             icon="power", text="Quit",
@@ -80,11 +76,17 @@ class MainApp(App):
         # original icons: checkbox-blank-circle
 
         # As a proposal, the actual (default)value of the tf_workspace_path-param is copied to the clipboard:
-        workspace_path_proposal = CU.tfs.dic['tf_workspace_path'].value
+        workspace_path_proposal = CU.tfs.dic['tf_workspace_path'].default_value
+
+        dialog_text = f"{CU.tfs.dic['tf_workspace_path'].description}"
+        if (CU.tfs.dic['tf_workspace_path'].default_value != CU.tfs.dic['tf_workspace_path'].value):
+            # This means that the user did configure a customized path:
+            dialog_text =f"{CU.tfs.dic['tf_workspace_path'].value}"
+
         pyperclip.copy(str(workspace_path_proposal))
         self.show_example_input_dialog(title=f"Enter \"{CU.tfs.dic['WORKSPACE_NAME'].value}\"-Folder or its Parent Folder",
                                        hint_text=f"{CU.tfs.dic['tf_workspace_path'].description}",
-                                       text=f"{CU.tfs.dic['tf_workspace_path'].description}",
+                                       text=dialog_text,
                                        size_hint=(.8, .3), text_button_ok="Load/Create",
                                        callback=lambda text_button, instance: {CU.tfs.create_load_tf_workspace(instance.text_field.text, workspace_path_proposal), toast(str(CU.tfs.dic['tf_workspace_path'].value))})
 
@@ -130,7 +132,14 @@ class MainApp(App):
         dialog.open()
 
 if __name__ == "__main__":
+    if(CU.tfs.dic['CONFIG_FILE_PATH'].value.exists()):
+        # If the config-file exists, then try to import it:
+        CU.tfs.import_tf_settings_from_config()
+    else:
+        # Else, when the config-file is absent, then export (a new) one:
+        CU.tfs.export_tf_settings_to_config()
+
     mapp = MainApp()
-    CU.tfs.import_tf_settings_from_config()
-    CU.tfs.export_tf_settings_to_config()
     mapp.run()
+
+    CU.tfs.export_tf_settings_to_config()

@@ -48,43 +48,43 @@ class TFSettings:
     def import_tf_settings_from_config(self):
         # TODO: Test what happens when missing:
         with open(f"{self.dic['CONFIG_FILE_PATH'].value}") as config_file:
-            data = json.load(config_file)
+            config_dic = json.load(config_file)
 
+            for key in config_dic:
+                self.dic[key].value = config_dic[key]['value']
 
-            print("Parsing of the JSON-configfile was successfully")
+            print("Parsing of the JSON-configfile was successful.")
 
-
-    def create_load_tf_workspace(self, tf_workspace, workspace_path_proposal):
+    def create_load_tf_workspace(self, tf_workspace_path, tf_workspace_path_proposal):
 
         # Without whitespace the length of ans_user should be bigger than 0:
-        if (tf_workspace is not None and str(tf_workspace).strip().__len__() > 0):
-            tf_workspace = pl.Path(tf_workspace)
+        if (tf_workspace_path is not None and str(tf_workspace_path).strip().__len__() > 0):
+            tf_workspace_path = pl.Path(tf_workspace_path)
         else:
-            # In case of trivial tf_workspace, the original proposal is used:
-            tf_workspace = pl.Path(workspace_path_proposal)
+            # In case of trivial tf_workspace_path, the original proposal is used:
+            tf_workspace_path = pl.Path(tf_workspace_path_proposal)
 
-        # Make sure that tf_workspace is actually a Path-object:
-        tf_workspace = pl.Path(tf_workspace)
+        # Make sure that tf_workspace_path is actually a Path-object:
+        tf_workspace_path = pl.Path(tf_workspace_path)
 
-        if (tf_workspace.is_file()):
+        if (tf_workspace_path.is_file()):
             # If one would have specified a file, then the workspace will be created under its parent
-            tf_workspace = tf_workspace.parents[0]
+            tf_workspace_path = tf_workspace_path.parents[0]
 
         # Check whether innermost subdirectory is already the workspace itself:
-        if (tf_workspace.name != str(self.dic['WORKSPACE_NAME'].value)):
-            tf_workspace = tf_workspace / self.dic['WORKSPACE_NAME'].value
+        if (tf_workspace_path.name != str(self.dic['WORKSPACE_NAME'].value)):
+            tf_workspace_path = tf_workspace_path / self.dic['WORKSPACE_NAME'].value
 
-        # Update the tf_workspace TFSetting:
-        self.dic['tf_workspace'].value = tf_workspace
-        # TODO: Will I save paths platform indep as string or? => It needs to be human readible as setting, only when exporting fileseparators need to be converted to {FILESEP} for example
+        # Update the tf_workspace_path TFSetting:
+        self.dic['tf_workspace_path'].value = tf_workspace_path
 
-        # Create tf_workspace in case it doesn't exist yet, when it did, it doesn't get overridden:
-        images_videos_dir = tf_workspace / self.dic['IMAGES_VIDEOS_DIR_NAME'].value
-        playlists_dir = tf_workspace / self.dic['PLAYLISTS_DIR_NAME'].value
-        prep_midi_dir = tf_workspace / self.dic['PREP_MIDI_DIR_NAME'].value
-        raw_midi_dir = tf_workspace / self.dic['RAW_MIDI_DIR_NAME'].value
+        # Create tf_workspace_path in case it doesn't exist yet, when it did, it doesn't get overridden:
+        images_videos_dir = tf_workspace_path / self.dic['IMAGES_VIDEOS_DIR_NAME'].value
+        playlists_dir = tf_workspace_path / self.dic['PLAYLISTS_DIR_NAME'].value
+        prep_midi_dir = tf_workspace_path / self.dic['PREP_MIDI_DIR_NAME'].value
+        raw_midi_dir = tf_workspace_path / self.dic['RAW_MIDI_DIR_NAME'].value
 
-        # There's no explicit creation of the tf_workspace folder itself because parents will be auto-created, while creating its children:
+        # There's no explicit creation of the tf_workspace_path folder itself because parents will be auto-created, while creating its children:
         images_videos_dir.mkdir(exist_ok=True, parents=True)
         playlists_dir.mkdir(exist_ok=True, parents=True)
         prep_midi_dir.mkdir(exist_ok=True, parents=True)
