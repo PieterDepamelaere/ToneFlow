@@ -17,17 +17,17 @@ class TFSettings:
         # Add new TFSetting-objects to dic (_name, _value, _default_value, _description="", _is_editable=False))
         self.dic['APP_NAME'] = TFSetting("Name of Application", None, str("ToneFlow" + u"\u00AE"), None, False)
         self.dic['MAJOR_MINOR_VERSION'] = TFSetting(f"{self.dic['APP_NAME'].value} Version MAJOR.MINOR", None, "0.1", "In theory, an update of the minor version alone shouldn't induce breaking changes.", False)
-        self.dic['CONFIG_FILE_PATH'] = TFSetting("Path to Config File", None, curr_file.parents[2] / "Config_TF.json", None, True)
-        self.dic['IMG_DIR'] = TFSetting("Internal Directory of Images", None, str(curr_file.parents[2]) + f"{os.sep}img{os.sep}", None, False)
+        self.dic['CONFIG_FILE_PATH'] = TFSetting("Path to Config File", None, curr_file.parents[2] / "Config_TF.json", None, False)
+        self.dic['IMG_DIR_PATH'] = TFSetting("Internal Directory of Images", None, curr_file.parents[2] / "img", None, False)
         self.dic['WORKSPACE_NAME'] = TFSetting("Name of Workspace", None, "Workspace_TF", None, False)
+        self.dic['FILE_SEP_TEXT'] = TFSetting("Exportable File Separator", None, "/FS/", None, False)
         self.dic['IMAGES_VIDEOS_DIR_NAME'] = TFSetting("Name of Images_Videos Folder in Workspace", None, "Images_Videos", None, False)
         self.dic['PLAYLISTS_DIR_NAME'] = TFSetting("Name of Playlists Folder in Workspace", None, "Playlists", None, False)
         self.dic['PREP_MIDI_DIR_NAME'] = TFSetting("Name of Prep_MIDI Folder in Workspace", None, "Prep_MIDI", None, False)
         self.dic['RAW_MIDI_DIR_NAME'] = TFSetting("Name of Raw_MIDI Folder in Workspace", None, "Raw_MIDI", None, False)
-        self.dic['tf_workspace'] = TFSetting("ToneFlow Workspace", None, str(pl.Path(curr_file.parents[3] / f"{self.dic['WORKSPACE_NAME'].value}")), f"???{os.sep}{self.dic['WORKSPACE_NAME'].value} \t(Preferably path on external device like flash drive)", True)
+        self.dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self.dic['WORKSPACE_NAME'].value}", f"???{os.sep}{self.dic['WORKSPACE_NAME'].value} \t(Preferably path on external device like flash drive)", True)
 
 
-        # self.tf_workspace=None
         # TODO: When saving a path to json make sure to do in platform indep fashion so that is is recoverable on other system, yet the config file is never meant to be ported across platform
         # TODO: Config file itself can not be saved to workspace, because one of it's props is the location of the workspace
         # TODO: Implement settings:
@@ -40,59 +40,18 @@ class TFSettings:
         # _overall_mute_play_along
 
     def export_tf_settings_to_config(self):
-
-        with open(f"{self.dic['CONFIG_FILE_PATH'].value}", 'w') as file:
+        with open(f"{self.dic['CONFIG_FILE_PATH'].value}", 'w') as config_file:
             # Only dump editable properties
-            json.dump({k: v for k, v in self.dic.items() if v.is_editable}, fp=file, default=lambda s: s.to_json(), indent=4,
+            json.dump({k: v for k, v in self.dic.items() if v.is_editable}, fp=config_file, default=lambda s: s.to_json(), indent=4,
                    sort_keys=True)
 
     def import_tf_settings_from_config(self):
-        pass
+        # TODO: Test what happens when missing:
+        with open(f"{self.dic['CONFIG_FILE_PATH'].value}") as config_file:
+            data = json.load(config_file)
 
-        # TODO: Implement properly
-        # if ():
-        #
-        #     # loading existing json_config_file
-        #     if (args["json_config_file"] is not None):
-        #         interactive_mode = False
-        #         with open(args["json_config_file"]) as config_file:
-        #             data = json.load(config_file)
-        #
-        #         # Default values:
-        #     local_workspace = None
-        #     decision_use_existing_model = False
-        #     existing_model_weights = None
-        #     continue_training = True
-        #     original_local_img_data = None
-        #     original_local_lbl_data = None
-        #     scale_factor = 1
-        #     batch_size = 64
-        #     epochs = 0
-        #     run_description = None
-        #     IMAGE_EXTENSION = ".bmp"
-        #     upperbound_histogram = 122.0
-        #     max_target_label_pred_plot = 125
-        #
-        #     if data is not None:
-        #         # Parse the data to according variables:
-        #
-        #         local_workspace = pl.Path(data["local_workspace"])
-        #         decision_use_existing_model = Main.str_to_bool(data["decision_use_existing_model"])
-        #         existing_model_weights = pl.Path(data["existing_model_weights"])
-        #         continue_training = Main.str_to_bool(data["continue_training"])
-        #         original_local_img_data = pl.Path(data["original_local_img_data"])
-        #         original_local_lbl_data = pl.Path(data["original_local_lbl_data"])
-        #         scale_factor = data["scale_factor"]
-        #         batch_size = data["batch_size"]
-        #         epochs = data["epochs"]
-        #         run_description = data["run_description"]
-        #         IMAGE_EXTENSION = data["IMAGE_EXTENSION"]
-        #         upperbound_histogram = data["upperbound_histogram"]
-        #         max_target_label_pred_plot = data["max_target_label_pred_plot"]
-        #
-        #         print("Parsing of the JSON-configfile was successfully")
-        #
-        # else:
+
+            print("Parsing of the JSON-configfile was successfully")
 
 
     def create_load_tf_workspace(self, tf_workspace, workspace_path_proposal):

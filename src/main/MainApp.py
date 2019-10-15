@@ -45,7 +45,7 @@ class MainApp(App):
 
 
     def build(self):
-        self.icon = str(pl.Path(CU.tfs.dic['IMG_DIR'].value) / "ToneFlow_Logo_TaskBarIcon.png")
+        self.icon = str(pl.Path(CU.tfs.dic['IMG_DIR_PATH'].value) / "ToneFlow_Logo_TaskBarIcon.png")
         self.main_widget = Builder.load_file(str(curr_file.with_suffix(".kv")))
         # self.Window.bind(on_request_close= lambda x:self.on_stop())
         return self.main_widget
@@ -79,14 +79,14 @@ class MainApp(App):
 
         # original icons: checkbox-blank-circle
 
-        # As a proposal, the actual (default)value of the tf_workspace-param is copied to the clipboard:
-        workspace_path_proposal = CU.tfs.dic['tf_workspace'].value
+        # As a proposal, the actual (default)value of the tf_workspace_path-param is copied to the clipboard:
+        workspace_path_proposal = CU.tfs.dic['tf_workspace_path'].value
         pyperclip.copy(str(workspace_path_proposal))
-        self.show_example_input_dialog(title=f"Enter Path to \"{CU.tfs.dic['WORKSPACE_NAME'].value}\"-Folder or its Parent Folder",
-                                       hint_text=f"{CU.tfs.dic['tf_workspace'].description}",
-                                       text=f"{CU.tfs.dic['tf_workspace'].description}",
+        self.show_example_input_dialog(title=f"Enter \"{CU.tfs.dic['WORKSPACE_NAME'].value}\"-Folder or its Parent Folder",
+                                       hint_text=f"{CU.tfs.dic['tf_workspace_path'].description}",
+                                       text=f"{CU.tfs.dic['tf_workspace_path'].description}",
                                        size_hint=(.8, .3), text_button_ok="Load/Create",
-                                       callback=lambda text_button, instance: {CU.tfs.create_load_tf_workspace(instance.text_field.text, workspace_path_proposal), toast(str(CU.tfs.dic['tf_workspace'].value))})
+                                       callback=lambda text_button, instance: {CU.tfs.create_load_tf_workspace(instance.text_field.text, workspace_path_proposal), toast(str(CU.tfs.dic['tf_workspace_path'].value))})
 
     def on_pause(self):
         return True
@@ -119,7 +119,7 @@ class MainApp(App):
             )
         ok_cancel_dialog.open()
 
-    def show_example_input_dialog(self, title="Enter", hint_text=None, text="Type here", size_hint=(.8, .4), text_button_ok="Ok", callback=None):
+    def show_example_input_dialog(self, title="Please Enter", hint_text=None, text="Type here", size_hint=(.8, .4), text_button_ok="Ok", callback=None):
         dialog = MDInputDialog(
             title=title,
             hint_text=hint_text,
@@ -131,5 +131,6 @@ class MainApp(App):
 
 if __name__ == "__main__":
     mapp = MainApp()
+    CU.tfs.import_tf_settings_from_config()
     CU.tfs.export_tf_settings_to_config()
     mapp.run()

@@ -59,11 +59,16 @@ class TFSetting:
         self._value = self._default_value
 
     def to_json(self):
-        if (self._is_editable):
-            converted_value = self.value
+        if (self.is_editable):
+            exportable_value = self.value
             if (isinstance(self.value, pl.Path)):
                 # The TFSetting indicates a Path-obj:
-                converted_value = "/FILE_SEP/".join(self.value.parts)
-            return dict(value=converted_value)
+                # exportable_value = "/FILE_SEP/".join(self.value.parts)
+
+                # Doing it in above more elegant way, sees first '/' of linux path as a solid part, so inevitable extra fileseparator gets prepended
+                exportable_value = f"{CU.tfs.dic['FILE_SEP_TEXT'].value}".join(self.value.as_posix().split("/"))
+
+            return dict(name=self.name, value=exportable_value)
         else:
+            # This case will theoretically no longer occur given that the export method only serializes a subsection of the
             return None

@@ -1,12 +1,13 @@
 #:kivy 1.11.1
 
 #:import os os
-#:import CommonUtils src.model.CommonUtils.CommonUtils
+#:import pl pathlib
+#:import CU src.model.CommonUtils.CommonUtils
 
 
 <ContentNavigationDrawer@MDNavigationDrawer>:
 
-    drawer_logo: f"{CommonUtils.tfs.dic['IMG_DIR'].value}{os.sep}ToneFlow_Logo_Drawer.png"
+    drawer_logo: str(CU.tfs.dic['IMG_DIR_PATH'].value / "ToneFlow_Logo_Drawer.png")
     #drawer_title: "Menu:"
 
     NavigationDrawerSubheader:
