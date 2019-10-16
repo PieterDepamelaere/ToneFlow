@@ -88,7 +88,8 @@ class MainApp(App):
                                        hint_text=f"{CU.tfs.dic['tf_workspace_path'].description}",
                                        text=dialog_text,
                                        size_hint=(.8, .3), text_button_ok="Load/Create",
-                                       callback=lambda text_button, instance: {CU.tfs.create_load_tf_workspace(instance.text_field.text, workspace_path_proposal), toast(str(CU.tfs.dic['tf_workspace_path'].value))})
+                                       callback=lambda text_button, instance: {CU.tfs.dic['tf_workspace_path'].set_value(instance.text_field.text),
+                                                                               toast(str(CU.tfs.dic['tf_workspace_path'].value))})
 
     def on_pause(self):
         return True

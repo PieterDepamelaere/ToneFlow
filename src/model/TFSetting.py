@@ -10,7 +10,7 @@ sys.path.insert(0, str(curr_file.parents[2]))
 from src.model.CommonUtils import CommonUtils as CU
 
 class TFSetting:
-    def __init__(self, name, value, default_value, description, is_editable=False):
+    def __init__(self, name, value, default_value, description, is_editable=False, callback_on_set=None):
 
         if (value is None):
             value = default_value
@@ -24,6 +24,7 @@ class TFSetting:
         self._default_value = default_value
         self._description = description
         self._is_editable = is_editable
+        self._callback_on_set = callback_on_set
 
     def get_name(self):
         return self._name
@@ -42,7 +43,10 @@ class TFSetting:
             value = str(value).replace(f"{CU.tfs.dic['FILE_SEP_TEXT'].value}",f"{os.sep}")
 
         value = CU.safe_cast(value, type(self._default_value), "")
+
+        value = self._callback_on_set(value)
         self._value = value
+
 
     def get_default_value(self):
         return self._default_value
