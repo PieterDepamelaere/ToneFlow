@@ -88,8 +88,17 @@ class MainApp(App):
         # TODO: Experiment in later stage with kivy settings, because it might ruin the setup
         return False
 
-    def set_color(self):
-        pass
+    def set_theme_toolbar(self, primary_color, accent_color):
+        if (primary_color is not None and accent_color is not None):
+            primary_color, accent_color = str(primary_color), str(accent_color)
+
+            print(f"Primary color: {primary_color}")
+
+            if (primary_color in palette) and (accent_color in palette):
+                # Update the primary and accent colors
+                MainApp.theme_cls.primary_palette = primary_color
+                MainApp.theme_cls.accent_palette = accent_color
+
 
     def set_title_toolbar(self, title):
         """Set string title in MDToolbar for the whole application."""

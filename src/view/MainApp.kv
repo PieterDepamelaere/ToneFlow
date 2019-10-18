@@ -5,12 +5,18 @@
 #:import CU src.model.CommonUtils.CommonUtils
 #:import toast kivymd.toast.toast
 
+#set primary_color str(app.theme_cls.primary_palette)
+#set accent_color str(app.theme_cls.accent_palette)
 
 <MyNavigationDrawerIconButton@NavigationDrawerIconButton>
-    badge_text: "#1"
+    # TODO: So you can't do default here?
+    #theme_primary_color: ""
+    #theme_accent_color: ""
+
     on_release:
-        app.show_screen(root.text)
+        app.set_theme_toolbar(self.theme_primary_color, self.theme_accent_color)
         app.set_title_toolbar(root.text)
+        app.show_screen(root.text)
         toast(root.text)
 
 
@@ -20,30 +26,39 @@
     #drawer_title: "Menu:"
 
     NavigationDrawerSubheader:
-        text: "Menu:"
+        text: "Menus:"
 
     MyNavigationDrawerIconButton:
         icon: "playlist-music"
         text: "Playlists"
+        badge_text: "1"
+        theme_primary_color: "Red"
+        theme_accent_color: "Pink"
 
     MyNavigationDrawerIconButton:
         icon: "music-note"
         text: "Songs"
+        badge_text: "1"
+        theme_primary_color: "Yellow"
+        theme_accent_color: "DeepOrange"
 
     NavigationDrawerDivider
+
+    NavigationDrawerSubheader:
+        text: "Basics:"
 
     MyNavigationDrawerIconButton:
         icon: "settings"
         text: "Settings"
+        theme_primary_color: "Indigo"
+        theme_accent_color: "Blue"
 
-    MyNavigationDrawerIconButton:
+    NavigationDrawerIconButton:
         icon: "power"
         text: "Quit"
         on_release:
-            lambda x:app.on_stop()
+            app.on_stop()
 
-    #NavigationDrawerSubheader:
-    #    text: "Second:"
 
 
 NavigationLayout:
