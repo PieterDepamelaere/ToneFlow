@@ -2,7 +2,6 @@ import os
 import sys
 import pathlib as pl
 curr_file = pl.Path(os.path.realpath(__file__))
-# curr_file_dir = curr_file.parents[0]
 
 sys.path.insert(0, str(curr_file.parents[0]))
 sys.path.insert(0, str(curr_file.parents[1]))
@@ -46,7 +45,7 @@ class MainApp(App):
 
     def build(self):
         self.icon = str(pl.Path(CU.tfs.dic['IMG_DIR_PATH'].value) / "ToneFlow_Logo_TaskBarIcon.png")
-        self.main_widget = Builder.load_file(str(curr_file.with_suffix(".kv")))
+        self.main_widget = Builder.load_file(str(curr_file.parents[1] / "view" / (curr_file.with_suffix(".kv")).name))
         # self.Window.bind(on_request_close= lambda x:self.on_stop())
         return self.main_widget
 
