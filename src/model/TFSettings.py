@@ -56,8 +56,8 @@ class TFSettings:
 
     def cb_create_load_tf_workspace(self, tf_workspace_path):
 
-        # Without whitespace the length of ans_user should be bigger than 0:
-        if (tf_workspace_path is not None and str(tf_workspace_path).strip().__len__() > 0):
+        # Without whitespace the length of ans_user should be bigger than 0, also make sure that when the tf_workspace_path's description is returned, that :
+        if ((tf_workspace_path is not None) and (len(str(tf_workspace_path).strip()) > 0) and (str(tf_workspace_path) != self.dic['tf_workspace_path'].description)):
             tf_workspace_path = pl.Path(tf_workspace_path)
         else:
             # In case of trivial tf_workspace_path, the original proposal is used:

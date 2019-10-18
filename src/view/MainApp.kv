@@ -3,6 +3,15 @@
 #:import os os
 #:import pl pathlib
 #:import CU src.model.CommonUtils.CommonUtils
+#:import toast kivymd.toast.toast
+
+
+<MyNavigationDrawerIconButton@NavigationDrawerIconButton>
+    badge_text: "#1"
+    on_release:
+        app.show_screen(root.text)
+        app.set_title_toolbar(root.text)
+        toast(root.text)
 
 
 <ContentNavigationDrawer@MDNavigationDrawer>:
@@ -12,6 +21,26 @@
 
     NavigationDrawerSubheader:
         text: "Menu:"
+
+    MyNavigationDrawerIconButton:
+        icon: "playlist-music"
+        text: "Playlists"
+
+    MyNavigationDrawerIconButton:
+        icon: "music-note"
+        text: "Songs"
+
+    NavigationDrawerDivider
+
+    MyNavigationDrawerIconButton:
+        icon: "settings"
+        text: "Settings"
+
+    MyNavigationDrawerIconButton:
+        icon: "power"
+        text: "Quit"
+        on_release:
+            lambda x:app.on_stop()
 
     #NavigationDrawerSubheader:
     #    text: "Second:"
