@@ -41,16 +41,12 @@
 
     NavigationDrawerIconButton:
         icon: "music-note"
-        text: str(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'].name)
+        text: str(CU.tfs.dic['SCREEN_SONGS_CLASS'].name)
         badge_text: "!"
         theme_primary_color: "Amber"
         theme_accent_color: "DeepOrange"
         on_release:
-            app.set_theme_toolbar(self.theme_primary_color, self.theme_accent_color)
-            app.set_title_toolbar(self.text)
-            app.show_screen(self.text)
-            #set_right_action_items(...)
-            toast(self.text)
+            app.show_screen(CU.tfs.dic['SCREEN_SONGS_CLASS'], self.theme_primary_color, self.theme_accent_color)
 
     NavigationDrawerDivider
 
@@ -59,15 +55,20 @@
 
     NavigationDrawerIconButton:
         icon: "settings"
-        text: "Settings"
-        theme_primary_color: "Indigo"
-        theme_accent_color: "Blue"
+        text: str(CU.tfs.dic['SCREEN_SETTINGS_CLASS'].name)
+        theme_primary_color: "Green"
+        theme_accent_color: "Lime"
         on_release:
-            app.set_theme_toolbar(self.theme_primary_color, self.theme_accent_color)
-            app.set_title_toolbar(self.text)
-            app.show_screen(self.text)
-            #set_right_action_items(...)
-            toast(self.text)
+            app.show_screen(CU.tfs.dic['SCREEN_SETTINGS_CLASS'], self.theme_primary_color, self.theme_accent_color)
+
+    NavigationDrawerIconButton:
+        icon: "lifebuoy"
+        text: str(CU.tfs.dic['SCREEN_HELP_CLASS'].name)
+        theme_primary_color: "DeepPurple"
+        theme_accent_color: "Purple"
+        on_release:
+            app.show_screen(CU.tfs.dic['SCREEN_HELP_CLASS'], self.theme_primary_color, self.theme_accent_color)
+
 
     NavigationDrawerIconButton:
         icon: "power"
@@ -106,7 +107,7 @@ NavigationLayout:
                 transition: NoTransition()
 
                 Screen:
-                    name: 'previous'
+                    name: "Help"
 
                     FloatLayout:
 

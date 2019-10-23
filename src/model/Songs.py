@@ -8,7 +8,7 @@ curr_file = pl.Path(os.path.realpath(__file__))
 from src.model import CommonUtils as CU
 
 
-class PlayLists(Screen):
+class Songs(Screen):
 
     def __init__(self, **kwargs):
         super().__init__(name=type(self).__name__, **kwargs)
@@ -16,7 +16,6 @@ class PlayLists(Screen):
         self._context_menus = list()
 
         self._list = list()
-
 
     def get_list(self):
         return self._list
@@ -27,8 +26,8 @@ class PlayLists(Screen):
 
     list = property(get_list, set_list)
 
-    async def scan_workspace_for_playlists(self):
+    async def scan_workspace_for_songs(self):
         pass
 
-    def refresh_playlists(self):
+    def refresh_songs(self):
         pass
