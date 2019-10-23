@@ -3,21 +3,23 @@
 #:import os os
 #:import pl pathlib
 #:import CU src.model.CommonUtils.CommonUtils
+#:import NoTransition kivy.uix.screenmanager.NoTransition
 #:import toast kivymd.toast.toast
 
 #set primary_color str(app.theme_cls.primary_palette)
 #set accent_color str(app.theme_cls.accent_palette)
 
-<MyNavigationDrawerIconButton@NavigationDrawerIconButton>
-    # TODO: So you can't do default here?
+#<MyNavigationDrawerIconButton@NavigationDrawerIconButton>
+    # TODO: So you can't do default here? + Problems which I launched on kivy + Maybe all callbacks except for show_screen should be invoked from pythoncode?
     #theme_primary_color: ""
     #theme_accent_color: ""
 
-    on_release:
-        app.set_theme_toolbar(self.theme_primary_color, self.theme_accent_color)
-        app.set_title_toolbar(root.text)
-        app.show_screen(root.text)
-        toast(root.text)
+    #on_release:
+        #app.set_theme_toolbar(self.theme_primary_color, self.theme_accent_color)
+        #app.set_title_toolbar(root.text)
+        #app.show_screen(root.text)
+        #set_right_action_items(...)
+        #toast(root.text)
 
 
 <ContentNavigationDrawer@MDNavigationDrawer>:
@@ -28,30 +30,44 @@
     NavigationDrawerSubheader:
         text: "Menus:"
 
-    MyNavigationDrawerIconButton:
+    NavigationDrawerIconButton:
         icon: "playlist-music"
-        text: "Playlists"
-        badge_text: "1"
+        text: str(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'].name)
+        badge_text: "!"
         theme_primary_color: "Red"
         theme_accent_color: "Pink"
+        on_release:
+            app.show_screen(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'], self.theme_primary_color, self.theme_accent_color)
 
-    MyNavigationDrawerIconButton:
+    NavigationDrawerIconButton:
         icon: "music-note"
-        text: "Songs"
-        badge_text: "1"
-        theme_primary_color: "Yellow"
+        text: str(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'].name)
+        badge_text: "!"
+        theme_primary_color: "Amber"
         theme_accent_color: "DeepOrange"
+        on_release:
+            app.set_theme_toolbar(self.theme_primary_color, self.theme_accent_color)
+            app.set_title_toolbar(self.text)
+            app.show_screen(self.text)
+            #set_right_action_items(...)
+            toast(self.text)
 
     NavigationDrawerDivider
 
     NavigationDrawerSubheader:
         text: "Basics:"
 
-    MyNavigationDrawerIconButton:
+    NavigationDrawerIconButton:
         icon: "settings"
         text: "Settings"
         theme_primary_color: "Indigo"
         theme_accent_color: "Blue"
+        on_release:
+            app.set_theme_toolbar(self.theme_primary_color, self.theme_accent_color)
+            app.set_title_toolbar(self.text)
+            app.show_screen(self.text)
+            #set_right_action_items(...)
+            toast(self.text)
 
     NavigationDrawerIconButton:
         icon: "power"
@@ -67,19 +83,71 @@ NavigationLayout:
     ContentNavigationDrawer:
         id: nav_drawer
 
-    BoxLayout:
-        orientation: 'vertical'
+    FloatLayout:
+        id: float_box
 
-        MDToolbar:
-            id: toolbar
-            title: app.title
-            md_bg_color: app.theme_cls.primary_color
-            background_palette: 'Primary'
-            background_hue: '500'
-            elevation: 10
-            left_action_items:
-                [['menu', lambda x: app.root.toggle_nav_drawer()]]
-            right_action_items:
-                [['dots-vertical', lambda x: app.root.toggle_nav_drawer()]]
+        BoxLayout:
+            orientation: 'vertical'
 
-        Widget:
+            MDToolbar:
+                id: toolbar
+                title: app.title
+                md_bg_color: app.theme_cls.primary_color
+                background_palette: 'Primary'
+                background_hue: '500'
+                elevation: 10
+                left_action_items:
+                    [['menu', lambda x: app.root.toggle_nav_drawer()]]
+                right_action_items:
+                    [['dots-vertical', lambda x: app.root.toggle_nav_drawer()]]
+
+            ScreenManager:
+                id: scr_mngr
+                transition: NoTransition()
+
+                Screen:
+                    name: 'previous'
+
+                    FloatLayout:
+
+                        Image:
+                            source: str(CU.tfs.dic['IMG_DIR_PATH'].value / "ToneFlow_Logo.png")
+                            opacity: .3
+
+                        BoxLayout:
+                            orientation: 'vertical'
+                            spacing: dp(10)
+                            size_hint_y: None
+                            height: self.minimum_height
+                            pos_hint: {'center_x': .5, 'center_y': .5}
+
+                            MDLabel:
+                                text: f"Welcome"
+                                size_hint_y: None
+                                height: self.texture_size[1]
+                                font_style: 'Subtitle1'
+                                theme_text_color: 'Primary'
+                                markup: True
+                                halign: 'center'
+                                text_size: self.width - 20, None
+
+                            MDRaisedButton:
+                                text: 'Click Me'
+                                pos_hint: {'center_x': .5}
+                                on_release:
+                                    toast("I'm a button")
+                                    #app.set_menu_for_demo_apps()
+                                    #app.instance_menu_demo_apps = MDDropdownMenu(\
+                                    #items=app.menu_for_demo_apps, \
+                                    #max_height=dp(260), width_mult=4)
+                                    #app.instance_menu_demo_apps.open(self)
+
+                            MDLabel:
+                                text: "Cool & good"
+                                size_hint_y: None
+                                height: self.texture_size[1]
+                                font_style: 'Subtitle1'
+                                theme_text_color: 'Primary'
+                                markup: True
+                                halign: 'center'
+                                text_size: self.width - 20, None

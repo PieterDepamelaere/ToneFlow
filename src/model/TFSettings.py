@@ -6,6 +6,7 @@ import pathlib as pl
 import json
 
 from src.model.TFSetting import TFSetting
+from src.model.PlayLists import PlayLists
 
 curr_file = pl.Path(os.path.realpath(__file__))
 
@@ -25,6 +26,7 @@ class TFSettings:
         self.dic['PLAYLISTS_DIR_NAME'] = TFSetting("Name of Playlists Folder in Workspace", None, "Playlists", None, False, None)
         self.dic['PREP_MIDI_DIR_NAME'] = TFSetting("Name of Prep_MIDI Folder in Workspace", None, "Prep_MIDI", None, False, None)
         self.dic['RAW_MIDI_DIR_NAME'] = TFSetting("Name of Raw_MIDI Folder in Workspace", None, "Raw_MIDI", None, False, None)
+        self.dic['SCREEN_PLAYLISTS_CLASS'] = TFSetting("Playlists", None, PlayLists, False, None)
         self.dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self.dic['WORKSPACE_NAME'].value}", f"???{os.sep}{self.dic['WORKSPACE_NAME'].value} \t(Preferably path on external device like flash drive)", True, lambda value: self.cb_create_load_tf_workspace(value))
 
 

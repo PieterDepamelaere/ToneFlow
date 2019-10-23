@@ -51,6 +51,7 @@ class MainApp(App):
         return self.main_widget
 
     def decide_stop_or_not(self, *args):
+        # TODO: Stop warning is not shown yet when you close via closing the window by itself.
         if args[0] is not None:
             # print(f"args0 {str(args[0])}")
             if (CU.safe_cast(args[0], str, "")).lower() == "yes":
@@ -88,11 +89,15 @@ class MainApp(App):
         # TODO: Experiment in later stage with kivy settings, because it might ruin the setup
         return False
 
+    def set_right_action_items(self, right_action_items):
+        pass
+        # TODO: Depending on the screen other context oriented options should appear under the three vertical dots
+
     def set_theme_toolbar(self, primary_color, accent_color):
         if (primary_color is not None and accent_color is not None):
             primary_color, accent_color = str(primary_color), str(accent_color)
-
-            print(f"Primary color: {primary_color}")
+            # Print test below to illustrate the number of times it is fired:
+            # print(f"Primary color: {primary_color}")
 
             if (primary_color in palette) and (accent_color in palette):
                 # Update the primary and accent colors
@@ -125,8 +130,23 @@ class MainApp(App):
         dialog.text_field.text = text
         dialog.open()
 
-    def show_screen(self, name_screen):
-        pass
+    def show_screen(self, screen_property, theme_primary_color, theme_accent_color):
+
+        screen_class = screen_property.value
+        class_name = screen_class.__name__
+        if(not self.main_widget.ids.scr_mngr.has_screen(class_name)):
+            # If the scr_mngr doesn't have such screen yet, make one:
+            Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(class_name).with_suffix(".kv")).name))
+            self.main_widget.ids.scr_mngr.add_widget(screen_class())
+
+        self.set_theme_toolbar(theme_primary_color, theme_accent_color)
+        self.set_title_toolbar(screen_property.name)
+        # set_right_action_items(...) list of callbacks can already be created upon screen creation
+
+        self.main_widget.ids.scr_mngr.current = class_name
+        CU.switch_screen(screen_class)
+        toast(class_name)
+
 
 if __name__ == "__main__":
     if(CU.tfs.dic['CONFIG_FILE_PATH'].value.exists()):
