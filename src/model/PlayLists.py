@@ -39,7 +39,6 @@ class PlayLists(Screen):
         asynckivy.start(self.async_filter_list(search_pattern))
 
     async def async_filter_list(self, search_pattern):
-        # search_pattern = self.ids.search_field.text
         search_pattern = CU.safe_cast(search_pattern, str, "")
         print(f"search pattern is {search_pattern}")
         playlist_name = None
@@ -60,9 +59,6 @@ class PlayLists(Screen):
         await asynckivy.sleep(0)
 
     def refresh_list(self):
-        # It is an ObservableList
-        # a: RecycleView  = self.ids.rv
-        # self.ids.rv.refresh_from_data()
 
         # Clear existing list<PlayList>:
         self._list.clear()
@@ -77,25 +73,18 @@ class PlayLists(Screen):
         :return:
         """
 
-        # if not self.ids.refresh_layout.refresh_spinner:
-        #     # If the refresh method was not triggered by scrolling but from e.g. a menu item the spinner should also be shown:
-        #     self.ids.refresh_layout.refresh_spinner = RefreshSpinner(_refresh_layout=self)
-
-        # async self.set_list([file_name for file_name in pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).rglob("*.json")])
-        # yield pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).rglob("*.json")
 
         for file_name in pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).rglob("*.json"):
 
             # playlist = await Playlist()
             # await self.append_item to list()
-            # TODO: Remove all the thread sleeps
+            # TODO: Remove all the thread sleeps and as much print out, this makes thins slower. + mechanism to derive exceptions to error popup or so
+            # Depending on the amount of time it takes to run through the refresh, the spinner will be more/longer visible:
             await asynckivy.sleep(0)
-            print(">> before error")
+            print(f">> Refresh taking place of {file_name}")
             self._list.append(file_name)
-            print("after error")
 
         await self.async_filter_list(self.ids.search_field.text)
-
         self.ids.refresh_layout.refresh_done()
 
 class IconLeftSampleWidget(ILeftBodyTouch, MDIconButton):
