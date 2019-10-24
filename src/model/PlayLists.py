@@ -2,10 +2,13 @@ import os
 import sys
 import pathlib as pl
 from kivy.uix.screenmanager import Screen
+from kivymd.utils import asynckivy
+from kivymd.uix.button import MDIconButton
+from kivymd.uix.list import ILeftBodyTouch
 
 curr_file = pl.Path(os.path.realpath(__file__))
 
-from src.model import CommonUtils as CU
+from src.model.CommonUtils import CommonUtils as CU
 
 
 class PlayLists(Screen):
@@ -15,6 +18,7 @@ class PlayLists(Screen):
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a list of callbacks
         self._context_menus = list()
 
+        # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
         self._list = list()
 
 
@@ -27,8 +31,42 @@ class PlayLists(Screen):
 
     list = property(get_list, set_list)
 
-    async def scan_workspace_for_playlists(self):
+    async def filter_list(self, search_pattern):
         pass
 
-    def refresh_playlists(self):
-        pass
+    def refresh_list(self):
+
+        asynckivy.start(self.async_refresh_list())
+        # for i in range(1000000):
+        #     print(i)
+
+    async def async_refresh_list(self):
+        """
+        Scan the workspace for playlists
+        :return:
+        """
+        # Clear existing Playlists:
+        self.set_list(list())
+
+        # async self.set_list([file_name for file_name in pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).rglob("*.json")])
+        # yield pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).rglob("*.json")
+
+        for file_name in pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).rglob("*.json"):
+
+            # playlist = await Playlist()
+            # await self.append_item to list()
+            await asynckivy.sleep(0.5)
+
+            self.ids.rv.data.append(
+            {
+                "viewclass": "MDIconItemForMdIconsList",
+                "icon": "playlist-music",
+                "text": str(file_name.stem),
+                "callback": None
+            }
+        )
+
+        # self.ids.refresh_layout.refresh_done()
+
+class IconLeftSampleWidget(ILeftBodyTouch, MDIconButton):
+    pass

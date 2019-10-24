@@ -5,7 +5,7 @@ from kivy.uix.screenmanager import Screen
 
 curr_file = pl.Path(os.path.realpath(__file__))
 
-from src.model import CommonUtils as CU
+from src.model.CommonUtils import CommonUtils as CU
 
 
 class Songs(Screen):

@@ -4,7 +4,11 @@
 #:import pl pathlib
 #:import CU src.model.CommonUtils.CommonUtils
 #:import toast kivymd.toast.toast
+#:import MDIconButton kivymd.uix.button.MDIconButton
+#:import ILeftBodyTouch kivymd.uix.list.ILeftBodyTouch
 
+<IconLeftSampleWidget@ILeftBodyTouch + MDIconButton>
+    #icon: root.icon
 
 <MDIconItem@OneLineIconListItem>
     icon: 'android'
@@ -12,7 +16,7 @@
     IconLeftSampleWidget:
         icon: root.icon
 
-
+MDIconItemForMdIconsList
 <MDIconItemForMdIconsList@OneLineIconListItem>:
     icon: 'android'
     on_release: toast(self.text) #root.callback(root.icon)
@@ -23,7 +27,7 @@
 
 <PLayLists@Screen>
     name: CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'].value.__name__
-    #on_enter: app.set_list_md_icons()
+    on_enter: self.refresh_list()
 
     BoxLayout:
         orientation: 'vertical'

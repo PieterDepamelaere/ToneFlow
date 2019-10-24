@@ -137,14 +137,14 @@ class MainApp(App):
         if(not self.main_widget.ids.scr_mngr.has_screen(class_name)):
             # If the scr_mngr doesn't have such screen yet, make one:
             Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(class_name).with_suffix(".kv")).name))
-            self.main_widget.ids.scr_mngr.add_widget(screen_class())
+            screen_object = screen_class()
+            self.main_widget.ids.scr_mngr.add_widget(screen_object)
 
         self.set_theme_toolbar(theme_primary_color, theme_accent_color)
         self.set_title_toolbar(screen_property.name)
         # set_right_action_items(...) list of callbacks can already be created upon screen creation
-
         self.main_widget.ids.scr_mngr.current = class_name
-        CU.switch_screen(screen_class)
+        # CU.switch_screen(screen_class)
         toast(class_name)
 
 
