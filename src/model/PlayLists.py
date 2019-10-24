@@ -3,7 +3,7 @@ import sys
 import pathlib as pl
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.screenmanager import Screen
-from kivy.properties import ObservableList
+from kivy.properties import ObservableList, ListProperty
 from kivymd.utils import asynckivy
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.list import ILeftBodyTouch
@@ -21,8 +21,7 @@ class PlayLists(Screen):
         self._context_menus = list()
 
         # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
-        self._list = list()
-
+        self._list = list() # ObservableList(None, object, list())
 
     def get_list(self):
         return self._list
@@ -32,17 +31,41 @@ class PlayLists(Screen):
         self._list = list
 
     list = property(get_list, set_list)
+    # a = ListProperty().
 
-    async def filter_list(self, search_pattern):
-        pass
+    def filter_list(self, search_pattern):
+        self.ids.rv.data = []
+
+        asynckivy.start(self.async_filter_list(search_pattern))
+
+    async def async_filter_list(self, search_pattern):
+        # search_pattern = self.ids.search_field.text
+        search_pattern = CU.safe_cast(search_pattern, str, "")
+        print(f"search pattern is {search_pattern}")
+        playlist_name = None
+        self.ids.rv.data = []
+
+        for playlist in self._list:
+            playlist_name = str(playlist.stem)
+            if (len(search_pattern) == 0 or ((len(search_pattern) > 0) and (search_pattern.lower() in playlist_name.lower()))):
+
+                self.ids.rv.data.append(
+                    {
+                        "viewclass": "PlayListRowView",
+                        "icon": "playlist-music",
+                        "text": playlist_name,
+                        "callback": None
+                    }
+                )
+        await asynckivy.sleep(0)
 
     def refresh_list(self):
         # It is an ObservableList
         # a: RecycleView  = self.ids.rv
         # self.ids.rv.refresh_from_data()
 
-        # self.ids.rv.
-        # self.ids.rv.data.clear()
+        # Clear existing list<PlayList>:
+        self._list.clear()
 
         asynckivy.start(self.async_refresh_list())
         # for i in range(1000000):
@@ -53,8 +76,10 @@ class PlayLists(Screen):
         Scan the workspace for playlists
         :return:
         """
-        # Clear existing Playlists:
-        self.set_list(list())
+
+        # if not self.ids.refresh_layout.refresh_spinner:
+        #     # If the refresh method was not triggered by scrolling but from e.g. a menu item the spinner should also be shown:
+        #     self.ids.refresh_layout.refresh_spinner = RefreshSpinner(_refresh_layout=self)
 
         # async self.set_list([file_name for file_name in pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).rglob("*.json")])
         # yield pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).rglob("*.json")
@@ -63,16 +88,13 @@ class PlayLists(Screen):
 
             # playlist = await Playlist()
             # await self.append_item to list()
-            await asynckivy.sleep(0.75)
+            # TODO: Remove all the thread sleeps
+            await asynckivy.sleep(0)
+            print(">> before error")
+            self._list.append(file_name)
+            print("after error")
 
-            self.ids.rv.data.append(
-            {
-                "viewclass": "MDIconItemForMdIconsList",
-                "icon": "playlist-music",
-                "text": str(file_name.stem),
-                "callback": None
-            }
-        )
+        await self.async_filter_list(self.ids.search_field.text)
 
         self.ids.refresh_layout.refresh_done()
 

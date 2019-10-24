@@ -10,7 +10,7 @@
 <IconLeftSampleWidget@ILeftBodyTouch + MDIconButton>
     icon: root.icon
 
-<MDIconItemForMdIconsList@OneLineIconListItem>:
+<PlayListRowView@OneLineIconListItem>:
     icon: 'android'
     on_release: toast(self.text) #root.callback(root.icon)
 
@@ -36,7 +36,7 @@
             MDTextField:
                 id: search_field
                 hint_text: "Search playlists"
-                on_text: toast(self.text) #app.set_list_md_icons(self.text, True)
+                on_text: root.filter_list(self.text)
 
             MDIconButton:
                 icon: 'close'
