@@ -33,15 +33,15 @@ class PlayLists(Screen):
     list = property(get_list, set_list)
     # a = ListProperty().
 
-    def filter_list(self, search_pattern):
-        self.ids.rv.data = []
+    def clear_search_pattern(self):
+        self.ids.search_field.text=""
 
-        asynckivy.start(self.async_filter_list(search_pattern))
+    def filter_list(self):
+        asynckivy.start(self.async_filter_list())
 
-    async def async_filter_list(self, search_pattern):
-        search_pattern = CU.safe_cast(search_pattern, str, "")
+    async def async_filter_list(self):
+        search_pattern = CU.safe_cast(self.ids.search_field.text, str, "")
         print(f"search pattern is {search_pattern}")
-        playlist_name = None
         self.ids.rv.data = []
 
         for playlist in self._list:
@@ -64,16 +64,12 @@ class PlayLists(Screen):
         self._list.clear()
 
         asynckivy.start(self.async_refresh_list())
-        # for i in range(1000000):
-        #     print(i)
 
     async def async_refresh_list(self):
         """
         Scan the workspace for playlists
         :return:
         """
-
-
         for file_name in pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).rglob("*.json"):
 
             # playlist = await Playlist()
@@ -84,7 +80,7 @@ class PlayLists(Screen):
             print(f">> Refresh taking place of {file_name}")
             self._list.append(file_name)
 
-        await self.async_filter_list(self.ids.search_field.text)
+        await self.async_filter_list()
         self.ids.refresh_layout.refresh_done()
 
 class IconLeftSampleWidget(ILeftBodyTouch, MDIconButton):

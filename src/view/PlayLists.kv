@@ -31,15 +31,35 @@
             height: self.minimum_height
 
             MDIconButton:
+                id: magnifier_button
                 icon: 'magnify'
+                on_release: root.filter_list()
+
+            #MDTextFieldRound:
+                #id: search_field
+                #icon_type: 'all'
+                #icon_left: 'magnify'
+                #icon_left_disabled: False
+                #icon_right: 'close'
+                #icon_right_disabled: False
+                #icon_callback: lambda x,y: print(f"icon fired x: {str(x)}, y: {str(y.id)}")
+                #on_text: root.filter_list(self.text)
+                #password: False
+                #hint_text: "Search playlists"
+                #helper_text: "Enter a small snippet of the name of the intended playlist"
+                #helper_text_mode: "on_focus"
 
             MDTextField:
                 id: search_field
                 hint_text: "Search playlists"
-                on_text: root.filter_list(self.text)
+                on_text: root.filter_list()
+                helper_text: "Enter a small snippet of the name of the intended playlist"
+                helper_text_mode: "on_focus"
 
             MDIconButton:
+                id: close_button
                 icon: 'close'
+                on_release: root.clear_search_pattern()
 
         MDScrollViewRefreshLayout:
             id: refresh_layout
