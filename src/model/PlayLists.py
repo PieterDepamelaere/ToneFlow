@@ -1,7 +1,9 @@
 import os
 import sys
 import pathlib as pl
+from kivy.uix.recycleview import RecycleView
 from kivy.uix.screenmanager import Screen
+from kivy.properties import ObservableList
 from kivymd.utils import asynckivy
 from kivymd.uix.button import MDIconButton
 from kivymd.uix.list import ILeftBodyTouch
@@ -35,6 +37,12 @@ class PlayLists(Screen):
         pass
 
     def refresh_list(self):
+        # It is an ObservableList
+        # a: RecycleView  = self.ids.rv
+        # self.ids.rv.refresh_from_data()
+
+        # self.ids.rv.
+        # self.ids.rv.data.clear()
 
         asynckivy.start(self.async_refresh_list())
         # for i in range(1000000):
@@ -55,7 +63,7 @@ class PlayLists(Screen):
 
             # playlist = await Playlist()
             # await self.append_item to list()
-            await asynckivy.sleep(0.5)
+            await asynckivy.sleep(0.75)
 
             self.ids.rv.data.append(
             {
@@ -66,7 +74,7 @@ class PlayLists(Screen):
             }
         )
 
-        # self.ids.refresh_layout.refresh_done()
+        self.ids.refresh_layout.refresh_done()
 
 class IconLeftSampleWidget(ILeftBodyTouch, MDIconButton):
     pass

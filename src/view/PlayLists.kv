@@ -8,22 +8,14 @@
 #:import ILeftBodyTouch kivymd.uix.list.ILeftBodyTouch
 
 <IconLeftSampleWidget@ILeftBodyTouch + MDIconButton>
-    #icon: root.icon
+    icon: root.icon
 
-<MDIconItem@OneLineIconListItem>
-    icon: 'android'
-
-    IconLeftSampleWidget:
-        icon: root.icon
-
-MDIconItemForMdIconsList
 <MDIconItemForMdIconsList@OneLineIconListItem>:
     icon: 'android'
     on_release: toast(self.text) #root.callback(root.icon)
 
     IconLeftSampleWidget:
         icon: root.icon
-
 
 <PLayLists@Screen>
     name: CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'].value.__name__
@@ -46,15 +38,36 @@ MDIconItemForMdIconsList
                 hint_text: "Search playlists"
                 on_text: toast(self.text) #app.set_list_md_icons(self.text, True)
 
-        RecycleView:
-            id: rv
-            key_viewclass: 'viewclass'
-            key_size: 'height'
+            MDIconButton:
+                icon: 'close'
 
-            RecycleBoxLayout:
-                padding: dp(10)
-                default_size: None, dp(48)
-                default_size_hint: 1, None
-                size_hint_y: None
-                height: self.minimum_height
-                orientation: 'vertical'
+        MDScrollViewRefreshLayout:
+            id: refresh_layout
+            refresh_callback: root.refresh_list
+            root_layout: app.main_widget.ids.float_box
+
+            RecycleView:
+                id: rv
+                key_viewclass: 'viewclass'
+                key_size: 'height'
+
+                RecycleBoxLayout:
+                    padding: dp(10)
+                    default_size: None, dp(48)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
+
+        #RecycleView:
+        #    id: rv
+         #   key_viewclass: 'viewclass'
+          #  key_size: 'height'
+
+           # RecycleBoxLayout:
+            #    padding: dp(10)
+             #   default_size: None, dp(48)
+              #  default_size_hint: 1, None
+               # size_hint_y: None
+                #height: self.minimum_height
+                #orientation: 'vertical'
