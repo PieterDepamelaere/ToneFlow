@@ -1,6 +1,9 @@
 import os
 import sys
+import time
+import traceback
 import pathlib as pl
+
 curr_file = pl.Path(os.path.realpath(__file__))
 
 sys.path.insert(0, str(curr_file.parents[0]))
@@ -12,22 +15,104 @@ os.environ['KIVY_VIDEO']='ffpyplayer'
 
 
 import kivy
-kivy.require('1.11.1') # replace with your current kivy version !
+kivy.require('1.11.1') # replace with your current kivy version!
 import pyperclip
 
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.utils import get_hex_from_color
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
 
+from kivymd.utils import asynckivy
 from kivymd.uix.navigationdrawer import NavigationDrawerIconButton
 from kivymd.uix.dialog import MDDialog, MDInputDialog
 from kivymd.theming import ThemeManager
+from kivymd.uix.menu import MDDropdownMenu
 from kivymd.toast import toast
 from kivymd.color_definitions import palette
 
+
 from src.main import *
 from src.model.CommonUtils import CommonUtils as CU
+
+
+from kivy.base import ExceptionHandler, ExceptionManager
+
+class E(ExceptionHandler):
+    def __init__(self):
+        super(E, self).__init__()
+        self._PASS_or_RAISE= ExceptionManager.PASS
+        self._is_exception_decision_made = False
+        self._exception_counter = 0
+
+    def handle_exception(self, e):
+        app = App.get_running_app()
+
+        # if self._exception_counter == 0:
+
+        # dialog = app.show_ok_cancel_dialog(
+        #     title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
+        #     text=f"[color={get_hex_from_color((1, 0, 0))}][b]{str(e)}[/b][/color]{os.linesep}{os.linesep}-> Our apologies for the inconvenience, please consult stack trace below:{os.linesep}{os.linesep}{traceback.format_exc()}",
+        #     size_hint=(.8, .6),
+        #     text_button_ok="Quit",
+        #     text_button_cancel="Proceed @ own risk",
+        #     callback=lambda *args: self.decide_raise_or_pass(*args)
+        # )
+
+        if(not self._is_exception_decision_made):
+
+            ok_cancel_dialog = MDDialog(
+                title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
+                text=f"[color={get_hex_from_color((1, 0, 0))}][b]{str(e)}[/b][/color]{os.linesep}{os.linesep}-> Our apologies for the inconvenience, please consult stack trace below:{os.linesep}{os.linesep}{traceback.format_exc()}",
+                size_hint=(.8, .6),
+                text_button_ok="Quit",
+                text_button_cancel="Proceed @ Own Risk",
+                events_callback=lambda *args: self.decide_raise_or_pass(*args)
+            )
+
+            ok_cancel_dialog.open()
+
+        else:
+
+            # async def async_waiting():
+            #     while (not self._is_exception_decision_made):
+            #         await asynckivy.sleep(1)
+            #
+            # asynckivy.start(async_waiting())
+
+
+
+            # Reset for next error:
+            self._is_exception_decision_made = False
+
+            # self._exception_counter += 1
+            return self._PASS_or_RAISE
+
+    def decide_raise_or_pass(self, *args):
+        if args[0] is not None:
+            if (CU.safe_cast(args[0], str, "")).lower() == "quit":
+                # TODO: Delete toast below:
+                toast("Quitting")
+                self._PASS_or_RAISE = ExceptionManager.RAISE
+            else:
+                toast("Not quitting")
+                self._PASS_or_RAISE = ExceptionManager.PASS
+        else:
+            toast("Not quitting")
+            self._PASS_or_RAISE = ExceptionManager.RAISE
+
+        self._is_exception_decision_made = True
+        print("dec made")
+
+ExceptionManager.add_handler(E())
+
+class MsgPopup(Popup):
+    def __init__(self, msg):
+        super(MsgPopup, self).__init__()
+        self.ids.message_label.text = msg
 
 class MainApp(App):
     """
@@ -41,6 +126,9 @@ class MainApp(App):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self._exception_counter = 0
+        self._context_menus = None
+
         # self.Window = Window
 
 
@@ -61,6 +149,25 @@ class MainApp(App):
         else:
             toast("Not quitting")
 
+    def get_context_menus(self):
+        return self._context_menus
+
+    def set_context_menus(self, items):
+        # Depending on the screen other context oriented options should appear under the three vertical dots
+        if (items is not None):
+            self._context_menus = [
+                {
+                    "viewclass": "MDMenuItem",
+                    "text": f"{key}",
+                    "callback": items[key]
+                }
+                for key in items
+            ]
+        else:
+            self._context_menus = None
+
+    context_menus = property(get_context_menus, set_context_menus)
+
     def on_pause(self):
         return True
 
@@ -74,24 +181,24 @@ class MainApp(App):
             dialog_text =f"{CU.tfs.dic['tf_workspace_path'].value}"
 
         pyperclip.copy(str(workspace_path_proposal))
-        self.show_example_input_dialog(title=f"Enter \"{CU.tfs.dic['WORKSPACE_NAME'].value}\"-Folder or its Parent Folder",
-                                       hint_text=f"{CU.tfs.dic['tf_workspace_path'].description}",
-                                       text=dialog_text,
-                                       size_hint=(.8, .3), text_button_ok="Load/Create",
-                                       callback=lambda text_button, instance: {CU.tfs.dic['tf_workspace_path'].set_value(instance.text_field.text),
+        self.show_input_dialog(title=f"Enter \"{CU.tfs.dic['WORKSPACE_NAME'].value}\"-Folder or its Parent Folder",
+                               hint_text=f"{CU.tfs.dic['tf_workspace_path'].description}",
+                               text=dialog_text,
+                               size_hint=(.8, .3), text_button_ok="Load/Create",
+                               callback=lambda text_button, instance: {CU.tfs.dic['tf_workspace_path'].set_value(instance.text_field.text),
                                                                                toast(str(CU.tfs.dic['tf_workspace_path'].value))})
 
 
-    def on_stop(self, *kwargs):
-        self.show_cancel_dialog(title="Confirmation dialog", text=f"Are you sure you want to [color={get_hex_from_color(self.theme_cls.primary_color)}][b]quit[/b][/color] {CU.tfs.dic['APP_NAME'].value}?", size_hint=(0.5, 0.3), text_button_ok="Yes", text_button_cancel="No", callback=self.decide_stop_or_not)
+    def on_stop(self):
+        self.show_ok_cancel_dialog(title="Confirmation dialog", text=f"Are you sure you want to [color={get_hex_from_color(self.theme_cls.primary_color)}][b]quit[/b][/color] {CU.tfs.dic['APP_NAME'].value}?", size_hint=(0.5, 0.3), text_button_ok="Yes", text_button_cancel="No", callback=lambda *args: self.decide_stop_or_not(*args))
+
+    def open_context_menu(self, instance):
+
+        MDDropdownMenu(items=self.context_menus, width_mult=3).open(instance)
 
     def open_settings(self, *args):
         # TODO: Experiment in later stage with kivy settings, because it might ruin the setup
         return False
-
-    def set_right_action_items(self, right_action_items):
-        pass
-        # TODO: Depending on the screen other context oriented options should appear under the three vertical dots
 
     def set_theme_toolbar(self, primary_color, accent_color):
         if (primary_color is not None and accent_color is not None):
@@ -109,18 +216,18 @@ class MainApp(App):
         """Set string title in MDToolbar for the whole application."""
         self.main_widget.ids.toolbar.title = title
 
-    def show_cancel_dialog(self, title, text, size_hint=(.8, .4), text_button_ok="Ok", text_button_cancel="Cancel", callback=None):
+    def show_ok_cancel_dialog(self, title, text, size_hint=(.8, .4), text_button_ok="Ok", text_button_cancel="Cancel", callback=None):
         ok_cancel_dialog = MDDialog(
-                title=title,
-                size_hint=size_hint,
-                text=text,
-                text_button_ok=text_button_ok,
-                text_button_cancel=text_button_cancel,
-                events_callback=callback
-            )
+            title=title,
+            size_hint=size_hint,
+            text=text,
+            text_button_ok=text_button_ok,
+            text_button_cancel=text_button_cancel,
+            events_callback=callback
+        )
         ok_cancel_dialog.open()
 
-    def show_example_input_dialog(self, title="Please Enter", hint_text=None, text="Type here", size_hint=(.8, .4), text_button_ok="Ok", callback=None):
+    def show_input_dialog(self, title="Please Enter", hint_text=None, text="Type here", size_hint=(.8, .4), text_button_ok="Ok", callback=None):
         dialog = MDInputDialog(
             title=title,
             hint_text=hint_text,
@@ -131,20 +238,23 @@ class MainApp(App):
         dialog.open()
 
     def show_screen(self, screen_property, theme_primary_color, theme_accent_color):
+        # Get a shorter alias for the screen_manager object:
+        scr_mngr = self.main_widget.ids.scr_mngr
 
+        # Extract class & class_name:
         screen_class = screen_property.value
         class_name = screen_class.__name__
-        if(not self.main_widget.ids.scr_mngr.has_screen(class_name)):
+        if(not scr_mngr.has_screen(class_name)):
             # If the scr_mngr doesn't have such screen yet, make one:
             Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(class_name).with_suffix(".kv")).name))
             screen_object = screen_class()
-            self.main_widget.ids.scr_mngr.add_widget(screen_object)
+            scr_mngr.add_widget(screen_object)
 
-        self.set_theme_toolbar(theme_primary_color, theme_accent_color)
+        # Update the title, theme, context menus and show toast when ready:
         self.set_title_toolbar(screen_property.name)
-        # set_right_action_items(...) list of callbacks can already be created upon screen creation
-        self.main_widget.ids.scr_mngr.current = class_name
-        # CU.switch_screen(screen_class)
+        self.set_theme_toolbar(theme_primary_color, theme_accent_color)
+        self.context_menus = scr_mngr.get_screen(class_name).context_menus
+        scr_mngr.current = class_name
         toast(class_name)
 
 
@@ -157,6 +267,47 @@ if __name__ == "__main__":
         CU.tfs.export_tf_settings_to_config()
 
     mapp = MainApp()
-    mapp.run()
+    try:
+        mapp.run()
+    except Exception as e:
+        print(f"{CU.tfs.dic['APP_NAME'].value} encountered an error & needs to shut down. Our apologies for the inconvenience. {os.linesep}{os.linesep}"
+              f"-> Please consult stack trace below:{os.linesep}{str(e)}{os.linesep}{os.linesep}{traceback.format_exc()}")
 
-    CU.tfs.export_tf_settings_to_config()
+        # error_dialog = MDDialog(
+        #     title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
+        #     size_hint=(.8, .6),
+        #     text=str(e),
+        #     text_button_ok="Quit",
+        #     events_callback=lambda x: str(x).lower()
+        # )
+        # error_dialog.open()
+
+        popup = MsgPopup(str(e))
+        popup.open()
+
+        # error_dialog = Popup(
+        #     title= f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
+        #     content= AnchorLayout(anchor_x='center', anchor_y='bottom').add_widget(Label(text=str(e), halign='left', valign='top')),
+        #     size_hint= (None, None),
+        #     size= (Window.width / 3, Window.height / 3),
+        #     auto_dismiss= True
+        # )
+        # error_dialog.open()
+        # time.sleep(5)
+
+
+    # else:
+    #     The else clause is only relevant when some instructions should only take place when the app shuts down correctly.
+    #     pass
+    finally:
+        try:
+            # TODO: Try to save the workspace if still possible when in error
+            pass
+        except Exception as e:
+            print("")
+        CU.tfs.export_tf_settings_to_config()
+
+
+
+    # IDEAS DURING FURTHER IMPLEMENTATION:
+    # TODO: Make mouse scrollwheel tempo/speed-control in concert mode.

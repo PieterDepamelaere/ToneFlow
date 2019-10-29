@@ -106,7 +106,7 @@ if __name__ == '__main__':
 #             text: "Open input dialog"
 #             pos_hint: {'center_x': .5, 'center_y': .7}
 #             opposite_colors: True
-#             on_release: app.show_example_input_dialog()
+#             on_release: app.show_input_dialog()
 #
 #         MDRectangleFlatButton:
 #             text: "Open Ok Cancel dialog"
@@ -127,7 +127,7 @@ if __name__ == '__main__':
 #     def on_start(self):
 #         self.icon = "/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/ToneFlow/img/ToneFlow_Logo_Filled.png"
 #         print("its me " +  str(self.get_application_icon()))
-#         self.show_example_input_dialog()
+#         self.show_input_dialog()
 #
 #     def on_title(self, instance, title):
 #         self.title = "owksy"
@@ -136,7 +136,7 @@ if __name__ == '__main__':
 #         from kivymd.toast.kivytoast import toast
 #         toast(args[0])
 #
-#     def show_example_input_dialog(self):
+#     def show_input_dialog(self):
 #         dialog = MDInputDialog(
 #             title='Enter path to workspace folder', hint_text="Where is the hint text", size_hint=(.8, .4),
 #             text_button_ok='Confirm',
@@ -155,8 +155,8 @@ if __name__ == '__main__':
 #
 # if __name__ == "__main__":
 #     # a = InputDiagTest()
-#     # a.show_example_input_dialog()
+#     # a.show_input_dialog()
 #     a = Example()
-#     # a.show_example_input_dialog()
+#     # a.show_input_dialog()
 #     a.run()
 #

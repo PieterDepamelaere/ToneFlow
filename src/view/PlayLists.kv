@@ -4,10 +4,11 @@
 #:import pl pathlib
 #:import CU src.model.CommonUtils.CommonUtils
 #:import toast kivymd.toast.toast
-#:import MDIconButton kivymd.uix.button.MDIconButton
 #:import ILeftBodyTouch kivymd.uix.list.ILeftBodyTouch
+#:import MDIconButton kivymd.uix.button.MDIconButton
 
-<IconLeftSampleWidget@ILeftBodyTouch + MDIconButton>
+
+<IconLeftSampleWidget@ILeftBodyTouch+MDIconButton>
     icon: root.icon
 
 <PlayListRowView@OneLineIconListItem>:
@@ -52,6 +53,7 @@
             MDTextField:
                 id: search_field
                 hint_text: "Search playlists"
+                color_mode: "primary" #"primary", options=["primary", "accent", "custom"]
                 on_text: root.filter_list()
                 helper_text: "Enter a small snippet of the name of the intended playlist"
                 helper_text_mode: "on_focus"

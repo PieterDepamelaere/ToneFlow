@@ -21,6 +21,23 @@
         #set_right_action_items(...)
         #toast(root.text)
 
+<MsgPopup>:
+    size_hint: .7, .4
+    title: "Attention"
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 20
+
+        Label:
+            id: message_label
+            size_hint_y: 0.4
+            text: "Label"
+        Button:
+            text: 'Dismiss'
+            size_hint_y: 0.4
+            on_press: root.dismiss()
 
 <ContentNavigationDrawer@MDNavigationDrawer>:
 
@@ -100,14 +117,14 @@ NavigationLayout:
                 left_action_items:
                     [['menu', lambda x: app.root.toggle_nav_drawer()]]
                 right_action_items:
-                    [['dots-vertical', lambda x: app.root.toggle_nav_drawer()]]
+                    [['dots-vertical', lambda x: app.open_context_menu(x)]]
 
             ScreenManager:
                 id: scr_mngr
                 transition: NoTransition()
 
                 Screen:
-                    name: "Help"
+                    name: "Welcome"
 
                     FloatLayout:
 

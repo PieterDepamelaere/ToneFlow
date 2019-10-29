@@ -1,24 +1,27 @@
 import os
 import sys
 import pathlib as pl
-from kivy.uix.recycleview import RecycleView
 from kivy.uix.screenmanager import Screen
-from kivy.properties import ObservableList, ListProperty
 from kivymd.utils import asynckivy
-from kivymd.uix.button import MDIconButton
-from kivymd.uix.list import ILeftBodyTouch
+from kivymd.toast import toast
 
 curr_file = pl.Path(os.path.realpath(__file__))
 
+from src.model.PlayList import PlayList
 from src.model.CommonUtils import CommonUtils as CU
 
 
 class PlayLists(Screen):
 
     def __init__(self, **kwargs):
-        super().__init__(name=type(self).__name__, **kwargs)
-        # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a list of callbacks
-        self._context_menus = list()
+        super(PlayLists, self).__init__(name=type(self).__name__, **kwargs)
+        # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
+        self._context_menus = {"Clear Input": lambda x: self.clear_search_pattern(),
+                               "Sort Playlists": lambda x: self.sort_list(),
+                               "Refresh": lambda x: self.refresh_list(),
+                               "Rename Playlist(s)": lambda x: toast("TODO: WIP"),
+                               "Help": lambda y: toast("TODO: WIP")}
+        # TODO: Implement the other context menus
 
         # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
         self._list = list() # ObservableList(None, object, list())
@@ -30,18 +33,22 @@ class PlayLists(Screen):
         list = CU.safe_cast(list, self._list.__class__, "")
         self._list = list
 
+    def get_context_menus(self):
+        return self._context_menus
+
     list = property(get_list, set_list)
-    # a = ListProperty().
+    context_menus = property(get_context_menus)
 
     def clear_search_pattern(self):
         self.ids.search_field.text=""
+        # After the filter text is changed, the filter_list() method is automatically triggered.
 
     def filter_list(self):
         asynckivy.start(self.async_filter_list())
 
     async def async_filter_list(self):
         search_pattern = CU.safe_cast(self.ids.search_field.text, str, "")
-        print(f"search pattern is {search_pattern}")
+        # print(f"search pattern is {search_pattern}")
         self.ids.rv.data = []
 
         for playlist in self._list:
@@ -70,18 +77,20 @@ class PlayLists(Screen):
         Scan the workspace for playlists
         :return:
         """
-        for file_name in pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).rglob("*.json"):
+        for file_path in pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).rglob("*.json"):
 
-            # playlist = await Playlist()
-            # await self.append_item to list()
-            # TODO: Remove all the thread sleeps and as much print out, this makes thins slower. + mechanism to derive exceptions to error popup or so
+            playlist = PlayList(file_path)
+
+            # TODO: mechanism to derive exceptions to error popup or so
             # Depending on the amount of time it takes to run through the refresh, the spinner will be more/longer visible:
-            await asynckivy.sleep(0)
-            print(f">> Refresh taking place of {file_name}")
-            self._list.append(file_name)
 
+
+            self._list.append(file_path)
+            await asynckivy.sleep(0)
+
+        # TODO: Make overscroll easier than it is now, in fact scrollbar should be always visible
         await self.async_filter_list()
         self.ids.refresh_layout.refresh_done()
 
-class IconLeftSampleWidget(ILeftBodyTouch, MDIconButton):
-    pass
+    def sort_list(self):
+        self.ids.rv.data.sort()

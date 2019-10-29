@@ -11,7 +11,7 @@ from src.model.CommonUtils import CommonUtils as CU
 class Songs(Screen):
 
     def __init__(self, **kwargs):
-        super().__init__(name=type(self).__name__, **kwargs)
+        super(Songs, self).__init__(name=type(self).__name__, **kwargs)
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a list of callbacks
         self._context_menus = list()
 
