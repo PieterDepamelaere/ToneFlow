@@ -13,7 +13,6 @@ sys.path.insert(0, str(curr_file.parents[2]))
 # Below statement if you want to use the video player, do this before the kivy import!
 os.environ['KIVY_VIDEO']='ffpyplayer'
 
-
 import kivy
 kivy.require('1.11.1') # replace with your current kivy version!
 import pyperclip
@@ -34,94 +33,18 @@ from kivymd.uix.menu import MDDropdownMenu
 from kivymd.toast import toast
 from kivymd.color_definitions import palette
 
-
-from src.main import *
+from src.main.TFExceptionHandler import TFExceptionHandler
 from src.model.CommonUtils import CommonUtils as CU
 
+from kivy.base import ExceptionManager
 
-from kivy.base import ExceptionHandler, ExceptionManager
-
-class E(ExceptionHandler):
-    def __init__(self):
-        super(E, self).__init__()
-        self._exception = None
-        self._error_dialog = None
-        self._PASS_or_RAISE = ExceptionManager.PASS # PASS==1, RAISE===0
-        self._is_exception_decision_made = False
-        self._exception_counter = 0
-
-    def handle_exception(self, exception):
-        app = App.get_running_app()
-
-        # Reset for next error:
-        if self._exception is None: # self._is_exception_decision_made:
-            # self._is_exception_decision_made = False
-            self._error_dialog = None
-            self._PASS_or_RAISE = ExceptionManager.PASS
-
-            if self._error_dialog is None:
-                self._exception = exception
-                self._error_dialog = app.show_ok_cancel_dialog(
-                    # title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
-                    title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
-                    text=f"[color={get_hex_from_color((1, 0, 0))}][i]{str(self._exception)}[/i][/color]{os.linesep}{os.linesep}[b]-> Our apologies for the inconvenience, please consult stack trace below:[/b]{os.linesep}{os.linesep}{traceback.format_exc()}",
-                    size_hint=(.8, .6),
-                    text_button_ok="Quit",
-                    text_button_cancel="Proceed @ Own Risk",
-                    callback=lambda *args: self.decide_raise_or_pass(*args)
-                )
-
-                # self._error_dialog = MDDialog(
-                #     title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
-                #     text=f"[color={get_hex_from_color((1, 0, 0))}][b]{str(self._exception)}[/b][/color]{os.linesep}{os.linesep}-> Our apologies for the inconvenience, please consult stack trace below:{os.linesep}{os.linesep}{traceback.format_exc()}",
-                #     size_hint=(.8, .6),
-                #     text_button_ok="Quit",
-                #     text_button_cancel="Proceed @ Own Risk",
-                #     events_callback=lambda *args: self.decide_raise_or_pass(*args)
-                # )
-                #
-                # self._error_dialog.open()
-
-
-        # async def async_waiting():
-        #     while (not self._is_exception_decision_made):
-        #         await asynckivy.sleep(1)
-        #
-        # asynckivy.start(async_waiting())
-
-        # self._error_dialog.dismiss()
-
-        # self._exception_counter += 1
-        return self._PASS_or_RAISE
-
-    def decide_raise_or_pass(self, *args):
-        if args[0] is not None:
-            if (CU.safe_cast(args[0], str, "")).lower() == "quit":
-                self._PASS_or_RAISE = ExceptionManager.RAISE
-                raise self._exception
-            else:
-                toast("Not quitting")
-                self._PASS_or_RAISE = ExceptionManager.PASS
-        else:
-            self._PASS_or_RAISE = ExceptionManager.RAISE
-
-        self._exception = None
-        # self._is_exception_decision_made = True
-
-        # TODO: Detelet print statement below
-        print("dec made")
-
-ExceptionManager.add_handler(E())
-
-class MsgPopup(Popup):
-    def __init__(self, msg):
-        super(MsgPopup, self).__init__()
-        self.ids.message_label.text = msg
 
 class MainApp(App):
     """
 
     """
+    # Foresee custom handling of errors, user can bypass them (maybe own mistake) or quit the app, but he sees pop up of the error:
+    ExceptionManager.add_handler(TFExceptionHandler())
     title = CU.tfs.dic['APP_NAME'].value + " - v" + CU.tfs.dic['MAJOR_MINOR_VERSION'].value
     theme_cls = ThemeManager()
     theme_cls.primary_palette = "Brown"
@@ -134,7 +57,6 @@ class MainApp(App):
         self._context_menus = None
 
         # self.Window = Window
-
 
     def build(self):
         self.icon = str(pl.Path(CU.tfs.dic['IMG_DIR_PATH'].value) / "ToneFlow_Logo_TaskBarIcon.png")
@@ -263,7 +185,6 @@ class MainApp(App):
         scr_mngr.current = class_name
         toast(class_name)
 
-
 if __name__ == "__main__":
     if(CU.tfs.dic['CONFIG_FILE_PATH'].value.exists()):
         # If the config-file exists, then try to import it:
@@ -276,44 +197,32 @@ if __name__ == "__main__":
     try:
         mapp.run()
     except Exception as e:
-        print(f"{CU.tfs.dic['APP_NAME'].value} encountered an error & needs to shut down. Our apologies for the inconvenience. {os.linesep}{os.linesep}"
-              f"-> Please consult stack trace below:{os.linesep}{str(e)}{os.linesep}{os.linesep}{traceback.format_exc()}")
-
-        # _error_dialog = MDDialog(
-        #     title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
-        #     size_hint=(.8, .6),
-        #     text=str(e),
-        #     text_button_ok="Quit",
-        #     events_callback=lambda x: str(x).lower()
-        # )
-        # _error_dialog.open()
-
-        popup = MsgPopup(str(e))
-        popup.open()
-
-        # _error_dialog = Popup(
-        #     title= f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
-        #     content= AnchorLayout(anchor_x='center', anchor_y='bottom').add_widget(Label(text=str(e), halign='left', valign='top')),
-        #     size_hint= (None, None),
-        #     size= (Window.width / 3, Window.height / 3),
-        #     auto_dismiss= True
-        # )
-        # _error_dialog.open()
-        # time.sleep(5)
-
+        print(f"{CU.tfs.dic['APP_NAME'].value} encountered an error & needs to shut down.{os.linesep}{os.linesep}"
+              f"{str(e)}{os.linesep}{os.linesep}-> Our apologies for the inconvenience, please consult the stack trace below:{os.linesep}{traceback.format_exc()}")
 
     # else:
     #     The else clause is only relevant when some instructions should only take place when the app shuts down correctly.
     #     pass
+
     finally:
+        # This finally block will always be executed no matter whether the app crashed or ended successfully
         try:
-            # TODO: Try to save the workspace if still possible when in error
-            pass
+            CU.tfs.export_tf_settings_to_config()
+
+            # TODO: + Try to save the workspace if still possible when in error
+
         except Exception as e:
-            print("")
-        CU.tfs.export_tf_settings_to_config()
+            print(f"-> {CU.tfs.dic['APP_NAME'].value} encountered unexpected error during the final saving of the workspace.")
 
 
 
+
+
+
+
+    # =========================================================================
     # IDEAS DURING FURTHER IMPLEMENTATION:
     # TODO: Make mouse scrollwheel tempo/speed-control in concert mode.
+
+
+    
