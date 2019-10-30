@@ -44,67 +44,71 @@ from kivy.base import ExceptionHandler, ExceptionManager
 class E(ExceptionHandler):
     def __init__(self):
         super(E, self).__init__()
-        self._PASS_or_RAISE= ExceptionManager.PASS
+        self._exception = None
+        self._error_dialog = None
+        self._PASS_or_RAISE = ExceptionManager.PASS # PASS==1, RAISE===0
         self._is_exception_decision_made = False
         self._exception_counter = 0
 
-    def handle_exception(self, e):
+    def handle_exception(self, exception):
         app = App.get_running_app()
 
-        # if self._exception_counter == 0:
+        # Reset for next error:
+        if self._exception is None: # self._is_exception_decision_made:
+            # self._is_exception_decision_made = False
+            self._error_dialog = None
+            self._PASS_or_RAISE = ExceptionManager.PASS
 
-        # dialog = app.show_ok_cancel_dialog(
-        #     title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
-        #     text=f"[color={get_hex_from_color((1, 0, 0))}][b]{str(e)}[/b][/color]{os.linesep}{os.linesep}-> Our apologies for the inconvenience, please consult stack trace below:{os.linesep}{os.linesep}{traceback.format_exc()}",
-        #     size_hint=(.8, .6),
-        #     text_button_ok="Quit",
-        #     text_button_cancel="Proceed @ own risk",
-        #     callback=lambda *args: self.decide_raise_or_pass(*args)
-        # )
+            if self._error_dialog is None:
+                self._exception = exception
+                self._error_dialog = app.show_ok_cancel_dialog(
+                    # title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
+                    title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
+                    text=f"[color={get_hex_from_color((1, 0, 0))}][i]{str(self._exception)}[/i][/color]{os.linesep}{os.linesep}[b]-> Our apologies for the inconvenience, please consult stack trace below:[/b]{os.linesep}{os.linesep}{traceback.format_exc()}",
+                    size_hint=(.8, .6),
+                    text_button_ok="Quit",
+                    text_button_cancel="Proceed @ Own Risk",
+                    callback=lambda *args: self.decide_raise_or_pass(*args)
+                )
 
-        if(not self._is_exception_decision_made):
-
-            ok_cancel_dialog = MDDialog(
-                title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
-                text=f"[color={get_hex_from_color((1, 0, 0))}][b]{str(e)}[/b][/color]{os.linesep}{os.linesep}-> Our apologies for the inconvenience, please consult stack trace below:{os.linesep}{os.linesep}{traceback.format_exc()}",
-                size_hint=(.8, .6),
-                text_button_ok="Quit",
-                text_button_cancel="Proceed @ Own Risk",
-                events_callback=lambda *args: self.decide_raise_or_pass(*args)
-            )
-
-            ok_cancel_dialog.open()
-
-        else:
-
-            # async def async_waiting():
-            #     while (not self._is_exception_decision_made):
-            #         await asynckivy.sleep(1)
-            #
-            # asynckivy.start(async_waiting())
+                # self._error_dialog = MDDialog(
+                #     title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
+                #     text=f"[color={get_hex_from_color((1, 0, 0))}][b]{str(self._exception)}[/b][/color]{os.linesep}{os.linesep}-> Our apologies for the inconvenience, please consult stack trace below:{os.linesep}{os.linesep}{traceback.format_exc()}",
+                #     size_hint=(.8, .6),
+                #     text_button_ok="Quit",
+                #     text_button_cancel="Proceed @ Own Risk",
+                #     events_callback=lambda *args: self.decide_raise_or_pass(*args)
+                # )
+                #
+                # self._error_dialog.open()
 
 
+        # async def async_waiting():
+        #     while (not self._is_exception_decision_made):
+        #         await asynckivy.sleep(1)
+        #
+        # asynckivy.start(async_waiting())
 
-            # Reset for next error:
-            self._is_exception_decision_made = False
+        # self._error_dialog.dismiss()
 
-            # self._exception_counter += 1
-            return self._PASS_or_RAISE
+        # self._exception_counter += 1
+        return self._PASS_or_RAISE
 
     def decide_raise_or_pass(self, *args):
         if args[0] is not None:
             if (CU.safe_cast(args[0], str, "")).lower() == "quit":
-                # TODO: Delete toast below:
-                toast("Quitting")
                 self._PASS_or_RAISE = ExceptionManager.RAISE
+                raise self._exception
             else:
                 toast("Not quitting")
                 self._PASS_or_RAISE = ExceptionManager.PASS
         else:
-            toast("Not quitting")
             self._PASS_or_RAISE = ExceptionManager.RAISE
 
-        self._is_exception_decision_made = True
+        self._exception = None
+        # self._is_exception_decision_made = True
+
+        # TODO: Detelet print statement below
         print("dec made")
 
 ExceptionManager.add_handler(E())
@@ -193,8 +197,8 @@ class MainApp(App):
         self.show_ok_cancel_dialog(title="Confirmation dialog", text=f"Are you sure you want to [color={get_hex_from_color(self.theme_cls.primary_color)}][b]quit[/b][/color] {CU.tfs.dic['APP_NAME'].value}?", size_hint=(0.5, 0.3), text_button_ok="Yes", text_button_cancel="No", callback=lambda *args: self.decide_stop_or_not(*args))
 
     def open_context_menu(self, instance):
-
-        MDDropdownMenu(items=self.context_menus, width_mult=3).open(instance)
+        if (self.context_menus != None):
+            MDDropdownMenu(items=self.context_menus, width_mult=3).open(instance)
 
     def open_settings(self, *args):
         # TODO: Experiment in later stage with kivy settings, because it might ruin the setup
@@ -226,16 +230,18 @@ class MainApp(App):
             events_callback=callback
         )
         ok_cancel_dialog.open()
+        return ok_cancel_dialog
 
     def show_input_dialog(self, title="Please Enter", hint_text=None, text="Type here", size_hint=(.8, .4), text_button_ok="Ok", callback=None):
-        dialog = MDInputDialog(
+        input_dialog = MDInputDialog(
             title=title,
             hint_text=hint_text,
             size_hint=size_hint,
             text_button_ok=text_button_ok,
             events_callback=callback)
-        dialog.text_field.text = text
-        dialog.open()
+        input_dialog.text_field.text = text
+        input_dialog.open()
+        return input_dialog
 
     def show_screen(self, screen_property, theme_primary_color, theme_accent_color):
         # Get a shorter alias for the screen_manager object:
@@ -273,26 +279,26 @@ if __name__ == "__main__":
         print(f"{CU.tfs.dic['APP_NAME'].value} encountered an error & needs to shut down. Our apologies for the inconvenience. {os.linesep}{os.linesep}"
               f"-> Please consult stack trace below:{os.linesep}{str(e)}{os.linesep}{os.linesep}{traceback.format_exc()}")
 
-        # error_dialog = MDDialog(
+        # _error_dialog = MDDialog(
         #     title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
         #     size_hint=(.8, .6),
         #     text=str(e),
         #     text_button_ok="Quit",
         #     events_callback=lambda x: str(x).lower()
         # )
-        # error_dialog.open()
+        # _error_dialog.open()
 
         popup = MsgPopup(str(e))
         popup.open()
 
-        # error_dialog = Popup(
+        # _error_dialog = Popup(
         #     title= f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
         #     content= AnchorLayout(anchor_x='center', anchor_y='bottom').add_widget(Label(text=str(e), halign='left', valign='top')),
         #     size_hint= (None, None),
         #     size= (Window.width / 3, Window.height / 3),
         #     auto_dismiss= True
         # )
-        # error_dialog.open()
+        # _error_dialog.open()
         # time.sleep(5)
 
 
