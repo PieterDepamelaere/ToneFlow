@@ -52,7 +52,7 @@ class PlayLists(Screen):
         self.ids.rv.data = []
 
         for playlist in self._list:
-            playlist_name = str(playlist.stem)
+            playlist_name = str(playlist.file_path.stem)
             if (len(search_pattern) == 0 or ((len(search_pattern) > 0) and (search_pattern.lower() in playlist_name.lower()))):
 
                 self.ids.rv.data.append(
@@ -85,7 +85,7 @@ class PlayLists(Screen):
             # Depending on the amount of time it takes to run through the refresh, the spinner will be more/longer visible:
 
 
-            self._list.append(file_path)
+            self._list.append(playlist)
             await asynckivy.sleep(0)
 
         # TODO: Make overscroll easier than it is now, in fact scrollbar should be always visible
@@ -93,4 +93,5 @@ class PlayLists(Screen):
         self.ids.refresh_layout.refresh_done()
 
     def sort_list(self):
-        self.ids.rv.data.sort()
+        self.set_list(sorted(self._list, key=lambda playlist: str(playlist.file_path)))
+        self.filter_list()

@@ -21,9 +21,18 @@ class PlayList(Screen):
                                "Help": lambda y: toast("TODO: WIP")}
         # TODO: Implement the other context menus
 
-        self.file_path = CU.safe_cast(file_path, pl.Path, None)
+        self._file_path = CU.safe_cast(file_path, pl.Path, None)
         # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
         self._list = list()  # ObservableList(None, object, list())
+
+    def get_file_path(self):
+        return self._file_path
+
+    def set_file_path(self, file_path):
+        file_path = CU.safe_cast(file_path, pl.Path, None)
+        self._file_path = file_path
+
+    file_path = property(get_file_path, set_file_path)
 
     def parse_from_json(self):
         pass

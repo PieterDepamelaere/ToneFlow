@@ -18,7 +18,7 @@ class LineupEntry(ABC):
     def set_file_path(self, file_path):
         """
         Setter _file_path
-        :param file_path: file_path
+        :param file_path: _file_path
         :return:
         """
         self._file_path = pl.Path(file_path)
