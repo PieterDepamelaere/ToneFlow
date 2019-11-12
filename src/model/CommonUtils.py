@@ -8,6 +8,7 @@ sys.path.insert(0, str(curr_file.parents[1]))
 sys.path.insert(0, str(curr_file.parents[2]))
 
 from functools import partial
+from kivymd.uix.dialog import MDDialog, MDInputDialog
 
 class CommonUtils:
 
@@ -48,6 +49,31 @@ class CommonUtils:
             return to_type(val)
         except (ValueError, TypeError):
             return default
+
+    @staticmethod
+    def show_ok_cancel_dialog(title, text, size_hint=(.8, .4), text_button_ok="Ok", text_button_cancel="Cancel", callback=None):
+        ok_cancel_dialog = MDDialog(
+            title=title,
+            size_hint=size_hint,
+            text=text,
+            text_button_ok=text_button_ok,
+            text_button_cancel=text_button_cancel,
+            events_callback=callback
+        )
+        ok_cancel_dialog.open()
+        return ok_cancel_dialog
+
+    @staticmethod
+    def show_input_dialog(title="Please Enter", hint_text=None, text="Type here", size_hint=(.8, .4), text_button_ok="Ok", callback=None):
+        input_dialog = MDInputDialog(
+            title=title,
+            hint_text=hint_text,
+            size_hint=size_hint,
+            text_button_ok=text_button_ok,
+            events_callback=callback)
+        input_dialog.text_field.text = text
+        input_dialog.open()
+        return input_dialog
 
     @classmethod
     def switch_screen(cls, choice):

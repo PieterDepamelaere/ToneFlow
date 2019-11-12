@@ -27,7 +27,6 @@ from kivy.uix.label import Label
 
 from kivymd.utils import asynckivy
 from kivymd.uix.navigationdrawer import NavigationDrawerIconButton
-from kivymd.uix.dialog import MDDialog, MDInputDialog
 from kivymd.theming import ThemeManager
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.toast import toast
@@ -107,7 +106,7 @@ class MainApp(App):
             dialog_text =f"{CU.tfs.dic['tf_workspace_path'].value}"
 
         pyperclip.copy(str(workspace_path_proposal))
-        self.show_input_dialog(title=f"Enter \"{CU.tfs.dic['WORKSPACE_NAME'].value}\"-Folder or its Parent Folder",
+        CU.show_input_dialog(title=f"Enter \"{CU.tfs.dic['WORKSPACE_NAME'].value}\"-Folder or its Parent Folder",
                                hint_text=f"{CU.tfs.dic['tf_workspace_path'].description}",
                                text=dialog_text,
                                size_hint=(.8, .3), text_button_ok="Load/Create",
@@ -116,7 +115,7 @@ class MainApp(App):
 
 
     def on_stop(self):
-        self.show_ok_cancel_dialog(title="Confirmation dialog", text=f"Are you sure you want to [color={get_hex_from_color(self.theme_cls.primary_color)}][b]quit[/b][/color] {CU.tfs.dic['APP_NAME'].value}?", size_hint=(0.5, 0.3), text_button_ok="Yes", text_button_cancel="No", callback=lambda *args: self.decide_stop_or_not(*args))
+        CU.show_ok_cancel_dialog(title="Confirmation dialog", text=f"Are you sure you want to [color={get_hex_from_color(self.theme_cls.primary_color)}][b]quit[/b][/color] {CU.tfs.dic['APP_NAME'].value}?", size_hint=(0.5, 0.3), text_button_ok="Yes", text_button_cancel="No", callback=lambda *args: self.decide_stop_or_not(*args))
 
     def open_context_menu(self, instance):
         if (self.context_menus != None):
@@ -142,45 +141,24 @@ class MainApp(App):
         """Set string title in MDToolbar for the whole application."""
         self.main_widget.ids.toolbar.title = title
 
-    def show_ok_cancel_dialog(self, title, text, size_hint=(.8, .4), text_button_ok="Ok", text_button_cancel="Cancel", callback=None):
-        ok_cancel_dialog = MDDialog(
-            title=title,
-            size_hint=size_hint,
-            text=text,
-            text_button_ok=text_button_ok,
-            text_button_cancel=text_button_cancel,
-            events_callback=callback
-        )
-        ok_cancel_dialog.open()
-        return ok_cancel_dialog
-
-    def show_input_dialog(self, title="Please Enter", hint_text=None, text="Type here", size_hint=(.8, .4), text_button_ok="Ok", callback=None):
-        input_dialog = MDInputDialog(
-            title=title,
-            hint_text=hint_text,
-            size_hint=size_hint,
-            text_button_ok=text_button_ok,
-            events_callback=callback)
-        input_dialog.text_field.text = text
-        input_dialog.open()
-        return input_dialog
-
     def show_screen(self, screen_property, theme_primary_color, theme_accent_color):
         # Get a shorter alias for the screen_manager object:
         scr_mngr = self.main_widget.ids.scr_mngr
-
         # Extract class & class_name:
         screen_class = screen_property.value
         class_name = screen_class.__name__
+
+        # Update the title, theme:
+        self.set_title_toolbar(screen_property.name)
+        self.set_theme_toolbar(theme_primary_color, theme_accent_color)
+
         if(not scr_mngr.has_screen(class_name)):
             # If the scr_mngr doesn't have such screen yet, make one:
             Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(class_name).with_suffix(".kv")).name))
             screen_object = screen_class()
             scr_mngr.add_widget(screen_object)
 
-        # Update the title, theme, context menus and show toast when ready:
-        self.set_title_toolbar(screen_property.name)
-        self.set_theme_toolbar(theme_primary_color, theme_accent_color)
+        # Update the context menu's and finally show toast when ready:
         self.context_menus = scr_mngr.get_screen(class_name).context_menus
         scr_mngr.current = class_name
         toast(class_name)

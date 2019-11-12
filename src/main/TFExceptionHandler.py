@@ -29,7 +29,7 @@ class TFExceptionHandler(ExceptionHandler):
 
             if self._error_dialog is None:
                 self._current_exception = exception
-                self._error_dialog = app.show_ok_cancel_dialog(
+                self._error_dialog = CU.show_ok_cancel_dialog(
                     # title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
                     title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
                     text=f"[color={get_hex_from_color((1, 0, 0))}][i]{str(self._current_exception)}[/i][/color]{os.linesep}{os.linesep}"

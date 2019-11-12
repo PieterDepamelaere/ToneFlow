@@ -1,84 +1,142 @@
-# -*- coding: utf-8 -*-
-
-import time
 from kivy.app import App
-from kivy.uix.label import Label
-from kivy.utils import get_color_from_hex
-from kivymd.utils import asynckivy as ak
+from kivy.lang import Builder
+from kivy.factory import Factory
+
+from kivymd.toast import toast
+from kivymd.theming import ThemeManager
+from kivymd.uix.stackfloatingbutton import MDStackFloatingButtons
 
 
-class TestApp(App):
+Builder.load_string('''
+
+
+<ExampleFloatingButtons@BoxLayout>:
+    orientation: 'vertical'
+
+    MDToolbar:
+        title: 'Stack Floating Buttons'
+        md_bg_color: app.theme_cls.primary_color
+        elevation: 10
+        left_action_items: [['menu', lambda x: None]]
+
+''')
+
+
+class Example(App):
+    theme_cls = ThemeManager()
+    theme_cls.primary_palette = 'Teal'
+    title = "Example Stack Floating Buttons"
+    create_stack_floating_buttons = False
+    floating_data = {
+        'Python': 'language-python',
+        'Php': 'language-php',
+        'C++': 'language-cpp'}
+
+    def set_my_language(self, instance_button):
+        toast(instance_button.icon)
 
     def build(self):
-        return Label(text='Hello', markup=True, font_size='80sp',
-                     outline_width=2,
-                     outline_color=get_color_from_hex('#FFFFFF'),
-                     color=get_color_from_hex('#000000'),
-                     )
-
-    def on_start(self):
-        # async def animate(label):
-        #     await ak.sleep(1.5)
-        #     while True:
-        #         label.outline_color = get_color_from_hex('#FFFFFF')
-        #         label.text = 'Do'
-        #         await ak.sleep(.5)
-        #         label.text = 'you'
-        #         await ak.sleep(.5)
-        #         label.text = 'like'
-        #         await ak.sleep(.5)
-        #         label.text = 'Kivy?'
-        #         await ak.sleep(2)
-        #
-        #         label.outline_color = get_color_from_hex('#FF5555')
-        #         label.text = 'Answer me!'
-        #         await ak.sleep(2)
-        #
-        #         label.outline_color = get_color_from_hex('#FFFF00')
-        #         label.text = 'Left-click to replay'
-        #         while True:
-        #             args, kwargs = await ak.event(label, 'on_touch_down')
-        #             touch = args[1]
-        #             if touch.button == 'left':
-        #                 break
-
-        def animate(label):
-            print("Got here 1")
-            time.sleep(1.5)
-            print("Got here 2")
-            for i in [0,2]:
-                label.outline_color = get_color_from_hex('#FFFFFF')
-                label.text = 'Do'
-                print("Got here 3")
-                time.sleep(.5)
-                label.text = 'you'
-                print("Got here 4")
-                time.sleep(.5)
-                label.text = 'like'
-                print("Got here 5")
-                time.sleep(.5)
-                label.text = 'Kivy?'
-                print("Got here 6")
-                time.sleep(2)
-
-                label.outline_color = get_color_from_hex('#FF5555')
-                label.text = 'Answer me!'
-                print("Got here 7")
-                time.sleep(2)
-
-                label.outline_color = get_color_from_hex('#FFFF00')
-                label.text = 'Left-click to replay'
-                # while True:
-                #     args, kwargs = ak.event(label, 'on_touch_down')
-                #     touch = args[1]
-                #     if touch.button == 'left':
-                #         break
-                print("Got here 8")
-        animate(self.root)
+        screen = Factory.ExampleFloatingButtons()
+        # Use this condition otherwise the stack will be created each time.
+        if not self.create_stack_floating_buttons:
+            screen.add_widget(MDStackFloatingButtons(
+                icon='lead-pencil',
+                # floating_data=self.floating_data,
+                floating_data={
+                    'Python': None,
+                    'Php': 'language-php',
+                    'C++': 'language-cpp'},
+                # floating_data={'a': 'b', 'c': 'd'},
+                callback=self.set_my_language))
+            self.create_stack_floating_buttons = True
+        return screen
 
 
-if __name__ == '__main__':
-    TestApp().run()
+Example().run()
+
+#
+#
+# # -*- coding: utf-8 -*-
+#
+# import time
+# from kivy.app import App
+# from kivy.uix.label import Label
+# from kivy.utils import get_color_from_hex
+# from kivymd.utils import asynckivy as ak
+#
+#
+# class TestApp(App):
+#
+#     def build(self):
+#         return Label(text='Hello', markup=True, font_size='80sp',
+#                      outline_width=2,
+#                      outline_color=get_color_from_hex('#FFFFFF'),
+#                      color=get_color_from_hex('#000000'),
+#                      )
+#
+#     def on_start(self):
+#         # async def animate(label):
+#         #     await ak.sleep(1.5)
+#         #     while True:
+#         #         label.outline_color = get_color_from_hex('#FFFFFF')
+#         #         label.text = 'Do'
+#         #         await ak.sleep(.5)
+#         #         label.text = 'you'
+#         #         await ak.sleep(.5)
+#         #         label.text = 'like'
+#         #         await ak.sleep(.5)
+#         #         label.text = 'Kivy?'
+#         #         await ak.sleep(2)
+#         #
+#         #         label.outline_color = get_color_from_hex('#FF5555')
+#         #         label.text = 'Answer me!'
+#         #         await ak.sleep(2)
+#         #
+#         #         label.outline_color = get_color_from_hex('#FFFF00')
+#         #         label.text = 'Left-click to replay'
+#         #         while True:
+#         #             args, kwargs = await ak.event(label, 'on_touch_down')
+#         #             touch = args[1]
+#         #             if touch.button == 'left':
+#         #                 break
+#
+#         def animate(label):
+#             print("Got here 1")
+#             time.sleep(1.5)
+#             print("Got here 2")
+#             for i in [0,2]:
+#                 label.outline_color = get_color_from_hex('#FFFFFF')
+#                 label.text = 'Do'
+#                 print("Got here 3")
+#                 time.sleep(.5)
+#                 label.text = 'you'
+#                 print("Got here 4")
+#                 time.sleep(.5)
+#                 label.text = 'like'
+#                 print("Got here 5")
+#                 time.sleep(.5)
+#                 label.text = 'Kivy?'
+#                 print("Got here 6")
+#                 time.sleep(2)
+#
+#                 label.outline_color = get_color_from_hex('#FF5555')
+#                 label.text = 'Answer me!'
+#                 print("Got here 7")
+#                 time.sleep(2)
+#
+#                 label.outline_color = get_color_from_hex('#FFFF00')
+#                 label.text = 'Left-click to replay'
+#                 # while True:
+#                 #     args, kwargs = ak.event(label, 'on_touch_down')
+#                 #     touch = args[1]
+#                 #     if touch.button == 'left':
+#                 #         break
+#                 print("Got here 8")
+#         animate(self.root)
+#
+#
+# if __name__ == '__main__':
+#     TestApp().run()
 
 # from kivy.app import App
 # from kivy.lang import Builder
