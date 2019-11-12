@@ -11,14 +11,8 @@
 <IconLeftSampleWidget@ILeftBodyTouch+MDIconButton>
     icon: root.icon
 
-<PlayListRowView@OneLineIconListItem>:
-    icon: 'android'
-    on_release: toast(self.text) #root.callback(root.icon)
-
-    IconLeftSampleWidget:
-        icon: root.icon
-
 <PLayLists@Screen>
+    id: id_playlist
     name: CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'].value.__name__
     on_enter: self.refresh_list()
 
@@ -35,20 +29,6 @@
                 id: magnifier_button
                 icon: 'magnify'
                 on_release: root.filter_list()
-
-            #MDTextFieldRound:
-                #id: search_field
-                #icon_type: 'all'
-                #icon_left: 'magnify'
-                #icon_left_disabled: False
-                #icon_right: 'close'
-                #icon_right_disabled: False
-                #icon_callback: lambda x,y: print(f"icon fired x: {str(x)}, y: {str(y.id)}")
-                #on_text: root.filter_list(self.text)
-                #password: False
-                #hint_text: "Search playlists"
-                #helper_text: "Enter a small snippet of the name of the intended playlist"
-                #helper_text_mode: "on_focus"
 
             MDTextField:
                 id: search_field
@@ -92,15 +72,30 @@
         y: dp(25)
         on_release: root.show_dialog_add_playlist()
 
-        #RecycleView:
-        #    id: rv
-         #   key_viewclass: 'viewclass'
-          #  key_size: 'height'
+<PlayListRowView@OneLineIconListItem>:
+    icon: 'android'
+    on_release: toast(self.text) #root.callback(root.icon)
 
-           # RecycleBoxLayout:
-            #    padding: dp(10)
-             #   default_size: None, dp(48)
-              #  default_size_hint: 1, None
-               # size_hint_y: None
-                #height: self.minimum_height
-                #orientation: 'vertical'
+    BoxLayout:
+        orientation: 'horizontal'
+        #size_hint_y: None
+        #height: '56'
+        spacing: '10dp'
+        pos_hint: {'center_y': 0.5}
+
+        IconLeftSampleWidget:
+            icon: root.icon
+
+        Widget:
+
+        MDIconButton:
+            icon: 'pencil'
+            #theme_text_color: 'Custom'
+            #text_color: app.theme_cls.primary_color
+            on_release: root.ids.id_playlist.edit_playlist()
+
+        MDIconButton:
+            icon: 'trash-can'
+            #theme_text_color: 'Custom'
+            #text_color: app.theme_cls.primary_color
+            on_release: root.ids.id_playlist.delete_playlist()

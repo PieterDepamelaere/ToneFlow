@@ -50,17 +50,12 @@ class PlayLists(Screen):
     list = property(get_list, set_list)
     context_menus = property(get_context_menus)
 
-    def show_dialog_add_playlist(self):
+    def delete_playlist(self, *args):
+        text_button, instance = args[0], args[1]
+        playlist_to_delete = CU.safe_cast(instance, PlayList, None)
+        pl.Path(instance)
+        self._list.remove(instance)
 
-        creation_time = datetime.now()
-
-        dialog_text = f"(Only alphanumeric characters & \"_-\", leave blank to cancel.){os.linesep}Concert_{creation_time.year}{creation_time.month}{creation_time.day}-{creation_time.hour}{creation_time.minute}{creation_time.second}"
-
-        CU.show_input_dialog(title=f"Enter Name of New Playlist",
-                             hint_text=dialog_text,
-                             text=dialog_text,
-                             size_hint=(.6, .4), text_button_ok="Add",
-                             callback=lambda text_button, instance: {self.check_name_new_playlist(instance.text_field.text), self.refresh_list()})
 
     def check_name_new_playlist(self, name_new_playlist):
         asynckivy.start(self.async_check_name_new_playlist(name_new_playlist))
@@ -137,6 +132,18 @@ class PlayLists(Screen):
         # TODO: Make overscroll easier than it is now, in fact scrollbar should be always visible
         await self.async_filter_list()
         self.ids.refresh_layout.refresh_done()
+
+    def show_dialog_add_playlist(self):
+
+        creation_time = datetime.now()
+
+        dialog_text = f"(Only alphanumeric characters & \"_-\", leave blank to cancel.){os.linesep}Concert_{creation_time.year}{creation_time.month}{creation_time.day}-{creation_time.hour}{creation_time.minute}{creation_time.second}"
+
+        CU.show_input_dialog(title=f"Enter Name of New Playlist",
+                             hint_text=dialog_text,
+                             text=dialog_text,
+                             size_hint=(.6, .4), text_button_ok="Add",
+                             callback=lambda text_button, instance: {self.check_name_new_playlist(instance.text_field.text), self.refresh_list()})
 
     def sort_list(self):
         self.set_list(sorted(self._list, key=lambda playlist: str(playlist.file_path)))
