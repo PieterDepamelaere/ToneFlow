@@ -5,9 +5,11 @@ import aiofiles
 import pathlib as pl
 from datetime import datetime
 
+from kivy.app import App
 from kivy.metrics import dp
+from kivy.utils import get_hex_from_color
 from kivy.uix.screenmanager import Screen
-from kivy.properties import NumericProperty
+from kivy.properties import NumericProperty, ObjectProperty
 
 from kivymd.utils import asynckivy
 from kivymd.toast import toast
@@ -17,17 +19,20 @@ curr_file = pl.Path(os.path.realpath(__file__))
 from src.model.PlayList import PlayList
 from src.model.CommonUtils import CommonUtils as CU
 
-
 class PlayLists(Screen):
+
+    app = None
 
     def __init__(self, **kwargs):
         super(PlayLists, self).__init__(name=type(self).__name__, **kwargs)
+        PlayLists.app = App.get_running_app()
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
-        self._context_menus = {"Clear Input": lambda x: {self.clear_search_pattern(), toast("Input cleared")},
+        self._context_menus = {"Add Playlist": lambda x: {self.show_dialog_add_playlist()},
+                               "Clear Input": lambda x: {self.clear_search_pattern(), toast("Input cleared")},
                                "Sort Playlists": lambda x: {self.sort_list(), toast("Playlists sorted")},
                                "Refresh": lambda x: {self.refresh_list(), toast("Refreshed")},
                                "Rename Playlist(s)": lambda x: toast("TODO: WIP"),
-                               "Help": lambda y: toast("TODO: WIP")}
+                               "Help": lambda x: toast("TODO: WIP")}
         # TODO: Implement the other context menus
 
         # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
@@ -50,17 +55,25 @@ class PlayLists(Screen):
     list = property(get_list, set_list)
     context_menus = property(get_context_menus)
 
-    def delete_playlist(self, *args):
-        text_button, instance = args[0], args[1]
-        playlist_to_delete = CU.safe_cast(instance, PlayList, None)
-        pl.Path(instance)
-        self._list.remove(instance)
+    def remove_playlist(self, playlist_rowview, *args):
+        decision = args[0]
+        playlist_to_delete = playlist_rowview.playlist_reference
 
+        if (str(decision).lower() == "remove"):
+            self._list.remove(playlist_to_delete)
 
-    def check_name_new_playlist(self, name_new_playlist):
-        asynckivy.start(self.async_check_name_new_playlist(name_new_playlist))
+            file_path_to_delete = playlist_to_delete.file_path
+            if (file_path_to_delete.exists() and file_path_to_delete.is_file()):
+                file_path_to_delete.unlink()
+            toast(f"{str(playlist_to_delete.file_path.stem)} successfully removed")
+        else:
+            toast(f"Canceled removal of {str(playlist_to_delete.file_path.stem)}")
 
-    async def async_check_name_new_playlist(self, name_new_playlist):
+    def add_playlist(self, name_new_playlist):
+        asynckivy.start(self.async_add_playlist(name_new_playlist))
+
+    async def async_add_playlist(self, name_new_playlist):
+        # Check the name_new_playlist by means of a regular expression:
         # Only allow names entirely consisting of alphanumeric characters, dashes and underscores
         if re.match("^[\w\d_-]+$", str(name_new_playlist)):
         # if len(str(name_new_playlist)) > 0:
@@ -100,8 +113,9 @@ class PlayLists(Screen):
                 self.ids.rv.data.append(
                     {
                         "viewclass": "PlayListRowView",
-                        "icon": "playlist-music",
-                        "text": playlist_name,
+                        "list_reference": self,
+                        "playlist_reference": playlist,
+                        # "text": playlist_name,
                         "callback": None
                     }
                 )
@@ -142,8 +156,20 @@ class PlayLists(Screen):
         CU.show_input_dialog(title=f"Enter Name of New Playlist",
                              hint_text=dialog_text,
                              text=dialog_text,
-                             size_hint=(.6, .4), text_button_ok="Add",
-                             callback=lambda text_button, instance: {self.check_name_new_playlist(instance.text_field.text), self.refresh_list()})
+                             size_hint=(.6, .4),
+                             text_button_ok="Add",
+                             callback=lambda text_button, instance, *args: {self.add_playlist(instance.text_field.text), self.refresh_list()})
+
+    def show_dialog_remove_playlist(self, playlist_rowview):
+
+        dialog_text=f"Are you want to remove [color={get_hex_from_color(PlayLists.app.theme_cls.primary_color)}][b]{str(playlist_rowview.playlist_reference.file_path.stem)}[/b][/color] from the list? This action cannot be undone."
+
+        CU.show_ok_cancel_dialog(title=f"Are You Sure?",
+                                 text=dialog_text,
+                                 size_hint=(.6, .4),
+                                 text_button_ok="Remove",
+                                 text_button_cancel="Cancel",
+                                 callback=lambda *args: {self.remove_playlist(playlist_rowview, *args), self.refresh_list()})
 
     def sort_list(self):
         self.set_list(sorted(self._list, key=lambda playlist: str(playlist.file_path)))

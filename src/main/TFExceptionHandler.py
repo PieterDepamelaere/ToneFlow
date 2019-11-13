@@ -18,7 +18,7 @@ class TFExceptionHandler(ExceptionHandler):
         self._PASS_or_RAISE = ExceptionManager.PASS # PASS==1, RAISE==0
 
     def handle_exception(self, exception):
-        app = App.get_running_app()
+        # app = App.get_running_app()
 
         # If the current problem is cleared, "accept" the next one:
         if self._current_exception is None:
