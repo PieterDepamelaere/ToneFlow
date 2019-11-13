@@ -6,7 +6,6 @@
 #:import toast kivymd.toast.toast
 #:import ILeftBodyTouch kivymd.uix.list.ILeftBodyTouch
 #:import MDIconButton kivymd.uix.button.MDIconButton
-#:import ObjectProperty kivy.properties.ObjectProperty
 
 <IconLeftSampleWidget@ILeftBodyTouch+MDIconButton>
     icon: root.icon
@@ -84,10 +83,11 @@
 
 <PlayListRowView@OneLineIconListItem>:
     icon: 'playlist-music' # One can code an if-statement after this
-    list_reference: ObjectProperty()
-    playlist_reference: ObjectProperty()
+    list_reference: None
+    playlist_reference: None
     on_release: toast(self.text) #root.callback(root.icon)
-    text: f'test {str(self.playlist_reference)}' # .file_path.stem
+    text: "" if self.playlist_reference is None else self.playlist_reference.file_path.stem # "contents (%s)"%(app.abcd)
+    # f'test {str(self.playlist_reference)}' # .file_path.stem
 
     BoxLayout:
         orientation: 'horizontal'
@@ -105,7 +105,7 @@
             icon: 'pencil'
             #theme_text_color: 'Custom'
             #text_color: app.theme_cls.primary_color
-            on_release: root.ids.id_playlist.edit_playlist()
+            on_release: root.list_reference.show_dialog_rename_playlist(root)
 
         MDIconButton:
             icon: 'trash-can'

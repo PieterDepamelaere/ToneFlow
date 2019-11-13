@@ -22,6 +22,7 @@ from src.model.CommonUtils import CommonUtils as CU
 class PlayLists(Screen):
 
     app = None
+    EXPLANATION_PLAYLIST_NAME = f"(Only alphanumeric characters & \"_-\", leave blank to cancel.){os.linesep}"
 
     def __init__(self, **kwargs):
         super(PlayLists, self).__init__(name=type(self).__name__, **kwargs)
@@ -55,28 +56,17 @@ class PlayLists(Screen):
     list = property(get_list, set_list)
     context_menus = property(get_context_menus)
 
-    def remove_playlist(self, playlist_rowview, *args):
-        decision = args[0]
-        playlist_to_delete = playlist_rowview.playlist_reference
-
-        if (str(decision).lower() == "remove"):
-            self._list.remove(playlist_to_delete)
-
-            file_path_to_delete = playlist_to_delete.file_path
-            if (file_path_to_delete.exists() and file_path_to_delete.is_file()):
-                file_path_to_delete.unlink()
-            toast(f"{str(playlist_to_delete.file_path.stem)} successfully removed")
-        else:
-            toast(f"Canceled removal of {str(playlist_to_delete.file_path.stem)}")
-
     def add_playlist(self, name_new_playlist):
         asynckivy.start(self.async_add_playlist(name_new_playlist))
 
     async def async_add_playlist(self, name_new_playlist):
+
+        # Omit the provided explanation-text in case it was not omitted:
+        name_new_playlist = str(name_new_playlist).replace(f"{PlayLists.EXPLANATION_PLAYLIST_NAME}", "")
+
         # Check the name_new_playlist by means of a regular expression:
         # Only allow names entirely consisting of alphanumeric characters, dashes and underscores
         if re.match("^[\w\d_-]+$", str(name_new_playlist)):
-        # if len(str(name_new_playlist)) > 0:
             filename_playlist = f"{str(name_new_playlist)}.json"
             if len(list(pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).glob(filename_playlist))) > 0:
                 toast(f"{name_new_playlist} already exists")
@@ -93,6 +83,52 @@ class PlayLists(Screen):
         else:
             toast(f"Name cannot be empty nor contain{os.linesep}non-alphanumeric characters except for \"-_\")")
         await asynckivy.sleep(0)
+
+    def rename_playlist(self, playlist_rowview, new_name_playlist):
+        asynckivy.start(self.async_rename_playlist(playlist_rowview, new_name_playlist))
+
+    async def async_rename_playlist(self, playlist_rowview, new_name_playlist):
+        # Omit the provided explanation-text in case it was not omitted:
+        new_name_playlist = str(new_name_playlist).replace(f"{PlayLists.EXPLANATION_PLAYLIST_NAME}", "")
+
+        # Check the new_name_playlist by means of a regular expression:
+        # Only allow names entirely consisting of alphanumeric characters, dashes and underscores
+        playlist_to_rename = playlist_rowview.playlist_reference
+
+        if re.match("^[\w\d_-]+$", str(new_name_playlist)):
+            filename_playlist = f"{str(new_name_playlist)}.json"
+            if len(list(pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).glob(filename_playlist))) > 0:
+                toast(f"{new_name_playlist} already exists")
+
+            elif playlist_to_rename.file_path.exists():
+                old_name = str(playlist_to_rename.file_path.stem)
+                file_path = pl.Path(playlist_to_rename.file_path.parents[0] / filename_playlist)
+                pl.Path(playlist_to_rename.file_path).rename(file_path)
+
+                # TODO: async option doesn't work in combination with asynckivy.start() error is TypeError: '_asyncio.Future' object is not callable
+                # async with open(str(file_path), 'w') as json_file:
+                #     await json_file.write("")
+
+                toast(f"{old_name} renamed to {new_name_playlist}")
+            else:
+                toast(f"Playlist {playlist_to_rename.file_path.stem} not found")
+        else:
+            toast(f"Name cannot be empty nor contain{os.linesep}non-alphanumeric characters except for \"-_\")")
+        await asynckivy.sleep(0)
+
+    def remove_playlist(self, playlist_rowview, *args):
+        decision = args[0]
+        playlist_to_delete = playlist_rowview.playlist_reference
+
+        if (str(decision).lower() == "remove"):
+            self._list.remove(playlist_to_delete)
+
+            file_path_to_delete = playlist_to_delete.file_path
+            if (file_path_to_delete.exists() and file_path_to_delete.is_file()):
+                pl.Path(file_path_to_delete).unlink()
+            toast(f"{str(playlist_to_delete.file_path.stem)} successfully removed")
+        else:
+            toast(f"Canceled removal of {str(playlist_to_delete.file_path.stem)}")
 
     def clear_search_pattern(self):
         self.ids.search_field.text=""
@@ -115,7 +151,6 @@ class PlayLists(Screen):
                         "viewclass": "PlayListRowView",
                         "list_reference": self,
                         "playlist_reference": playlist,
-                        # "text": playlist_name,
                         "callback": None
                     }
                 )
@@ -151,7 +186,8 @@ class PlayLists(Screen):
 
         creation_time = datetime.now()
 
-        dialog_text = f"(Only alphanumeric characters & \"_-\", leave blank to cancel.){os.linesep}Concert_{creation_time.year}{creation_time.month}{creation_time.day}-{creation_time.hour}{creation_time.minute}{creation_time.second}"
+        dialog_text = f"{PlayLists.EXPLANATION_PLAYLIST_NAME}" \
+            f"Concert_{creation_time.year}{creation_time.month}{creation_time.day}-{creation_time.hour}{creation_time.minute}{creation_time.second}"
 
         CU.show_input_dialog(title=f"Enter Name of New Playlist",
                              hint_text=dialog_text,
@@ -159,6 +195,18 @@ class PlayLists(Screen):
                              size_hint=(.6, .4),
                              text_button_ok="Add",
                              callback=lambda text_button, instance, *args: {self.add_playlist(instance.text_field.text), self.refresh_list()})
+
+    def show_dialog_rename_playlist(self, playlist_rowview):
+
+        dialog_text = f"{PlayLists.EXPLANATION_PLAYLIST_NAME}" \
+            f"{str(playlist_rowview.playlist_reference.file_path.stem)}"
+
+        CU.show_input_dialog(title=f"Enter New Name for Playlist",
+                             hint_text=dialog_text,
+                             text=dialog_text,
+                             size_hint=(.6, .4),
+                             text_button_ok="Update",
+                             callback=lambda text_button, instance, *args: {self.rename_playlist(playlist_rowview, instance.text_field.text), self.refresh_list()})
 
     def show_dialog_remove_playlist(self, playlist_rowview):
 
@@ -172,5 +220,5 @@ class PlayLists(Screen):
                                  callback=lambda *args: {self.remove_playlist(playlist_rowview, *args), self.refresh_list()})
 
     def sort_list(self):
-        self.set_list(sorted(self._list, key=lambda playlist: str(playlist.file_path)))
+        self.set_list(sorted(self._list, key=lambda playlist: str(playlist.file_path.stem)))
         self.filter_list()
