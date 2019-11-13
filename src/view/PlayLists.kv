@@ -7,8 +7,37 @@
 #:import ILeftBodyTouch kivymd.uix.list.ILeftBodyTouch
 #:import MDIconButton kivymd.uix.button.MDIconButton
 
-<IconLeftSampleWidget@ILeftBodyTouch+MDIconButton>
-    icon: root.icon
+<PlayListRowView@OneLineIconListItem>:
+    icon: 'playlist-music' # One can code an if-statement after this
+    list_obj: None
+    playlist_obj: None
+    on_release: toast(self.text) #root.callback(root.icon)
+    text: "" if self.playlist_obj is None else self.playlist_obj.file_path.stem
+
+    BoxLayout:
+        orientation: 'horizontal'
+        #size_hint_y: None
+        #height: '56'
+        spacing: '5dp'
+        pos_hint: {'center_y': 0.5}
+
+        MDIconButton:
+            icon: root.icon
+            on_release: toast(root.text) #root.on_release()
+
+        Widget:
+
+        MDIconButton:
+            icon: 'pencil'
+            #theme_text_color: 'Custom'
+            #text_color: app.theme_cls.primary_color
+            on_release: root.list_obj.show_dialog_rename_playlist(root)
+
+        MDIconButton:
+            icon: 'trash-can'
+            #theme_text_color: 'Custom'
+            #text_color: app.theme_cls.primary_color
+            on_release: root.list_obj.show_dialog_remove_playlist(root)
 
 <PLayLists@Screen>
     id: id_playlist
@@ -52,7 +81,6 @@
                 key_viewclass: 'viewclass'
                 key_size: 'height'
 
-
                 #SelectableRecycleBoxLayout:
                  #   default_size: None, dp(56)
                   #  default_size_hint: 1, None
@@ -80,35 +108,3 @@
         x: Window.width - self.width - dp(25)
         y: dp(25)
         on_release: root.show_dialog_add_playlist()
-
-<PlayListRowView@OneLineIconListItem>:
-    icon: 'playlist-music' # One can code an if-statement after this
-    list_reference: None
-    playlist_reference: None
-    on_release: toast(self.text) #root.callback(root.icon)
-    text: "" if self.playlist_reference is None else self.playlist_reference.file_path.stem # "contents (%s)"%(app.abcd)
-    # f'test {str(self.playlist_reference)}' # .file_path.stem
-
-    BoxLayout:
-        orientation: 'horizontal'
-        #size_hint_y: None
-        #height: '56'
-        spacing: '10dp'
-        pos_hint: {'center_y': 0.5}
-
-        IconLeftSampleWidget:
-            icon: root.icon
-
-        Widget:
-
-        MDIconButton:
-            icon: 'pencil'
-            #theme_text_color: 'Custom'
-            #text_color: app.theme_cls.primary_color
-            on_release: root.list_reference.show_dialog_rename_playlist(root)
-
-        MDIconButton:
-            icon: 'trash-can'
-            #theme_text_color: 'Custom'
-            #text_color: app.theme_cls.primary_color
-            on_release: root.list_reference.show_dialog_remove_playlist(root) # lambda *args: root.list_reference.remove_playlist(*args)
