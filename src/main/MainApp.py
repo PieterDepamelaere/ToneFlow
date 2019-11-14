@@ -136,7 +136,6 @@ class MainApp(App):
                 MainApp.theme_cls.primary_palette = primary_color
                 MainApp.theme_cls.accent_palette = accent_color
 
-
     def set_title_toolbar(self, title):
         """Set string title in MDToolbar for the whole application."""
         self.main_widget.ids.toolbar.title = title

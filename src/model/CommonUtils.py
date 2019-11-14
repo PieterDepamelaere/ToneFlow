@@ -17,7 +17,7 @@ class CommonUtils:
 
     # dic_screen_switch = {
     #
-    #     PlayLists: partial(PlayLists.refresh_list, object())
+    #     Songs: partial(Songs.refresh_list, object())
     #     # ,"Songs": partial(SwitchMain.change_local_paths),
     #     # "Settings": partial(SwitchMain.change_online_paths)
     #

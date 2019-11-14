@@ -31,7 +31,7 @@ class PlayLists(Screen):
         self._context_menus = {"Add Playlist": lambda x: {self.show_dialog_add_playlist()},
                                "Clear Input": lambda x: {self.clear_search_pattern()},
                                "Sort Playlists": lambda x: {self.sort_list()},
-                               "Refresh": lambda x: {self.refresh_list()},
+                               "Refresh": lambda x: {self.refresh_list(), toast(f"Refreshed")},
                                "Remove Playlist(s)": lambda x: toast("TODO: WIP"),
                                "Help": lambda x: toast("TODO: WIP")}
         # TODO: Implement the other context menus
@@ -125,11 +125,6 @@ class PlayLists(Screen):
                 old_name = str(playlist_to_rename.file_path.stem)
                 file_path = pl.Path(playlist_to_rename.file_path.parents[0] / filename_playlist)
                 pl.Path(playlist_to_rename.file_path).rename(file_path)
-
-                # TODO: async option doesn't work in combination with asynckivy.start() error is TypeError: '_asyncio.Future' object is not callable
-                # async with open(str(file_path), 'w') as json_file:
-                #     await json_file.write("")
-
                 toast(f"{old_name} renamed to {new_name_playlist}")
             else:
                 toast(f"Playlist {playlist_to_rename.file_path.stem} not found")
@@ -146,7 +141,7 @@ class PlayLists(Screen):
         """
         asynckivy.start(self.async_remove_playlist(playlist_rowview, *args))
 
-    def async_remove_playlist(self, playlist_rowview, *args):
+    async def async_remove_playlist(self, playlist_rowview, *args):
         """
         Actual process to remove a playlist.
         :param playlist_rowview:
@@ -231,7 +226,6 @@ class PlayLists(Screen):
 
         # TODO: Make overscroll easier than it is now, in fact scrollbar should be always visible
         await self.async_filter_list()
-        toast(f"Refreshed")
         self.ids.refresh_layout.refresh_done()
 
     def show_dialog_add_playlist(self):
