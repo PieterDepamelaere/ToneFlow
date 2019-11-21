@@ -104,9 +104,14 @@
         icon: 'folder-plus'
         #opposite_colors: True
         elevation_normal: 8
+        background_color: app.theme_cls.secondary_color
+        background_color_down: app.theme_cls.secondary_dark
+        theme_text_color: 'Secondary' #'ContrastParentBackground' 'Custom'
+
+
         #background_palette: 'Primary'
-        md_bg_color: app.theme_cls.primary_color
-        text_color: app.theme_cls.opposite_text_color
+        #md_bg_color: app.theme_cls.primary_color
+        #text_color: app.theme_cls.opposite_text_color
         x: Window.width - self.width - dp(25)
         y: dp(25)
         on_release: root.show_filemanager_add_songs_location()
