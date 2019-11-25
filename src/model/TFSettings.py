@@ -37,7 +37,9 @@ class TFSettings(Screen):
         self.dic['SCREEN_PLAYLISTS_CLASS'] = TFSetting("Playlists", None, PlayLists, False, None)
         self.dic['SCREEN_SETTINGS_CLASS'] = TFSetting("Settings", None, TFSettings, False, None)
         self.dic['SCREEN_SONGS_CLASS'] = TFSetting("Songs", None, Songs, False, None)
+        self.dic['THEME_BACKGROUND_HUE'] = TFSetting("Background hue influencing text color", None, '500', False, None)
 
+        # User editable ones:
         self.dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self.dic['WORKSPACE_NAME'].value}", f"???{os.sep}{self.dic['WORKSPACE_NAME'].value} \t(Preferably path on external device like flash drive)", True, lambda value: self.cb_create_load_tf_workspace(value))
 
 

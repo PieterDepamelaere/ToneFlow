@@ -52,7 +52,7 @@
         text: str(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'].name)
         badge_text: "!"
         theme_primary_color: "Red"
-        theme_accent_color: "Gray"
+        theme_accent_color: "Gray" #"Gray"
         on_release:
             app.show_screen(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'], self.theme_primary_color, self.theme_accent_color)
 
@@ -61,7 +61,7 @@
         text: str(CU.tfs.dic['SCREEN_SONGS_CLASS'].name)
         badge_text: "!"
         theme_primary_color: "Amber"
-        theme_accent_color: "DeepOrange"
+        theme_accent_color: "Gray" #"DeepOrange"
         on_release:
             app.show_screen(CU.tfs.dic['SCREEN_SONGS_CLASS'], self.theme_primary_color, self.theme_accent_color)
 
@@ -112,7 +112,7 @@ NavigationLayout:
                 title: app.title
                 md_bg_color: app.theme_cls.primary_color
                 background_palette: 'Primary'
-                background_hue: '500'
+                background_hue: CU.tfs.dic['THEME_BACKGROUND_HUE'].value
                 elevation: 10
                 left_action_items:
                     [['menu', lambda x: app.root.toggle_nav_drawer()]]

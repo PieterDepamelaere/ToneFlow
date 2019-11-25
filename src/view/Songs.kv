@@ -3,10 +3,12 @@
 #:import os os
 #:import pl pathlib
 #:import CU src.model.CommonUtils.CommonUtils
+#:import get_color_from_hex kivy.utils.get_color_from_hex
 #:import StringProperty kivy.properties.NumericProperty
 #:import toast kivymd.toast.toast
 #:import ILeftBodyTouch kivymd.uix.list.ILeftBodyTouch
 #:import MDIconButton kivymd.uix.button.MDIconButton
+#:import text_colors kivymd.color_definitions.text_colors
 
 <SongRowView@OneLineIconListItem>:
     icon: 'music-note' # One can code an if-statement after this
@@ -40,10 +42,11 @@
             #text_color: app.theme_cls.primary_color
             on_release: root.list_obj.show_dialog_remove_song(root)
 
-<Songs@Screen>
+<Songs>
     id: id_songs
     name: CU.tfs.dic['SCREEN_SONGS_CLASS'].value.__name__
-    on_enter: self.refresh_list()
+    on_enter:
+        self.refresh_list()
 
     BoxLayout:
         orientation: 'vertical'
@@ -100,18 +103,11 @@
                     orientation: 'vertical'
 
     MDFloatingActionButton:
-        id: button_add_song_location
+        id: floating_action_button
         icon: 'folder-plus'
-        #opposite_colors: True
         elevation_normal: 8
-        background_color: app.theme_cls.secondary_color
-        background_color_down: app.theme_cls.secondary_dark
-        theme_text_color: 'Secondary' #'ContrastParentBackground' 'Custom'
-
-
-        #background_palette: 'Primary'
-        #md_bg_color: app.theme_cls.primary_color
-        #text_color: app.theme_cls.opposite_text_color
         x: Window.width - self.width - dp(25)
         y: dp(25)
         on_release: root.show_filemanager_add_songs_location()
+        md_bg_color: app.theme_cls.primary_color
+        specific_text_color: get_color_from_hex(text_colors[app.theme_cls.primary_palette][CU.tfs.dic['THEME_BACKGROUND_HUE'].value])
