@@ -15,7 +15,7 @@
     list_obj: None
     song_entry_obj: None
     on_release: toast(self.text) #root.callback(root.icon)
-    text: "" if self.song_entry_obj is None else self.song_entry_obj.file_path.stem
+    text: '' if self.song_entry_obj is None else self.song_entry_obj.file_path.stem
 
     BoxLayout:
         orientation: 'horizontal'
@@ -64,11 +64,11 @@
 
             MDTextField:
                 id: search_field
-                hint_text: "Search songs"
-                color_mode: "primary" #"primary", options=["primary", "accent", "custom"]
+                hint_text: 'Search songs'
+                color_mode: 'primary' #'primary', options=['primary', 'accent', 'custom']
                 on_text: root.filter_list()
-                helper_text: "Enter a small snippet of the name of the intended song"
-                helper_text_mode: "on_focus"
+                helper_text: 'Enter a small snippet of the name of the intended song'
+                helper_text_mode: 'on_focus'
 
             MDIconButton:
                 id: close_button
@@ -108,6 +108,6 @@
         elevation_normal: 8
         x: Window.width - self.width - dp(25)
         y: dp(25)
-        on_release: root.show_filemanager_add_songs_location()
         md_bg_color: app.theme_cls.primary_color
         specific_text_color: get_color_from_hex(text_colors[app.theme_cls.primary_palette][CU.tfs.dic['THEME_BACKGROUND_HUE'].value])
+        on_release: root.show_filemanager_add_songs_location()

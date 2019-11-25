@@ -11,8 +11,8 @@
 
 #<MyNavigationDrawerIconButton@NavigationDrawerIconButton>
     # TODO: So you can't do default here? + Problems which I launched on kivy + Maybe all callbacks except for show_screen should be invoked from pythoncode?
-    #theme_primary_color: ""
-    #theme_accent_color: ""
+    #theme_primary_color: ''
+    #theme_accent_color: ''
 
     #on_release:
         #app.set_theme_toolbar(self.theme_primary_color, self.theme_accent_color)
@@ -23,7 +23,7 @@
 
 <MsgPopup>:
     size_hint: .7, .4
-    title: "Attention"
+    title: 'Attention'
 
     BoxLayout:
         orientation: 'vertical'
@@ -33,7 +33,7 @@
         Label:
             id: message_label
             size_hint_y: 0.4
-            text: "Label"
+            text: 'Label'
         Button:
             text: 'Dismiss'
             size_hint_y: 0.4
@@ -41,55 +41,55 @@
 
 <ContentNavigationDrawer@MDNavigationDrawer>:
 
-    drawer_logo: str(CU.tfs.dic['IMG_DIR_PATH'].value / "ToneFlow_Logo_Drawer.png")
-    #drawer_title: "Menu:"
+    drawer_logo: str(CU.tfs.dic['IMG_DIR_PATH'].value / 'ToneFlow_Logo_Drawer.png')
+    #drawer_title: 'Menu:'
 
     NavigationDrawerSubheader:
-        text: "Menus:"
+        text: 'Menus:'
 
     NavigationDrawerIconButton:
-        icon: "playlist-music"
+        icon: 'playlist-music'
         text: str(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'].name)
-        badge_text: "!"
-        theme_primary_color: "Red"
-        theme_accent_color: "Gray" #"Gray"
+        badge_text: '!'
+        theme_primary_color: 'Red'
+        theme_accent_color: 'Gray' #'Gray'
         on_release:
             app.show_screen(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'], self.theme_primary_color, self.theme_accent_color)
 
     NavigationDrawerIconButton:
-        icon: "music-note"
+        icon: 'music-note'
         text: str(CU.tfs.dic['SCREEN_SONGS_CLASS'].name)
-        badge_text: "!"
-        theme_primary_color: "Amber"
-        theme_accent_color: "Gray" #"DeepOrange"
+        badge_text: '!'
+        theme_primary_color: 'Amber'
+        theme_accent_color: 'Gray' #'DeepOrange'
         on_release:
             app.show_screen(CU.tfs.dic['SCREEN_SONGS_CLASS'], self.theme_primary_color, self.theme_accent_color)
 
     NavigationDrawerDivider
 
     NavigationDrawerSubheader:
-        text: "Basics:"
+        text: 'Basics:'
 
     NavigationDrawerIconButton:
-        icon: "settings"
+        icon: 'settings'
         text: str(CU.tfs.dic['SCREEN_SETTINGS_CLASS'].name)
-        theme_primary_color: "Green"
-        theme_accent_color: "Lime"
+        theme_primary_color: 'Green'
+        theme_accent_color: 'Lime'
         on_release:
             app.show_screen(CU.tfs.dic['SCREEN_SETTINGS_CLASS'], self.theme_primary_color, self.theme_accent_color)
 
     NavigationDrawerIconButton:
-        icon: "lifebuoy"
+        icon: 'lifebuoy'
         text: str(CU.tfs.dic['SCREEN_HELP_CLASS'].name)
-        theme_primary_color: "Pink"
-        theme_accent_color: "DeepPurple"
+        theme_primary_color: 'Pink'
+        theme_accent_color: 'DeepPurple'
         on_release:
             app.show_screen(CU.tfs.dic['SCREEN_HELP_CLASS'], self.theme_primary_color, self.theme_accent_color)
 
 
     NavigationDrawerIconButton:
-        icon: "power"
-        text: "Quit"
+        icon: 'power'
+        text: 'Quit'
         on_release:
             app.on_stop()
 
@@ -124,12 +124,12 @@ NavigationLayout:
                 transition: NoTransition()
 
                 Screen:
-                    name: "Welcome"
+                    name: 'Welcome'
 
                     FloatLayout:
 
                         Image:
-                            source: str(CU.tfs.dic['IMG_DIR_PATH'].value / "ToneFlow_Logo.png")
+                            source: str(CU.tfs.dic['IMG_DIR_PATH'].value / 'ToneFlow_Logo.png')
                             opacity: .3
 
                         BoxLayout:
@@ -140,7 +140,7 @@ NavigationLayout:
                             pos_hint: {'center_x': .5, 'center_y': .5}
 
                             MDLabel:
-                                text: f"Welcome"
+                                text: f'Welcome'
                                 size_hint_y: None
                                 height: self.texture_size[1]
                                 font_style: 'Subtitle1'
@@ -153,7 +153,7 @@ NavigationLayout:
                                 text: 'Click Me'
                                 pos_hint: {'center_x': .5}
                                 on_release:
-                                    toast("I'm a button")
+                                    toast('I\'m a button')
                                     #app.set_menu_for_demo_apps()
                                     #app.instance_menu_demo_apps = MDDropdownMenu(\
                                     #items=app.menu_for_demo_apps, \
@@ -161,7 +161,7 @@ NavigationLayout:
                                     #app.instance_menu_demo_apps.open(self)
 
                             MDLabel:
-                                text: "Cool & good"
+                                text: 'Cool & good'
                                 size_hint_y: None
                                 height: self.texture_size[1]
                                 font_style: 'Subtitle1'

@@ -34,6 +34,7 @@ from kivymd.color_definitions import palette
 
 from src.main.TFExceptionHandler import TFExceptionHandler
 from src.model.CommonUtils import CommonUtils as CU
+from src.model.TFSettings import TFSettings
 
 from kivy.base import ExceptionManager
 
@@ -44,7 +45,7 @@ class MainApp(App):
     """
     # Foresee custom handling of errors, user can bypass them (maybe own mistake) or quit the app, but he sees pop up of the error:
     ExceptionManager.add_handler(TFExceptionHandler())
-    title = CU.tfs.dic['APP_NAME'].value + " - v" + CU.tfs.dic['MAJOR_MINOR_VERSION'].value
+    #title = CU.tfs.dic['APP_NAME'].value + " - v" + CU.tfs.dic['MAJOR_MINOR_VERSION'].value
     theme_cls = ThemeManager()
     theme_cls.primary_palette = "Brown"
     theme_cls.accent_palette = "LightGreen"
@@ -55,13 +56,31 @@ class MainApp(App):
         self._exception_counter = 0
         self._context_menus = None
 
+        # Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(TFSettings.__name__).with_suffix(".kv")).name))
+        CU.tfs = TFSettings()
+
+        # CU.tfs = self.create_uninstantiated_screen(TFSettings)
+
+
+        MainApp.title = CU.tfs.dic['APP_NAME'].value + " - v" + CU.tfs.dic['MAJOR_MINOR_VERSION'].value
+
+
         # self.Window = Window
 
     def build(self):
         self.icon = str(pl.Path(CU.tfs.dic['IMG_DIR_PATH'].value) / "ToneFlow_Logo_TaskBarIcon.png")
         self.main_widget = Builder.load_file(str(curr_file.parents[1] / "view" / (curr_file.with_suffix(".kv")).name))
         # self.Window.bind(on_request_close= lambda x:self.on_stop())
+
+        self.main_widget.ids.scr_mngr.add_widget(CU.tfs)
+
         return self.main_widget
+
+    def create_uninstantiated_screen(self, screen_class):
+        class_name = screen_class.__name__
+        Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(class_name).with_suffix(".kv")).name))
+        screen_object = screen_class()
+        return screen_object
 
     def decide_stop_or_not(self, *args):
         # TODO: Stop warning is not shown yet when you close via closing the window by itself.
@@ -151,18 +170,20 @@ class MainApp(App):
         self.set_title_toolbar(screen_property.name)
         self.set_theme_toolbar(theme_primary_color, theme_accent_color)
 
+        # If the scr_mngr doesn't have such screen yet, make one:
         if(not scr_mngr.has_screen(class_name)):
-            # If the scr_mngr doesn't have such screen yet, make one:
-            Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(class_name).with_suffix(".kv")).name))
-            screen_object = screen_class()
-            scr_mngr.add_widget(screen_object)
+            scr_mngr.add_widget(self.create_uninstantiated_screen(screen_class))
 
         # Update the context menu's and finally show toast when ready:
         self.context_menus = scr_mngr.get_screen(class_name).context_menus
         scr_mngr.current = class_name
         toast(class_name)
 
+
 if __name__ == "__main__":
+
+    mapp = MainApp()
+
     if(CU.tfs.dic['CONFIG_FILE_PATH'].value.exists()):
         # If the config-file exists, then try to import it:
         CU.tfs.import_tf_settings_from_config()
@@ -170,7 +191,6 @@ if __name__ == "__main__":
         # Else, when the config-file is absent, then export (a new) one:
         CU.tfs.export_tf_settings_to_config()
 
-    mapp = MainApp()
     try:
         mapp.run()
     except Exception as e:

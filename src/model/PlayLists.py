@@ -41,7 +41,7 @@ class PlayLists(Screen):
 
         # Override needed overscroll to refresh the screen to the bare minimum:
         refresh_layout = self.ids.refresh_layout
-        refresh_layout.effect_cls.min_scroll_to_reload: NumericProperty(-dp(1))
+        refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)
 
     def get_list(self):
         return self._list
