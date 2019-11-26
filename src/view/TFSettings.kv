@@ -80,6 +80,9 @@
             refresh_callback: root.refresh_list
             root_layout: app.main_widget.ids.float_box
 
+            self.effect_cls:
+                self.min_scroll_to_reload: -dp(1)
+
             RecycleView:
                 id: rv
                 key_viewclass: 'viewclass'

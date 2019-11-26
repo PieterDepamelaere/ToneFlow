@@ -45,6 +45,11 @@ class MainApp(App):
     """
     # Foresee custom handling of errors, user can bypass them (maybe own mistake) or quit the app, but he sees pop up of the error:
     ExceptionManager.add_handler(TFExceptionHandler())
+
+    # Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(TFSettings.__name__).with_suffix(".kv")).name))
+    CU.tfs = TFSettings()
+    # CU.tfs = self.create_uninstantiated_screen(TFSettings)
+
     #title = CU.tfs.dic['APP_NAME'].value + " - v" + CU.tfs.dic['MAJOR_MINOR_VERSION'].value
     theme_cls = ThemeManager()
     theme_cls.primary_palette = "Brown"
@@ -55,13 +60,6 @@ class MainApp(App):
         super().__init__(**kwargs)
         self._exception_counter = 0
         self._context_menus = None
-
-        # Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(TFSettings.__name__).with_suffix(".kv")).name))
-        CU.tfs = TFSettings()
-
-        # CU.tfs = self.create_uninstantiated_screen(TFSettings)
-
-
         MainApp.title = CU.tfs.dic['APP_NAME'].value + " - v" + CU.tfs.dic['MAJOR_MINOR_VERSION'].value
 
 
