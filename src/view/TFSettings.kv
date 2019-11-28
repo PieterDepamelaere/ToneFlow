@@ -9,6 +9,7 @@
 #:import ILeftBodyTouch kivymd.uix.list.ILeftBodyTouch
 #:import MDIconButton kivymd.uix.button.MDIconButton
 #:import text_colors kivymd.color_definitions.text_colors
+#:import dp kivy.metrics.dp
 
 <TFSettingRowView@OneLineIconListItem>:
     icon: 'music-note' # One can code an if-statement after this
@@ -47,6 +48,8 @@
     name: CU.tfs.dic['SCREEN_SETTINGS_CLASS'].value.__name__
     on_enter:
         self.refresh_list()
+        # Override needed overscroll to refresh the screen to the bare minimum:
+        refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)
 
     BoxLayout:
         orientation: 'vertical'
@@ -79,9 +82,6 @@
             id: refresh_layout
             refresh_callback: root.refresh_list
             root_layout: app.main_widget.ids.float_box
-
-            self.effect_cls:
-                self.min_scroll_to_reload: -dp(1)
 
             RecycleView:
                 id: rv

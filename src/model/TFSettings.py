@@ -67,7 +67,6 @@ class TFSettings(Screen):
         # User editable ones:
         self.dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self.dic['WORKSPACE_NAME'].value}", f"???{os.sep}{self.dic['WORKSPACE_NAME'].value} \t(Preferably path on external device like flash drive)", True, lambda value: self.cb_create_load_tf_workspace(value))
 
-
         # TODO: When saving a path to json make sure to do in platform indep fashion so that is is recoverable on other system, yet the config file is never meant to be ported across platform
         # TODO: Config file itself can not be saved to workspace, because one of it's props is the location of the workspace
         # TODO: Implement settings:
@@ -78,10 +77,6 @@ class TFSettings(Screen):
         # show_gridlines_concert_mode
         # tone_flow_direction
         # _overall_mute_play_along
-
-        # Override needed overscroll to refresh the screen to the bare minimum:
-        # refresh_layout = self.ids.refresh_layout
-        # refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)
 
     def get_list(self):
         return self._list

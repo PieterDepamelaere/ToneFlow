@@ -47,6 +47,8 @@
     name: CU.tfs.dic['SCREEN_SONGS_CLASS'].value.__name__
     on_enter:
         self.refresh_list()
+        # Override needed overscroll to refresh the screen to the bare minimum:
+        refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)
 
     BoxLayout:
         orientation: 'vertical'

@@ -39,10 +39,6 @@ class PlayLists(Screen):
         # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
         self._list = list() # ObservableList(None, object, list())
 
-        # Override needed overscroll to refresh the screen to the bare minimum:
-        refresh_layout = self.ids.refresh_layout
-        refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)
-
     def get_list(self):
         return self._list
 
