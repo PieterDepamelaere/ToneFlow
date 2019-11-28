@@ -228,10 +228,9 @@ class PlayLists(Screen):
         Show a dialog to ask the name of the new playlist.
         :return:
         """
-        creation_time = datetime.now()
+        creation_time = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}" \
-            f"Concert_{creation_time.year}{creation_time.month}{creation_time.day}-{creation_time.hour}{creation_time.minute}{creation_time.second}"
+        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}Concert_{creation_time}"
 
         CU.show_input_dialog(title=f"Enter Name of New Playlist",
                              hint_text=dialog_text,
