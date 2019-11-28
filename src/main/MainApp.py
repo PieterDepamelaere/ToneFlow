@@ -46,11 +46,6 @@ class MainApp(App):
     # Foresee custom handling of errors, user can bypass them (maybe own mistake) or quit the app, but he sees pop up of the error:
     ExceptionManager.add_handler(TFExceptionHandler())
 
-    # Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(TFSettings.__name__).with_suffix(".kv")).name))
-    CU.tfs = TFSettings()
-    # CU.tfs = self.create_uninstantiated_screen(TFSettings)
-
-    #title = CU.tfs.dic['APP_NAME'].value + " - v" + CU.tfs.dic['MAJOR_MINOR_VERSION'].value
     theme_cls = ThemeManager()
     theme_cls.primary_palette = "Brown"
     theme_cls.accent_palette = "LightGreen"
@@ -58,10 +53,14 @@ class MainApp(App):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        # Create ToneFlow-settings object and corresponding settings:
+        CU.tfs = TFSettings()
+        Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(TFSettings.__name__).with_suffix(".kv")).name))
+
         self._exception_counter = 0
         self._context_menus = None
         MainApp.title = CU.tfs.dic['APP_NAME'].value + " - v" + CU.tfs.dic['MAJOR_MINOR_VERSION'].value
-
 
         # self.Window = Window
 
@@ -123,10 +122,10 @@ class MainApp(App):
             dialog_text =f"{CU.tfs.dic['tf_workspace_path'].value}"
 
         pyperclip.copy(str(workspace_path_proposal))
-        CU.show_input_dialog(title=f"Enter \"{CU.tfs.dic['WORKSPACE_NAME'].value}\"-Folder or its Parent Folder",
+        CU.show_input_dialog(title=f"Enter Path to \"{CU.tfs.dic['WORKSPACE_NAME'].value}\"-Folder or to its Parent Folder",
                                hint_text=f"{CU.tfs.dic['tf_workspace_path'].description}",
                                text=dialog_text,
-                               size_hint=(.8, .3), text_button_ok="Load/Create",
+                               size_hint=(.8, .4), text_button_ok="Load/Create",
                                callback=lambda text_button, instance: {CU.tfs.dic['tf_workspace_path'].set_value(instance.text_field.text),
                                                                                toast(str(CU.tfs.dic['tf_workspace_path'].value))})
 

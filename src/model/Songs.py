@@ -24,7 +24,6 @@ from src.model.CommonUtils import CommonUtils as CU
 class Songs(Screen):
 
     app = None
-    EXPLANATION_SONG_NAME = f"(Only alphanumeric characters & \"_-\", leave blank to cancel.){os.linesep}"
 
     def __init__(self, **kwargs):
         super(Songs, self).__init__(name=type(self).__name__, **kwargs)
@@ -73,7 +72,7 @@ class Songs(Screen):
         :return:
         """
         # Omit the provided explanation-text in case it was not omitted:
-        new_name_song = str(new_name_song).replace(f"{Songs.EXPLANATION_SONG_NAME}", "")
+        new_name_song = str(new_name_song).replace(f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}", "")
 
         # Check the new_name_song by means of a regular expression:
         # Only allow names entirely consisting of alphanumeric characters, dashes and underscores
@@ -249,13 +248,13 @@ class Songs(Screen):
         :param song_rowview:
         :return:
         """
-        dialog_text = f"{Songs.EXPLANATION_SONG_NAME}" \
+        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}" \
             f"{str(song_rowview.song_entry_obj.file_path.stem)}"
 
         CU.show_input_dialog(title=f"Enter New Name for Song",
                              hint_text=dialog_text,
                              text=dialog_text,
-                             size_hint=(.6, .4),
+                             size_hint=(.7, .4),
                              text_button_ok="Update",
                              callback=lambda text_button, instance, *args: {self.rename_song(song_rowview, instance.text_field.text), self.refresh_list()})
 
@@ -269,7 +268,7 @@ class Songs(Screen):
 
         CU.show_ok_cancel_dialog(title=f"Are You Sure?",
                                  text=dialog_text,
-                                 size_hint=(.6, .4),
+                                 size_hint=(.7, .4),
                                  text_button_ok="Remove",
                                  text_button_cancel="Cancel",
                                  callback=lambda *args: {self.remove_song(song_rowview, *args), self.refresh_list()})

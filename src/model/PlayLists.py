@@ -22,7 +22,6 @@ from src.model.CommonUtils import CommonUtils as CU
 class PlayLists(Screen):
 
     app = None
-    EXPLANATION_PLAYLIST_NAME = f"(Only alphanumeric characters & \"_-\", leave blank to cancel.){os.linesep}"
 
     def __init__(self, **kwargs):
         super(PlayLists, self).__init__(name=type(self).__name__, **kwargs)
@@ -67,7 +66,7 @@ class PlayLists(Screen):
         :return:
         """
         # Omit the provided explanation-text in case it was not omitted:
-        name_new_playlist = str(name_new_playlist).replace(f"{PlayLists.EXPLANATION_PLAYLIST_NAME}", "")
+        name_new_playlist = str(name_new_playlist).replace(f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}", "")
 
         # Check the name_new_playlist by means of a regular expression:
         # Only allow names entirely consisting of alphanumeric characters, dashes and underscores
@@ -106,7 +105,7 @@ class PlayLists(Screen):
         :return:
         """
         # Omit the provided explanation-text in case it was not omitted:
-        new_name_playlist = str(new_name_playlist).replace(f"{PlayLists.EXPLANATION_PLAYLIST_NAME}", "")
+        new_name_playlist = str(new_name_playlist).replace(f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}", "")
 
         # Check the new_name_playlist by means of a regular expression:
         # Only allow names entirely consisting of alphanumeric characters, dashes and underscores
@@ -231,13 +230,13 @@ class PlayLists(Screen):
         """
         creation_time = datetime.now()
 
-        dialog_text = f"{PlayLists.EXPLANATION_PLAYLIST_NAME}" \
+        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}" \
             f"Concert_{creation_time.year}{creation_time.month}{creation_time.day}-{creation_time.hour}{creation_time.minute}{creation_time.second}"
 
         CU.show_input_dialog(title=f"Enter Name of New Playlist",
                              hint_text=dialog_text,
                              text=dialog_text,
-                             size_hint=(.6, .4),
+                             size_hint=(.7, .4),
                              text_button_ok="Add",
                              callback=lambda text_button, instance, *args: {self.add_playlist(instance.text_field.text), self.refresh_list()})
 
@@ -247,13 +246,13 @@ class PlayLists(Screen):
         :param playlist_rowview:
         :return:
         """
-        dialog_text = f"{PlayLists.EXPLANATION_PLAYLIST_NAME}" \
+        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}" \
             f"{str(playlist_rowview.playlist_obj.file_path.stem)}"
 
         CU.show_input_dialog(title=f"Enter New Name for Playlist",
                              hint_text=dialog_text,
                              text=dialog_text,
-                             size_hint=(.6, .4),
+                             size_hint=(.7, .4),
                              text_button_ok="Update",
                              callback=lambda text_button, instance, *args: {self.rename_playlist(playlist_rowview, instance.text_field.text), self.refresh_list()})
 
@@ -267,7 +266,7 @@ class PlayLists(Screen):
 
         CU.show_ok_cancel_dialog(title=f"Are You Sure?",
                                  text=dialog_text,
-                                 size_hint=(.6, .4),
+                                 size_hint=(.7, .4),
                                  text_button_ok="Remove",
                                  text_button_cancel="Cancel",
                                  callback=lambda *args: {self.remove_playlist(playlist_rowview, *args), self.refresh_list()})

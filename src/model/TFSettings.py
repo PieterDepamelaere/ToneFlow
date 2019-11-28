@@ -34,7 +34,6 @@ class TFSettings(Screen):
 
     def __init__(self, **kwargs):
         super(TFSettings, self).__init__(name=type(self).__name__, **kwargs)
-        Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(TFSettings.__name__).with_suffix(".kv")).name))
         TFSettings.app = App.get_running_app()
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
         self._context_menus = {"Clear Input": lambda x: {self.clear_search_pattern()},
@@ -52,6 +51,8 @@ class TFSettings(Screen):
         self.dic['CONFIG_FILE_PATH'] = TFSetting("Path to Config File", None, curr_file.parents[2] / "Config_TF.json", None, False, None)
         self.dic['IMG_DIR_PATH'] = TFSetting("Internal Directory of Images", None, curr_file.parents[2] / "img", None, False, None)
         self.dic['WORKSPACE_NAME'] = TFSetting("Name of Workspace", None, "Workspace_TF", None, False, None)
+        self.dic['EXPLANATION_PLAYLIST_SONG_NAME'] = TFSetting("Explanation Playlist Song Name", None, f"(No spaces, only alphanumeric characters & \"_-\". Leave blank to cancel.){os.linesep}", None, False, None)
+        self.dic['EXPLANATION_WORKSPACE_PATH'] = TFSetting("Explanation Workspace Name", None, f"(Preferably choose path on external device like flash drive){os.linesep}", None, False, None)
         self.dic['FILE_SEP_TEXT'] = TFSetting("Exportable File Separator", None, "/FS/", None, False, None)
         self.dic['IMAGES_VIDEOS_DIR_NAME'] = TFSetting("Name of Images_Videos Folder in Workspace", None, "Images_Videos", None, False, None)
         self.dic['PLAYLISTS_DIR_NAME'] = TFSetting("Name of Playlists Folder in Workspace", None, "Playlists", None, False, None)
@@ -65,7 +66,7 @@ class TFSettings(Screen):
         self.dic['THEME_BACKGROUND_HUE'] = TFSetting("Background hue influencing text color", None, '500', False, None)
 
         # User editable ones:
-        self.dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self.dic['WORKSPACE_NAME'].value}", f"???{os.sep}{self.dic['WORKSPACE_NAME'].value} \t(Preferably path on external device like flash drive)", True, lambda value: self.cb_create_load_tf_workspace(value))
+        self.dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self.dic['WORKSPACE_NAME'].value}", f"{self.dic['EXPLANATION_WORKSPACE_PATH'].value}???{os.sep}{self.dic['WORKSPACE_NAME'].value}", True, lambda value: self.cb_create_load_tf_workspace(value))
 
         # TODO: When saving a path to json make sure to do in platform indep fashion so that is is recoverable on other system, yet the config file is never meant to be ported across platform
         # TODO: Config file itself can not be saved to workspace, because one of it's props is the location of the workspace
@@ -92,10 +93,16 @@ class TFSettings(Screen):
     context_menus = property(get_context_menus)
 
     def cb_create_load_tf_workspace(self, tf_workspace_path):
-
         # Without whitespace the length of ans_user should be bigger than 0, also make sure that when the tf_workspace_path's description is returned, that :
         if ((tf_workspace_path is not None) and (len(str(tf_workspace_path).strip()) > 0) and (str(tf_workspace_path) != self.dic['tf_workspace_path'].description)):
-            tf_workspace_path = pl.Path(tf_workspace_path)
+            # If user didn't omit the explanation on the workspace's path, then auto-ignore it:
+            tf_workspace_path = str(tf_workspace_path).replace(f"{self.dic['EXPLANATION_WORKSPACE_PATH'].value}", "")
+            # Again check whether the remaining path is not empty:
+            if (len(str(tf_workspace_path).strip()) > 0):
+                tf_workspace_path = pl.Path(tf_workspace_path)
+            else:
+                # In case of trivial tf_workspace_path, the original proposal is used:
+                tf_workspace_path = self.dic['tf_workspace_path'].default_value
         else:
             # In case of trivial tf_workspace_path, the original proposal is used:
             tf_workspace_path = self.dic['tf_workspace_path'].default_value
@@ -328,7 +335,7 @@ class TFSettings(Screen):
         CU.show_input_dialog(title=f"Enter Name of New Setting",
                              hint_text=dialog_text,
                              text=dialog_text,
-                             size_hint=(.6, .4),
+                             size_hint=(.7, .4),
                              text_button_ok="Add",
                              callback=lambda text_button, instance, *args: {self.add_setting(instance.text_field.text), self.refresh_list()})
 
@@ -344,7 +351,7 @@ class TFSettings(Screen):
         CU.show_input_dialog(title=f"Enter New Name for Setting",
                              hint_text=dialog_text,
                              text=dialog_text,
-                             size_hint=(.6, .4),
+                             size_hint=(.7, .4),
                              text_button_ok="Update",
                              callback=lambda text_button, instance, *args: {self.rename_setting(setting_rowview, instance.text_field.text), self.refresh_list()})
 
@@ -358,7 +365,7 @@ class TFSettings(Screen):
 
         CU.show_ok_cancel_dialog(title=f"Are You Sure?",
                                  text=dialog_text,
-                                 size_hint=(.6, .4),
+                                 size_hint=(.7, .4),
                                  text_button_ok="Remove",
                                  text_button_cancel="Cancel",
                                  callback=lambda *args: {self.remove_setting(setting_rowview, *args), self.refresh_list()})
