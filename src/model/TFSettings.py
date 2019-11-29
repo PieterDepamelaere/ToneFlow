@@ -37,8 +37,8 @@ class TFSettings(Screen):
         TFSettings.app = App.get_running_app()
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
         self._context_menus = {"Clear Input": lambda x: {self.clear_search_pattern()},
-                               "Sort Settings": lambda x: {self.sort_list()},
-                               "Refresh": lambda x: {self.refresh_list(), toast(f"Refreshed")},
+                               "Sort Settings": lambda x: {self.sort_editable_list()},
+                               "Refresh": lambda x: {self.refresh_editable_list(), toast(f"Refreshed")},
                                "Restore Factory Settings": lambda x: toast("TODO: WIP"),
                                "Help": lambda x: toast("TODO: WIP")}
         # TODO: Implement the other context menus
@@ -260,17 +260,14 @@ class TFSettings(Screen):
         :return:
         """
         decision = args[0]
-        setting_to_delete = setting_rowview.setting_obj
+        setting_to_restore = setting_rowview.setting_obj
 
         if (str(decision).lower() == "restore"):
-            self._editable_list.remove(setting_to_delete)
 
-            file_path_to_delete = setting_to_delete.file_path
-            if (file_path_to_delete.exists() and file_path_to_delete.is_file()):
-                pl.Path(file_path_to_delete).unlink()
-            toast(f"{str(setting_to_delete.file_path.stem)} successfully restored")
+            setting_to_restore.value = setting_to_restore.default_value
+            toast(f"{str(setting_to_restore.file_path.stem)} successfully restored")
         else:
-            toast(f"Canceled removal of {str(setting_to_delete.file_path.stem)}")
+            toast(f"Canceled restoration of factory setting for {str(setting_to_restore.name)}")
         await asynckivy.sleep(0)
 
     def clear_search_pattern(self):
@@ -280,16 +277,16 @@ class TFSettings(Screen):
         """
         self.ids.search_field.text=""
         toast("Input cleared")
-        # After the filter text is changed, the filter_list() method is automatically triggered.
+        # After the filter text is changed, the filter_editable_list() method is automatically triggered.
 
-    def filter_list(self):
+    def filter_editable_list(self):
         """
         Fires async method to filter the visual editable_list.
         :return:
         """
-        asynckivy.start(self.async_filter_list())
+        asynckivy.start(self.async_editable_filter_list())
 
-    async def async_filter_list(self):
+    async def async_editable_filter_list(self):
         """
         Filter the visual editable_list on the provided search pattern.
         :return:
@@ -313,7 +310,7 @@ class TFSettings(Screen):
                 )
         await asynckivy.sleep(0)
 
-    def refresh_list(self):
+    def refresh_editable_list(self):
         """
         Fires async method to refresh the internal editable_list.
         :return:
@@ -321,9 +318,9 @@ class TFSettings(Screen):
         # Clear existing editable_list<TFSetting>:
         self._editable_list.clear()
 
-        asynckivy.start(self.async_refresh_list())
+        asynckivy.start(self.async_refresh_editable_list())
 
-    async def async_refresh_list(self):
+    async def async_refresh_editable_list(self):
         """
         Scan the workspace-Settings folder for settings.
         :return:
@@ -338,7 +335,7 @@ class TFSettings(Screen):
             await asynckivy.sleep(0)
 
         # TODO: Make overscroll easier than it is now, in fact scrollbar should be always visible
-        await self.async_filter_list()
+        await self.async_editable_filter_list()
         self.ids.refresh_layout.refresh_done()
 
     # def show_dialog_add_setting(self):
@@ -356,7 +353,7 @@ class TFSettings(Screen):
     #                          text=dialog_text,
     #                          size_hint=(.7, .4),
     #                          text_button_ok="Add",
-    #                          callback=lambda text_button, instance, *args: {self.add_setting(instance.text_field.text), self.refresh_list()})
+    #                          callback=lambda text_button, instance, *args: {self.add_setting(instance.text_field.text), self.refresh_editable_list()})
 
     def show_dialog_edit_setting(self, setting_rowview):
         """
@@ -372,7 +369,7 @@ class TFSettings(Screen):
                              text=dialog_text,
                              size_hint=(.7, .4),
                              text_button_ok="Update",
-                             callback=lambda text_button, instance, *args: {self.edit_setting(setting_rowview, instance.text_field.text), self.refresh_list()})
+                             callback=lambda text_button, instance, *args: {self.edit_setting(setting_rowview, instance.text_field.text), self.refresh_editable_list()})
 
     def show_dialog_restore_factory_setting(self, setting_rowview):
         """
@@ -387,15 +384,15 @@ class TFSettings(Screen):
                                  size_hint=(.7, .4),
                                  text_button_ok="Remove",
                                  text_button_cancel="Cancel",
-                                 callback=lambda *args: {self.restore_factory_setting(setting_rowview, *args), self.refresh_list()})
+                                 callback=lambda *args: {self.restore_factory_setting(setting_rowview, *args), self.refresh_editable_list()})
 
-    def sort_list(self):
+    def sort_editable_list(self):
         """
         Will sort the internal editable_list in alphabetic order.
         :return:
         """
         self.set_editable_list(sorted(self._editable_list, key=lambda setting: str(setting.file_path.stem)))
-        self.filter_list()
+        self.filter_editable_list()
         toast("Settings sorted")
 
 #########################################################################################################

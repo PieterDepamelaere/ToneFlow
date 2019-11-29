@@ -31,6 +31,14 @@
 
         Widget:
 
+        MDTextField:
+            id: setting_field
+            hint_text: f"Search {CU.tfs.dic['APP_NAME'].value} settings"
+            color_mode: 'primary' #'primary', options=['primary', 'accent', 'custom']
+            on_text_validate: toast(f'Setting \"{tfsetting_obj.name}\" changed')
+            helper_text: 'Enter a small snippet of the name of the intended song'
+            helper_text_mode: 'on_focus'
+
         MDIconButton:
             icon: 'pencil'
             #theme_text_color: 'Custom'
@@ -38,7 +46,7 @@
             on_release: root.list_obj.show_dialog_edit_setting(root)
 
         MDIconButton:
-            icon: 'question'
+            icon: 'factory'
             #theme_text_color: 'Custom'
             #text_color: app.theme_cls.primary_color
             on_release: root.list_obj.show_dialog_restore_factory_setting(root)
@@ -47,7 +55,7 @@
     id: id_tfsettings
     name: CU.tfs.dic['SCREEN_SETTINGS_CLASS'].value.__name__
     on_enter:
-        self.refresh_list()
+        self.refresh_editable_list()
         # Override needed overscroll to refresh the screen to the bare minimum:
         refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)
 
@@ -63,13 +71,13 @@
             MDIconButton:
                 id: magnifier_button
                 icon: 'magnify'
-                on_release: root.filter_list()
+                on_release: root.filter_editable_list()
 
             MDTextField:
                 id: search_field
                 hint_text: f"Search {CU.tfs.dic['APP_NAME'].value} settings"
                 color_mode: 'primary' #'primary', options=['primary', 'accent', 'custom']
-                on_text: root.filter_list()
+                on_text: root.filter_editable_list()
                 helper_text: 'Enter a small snippet of the name of the intended song'
                 helper_text_mode: 'on_focus'
 
@@ -80,7 +88,7 @@
 
         MDScrollViewRefreshLayout:
             id: refresh_layout
-            refresh_callback: root.refresh_list
+            refresh_callback: root.refresh_editable_list
             root_layout: app.main_widget.ids.float_box
 
             RecycleView:

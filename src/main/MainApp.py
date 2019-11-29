@@ -57,6 +57,7 @@ class MainApp(App):
         # Create ToneFlow-settings object and corresponding settings:
         CU.tfs = TFSettings()
         Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(TFSettings.__name__).with_suffix(".kv")).name))
+        self.main_widget.ids.scr_mngr.add_widget(CU.tfs)
 
         self._exception_counter = 0
         self._context_menus = None
