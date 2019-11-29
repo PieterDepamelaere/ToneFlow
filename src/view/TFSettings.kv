@@ -12,11 +12,11 @@
 #:import dp kivy.metrics.dp
 
 <TFSettingRowView@OneLineIconListItem>:
-    icon: 'music-note' # One can code an if-statement after this
+    icon: 'settings' # One can code an if-statement after this
     list_obj: None
-    song_entry_obj: None
+    tfsetting_obj: None
     on_release: toast(self.text) #root.callback(root.icon)
-    text: '' if self.song_entry_obj is None else self.song_entry_obj.file_path.stem
+    text: '' if self.tfsetting_obj is None else f'{self.tfsetting_obj.name}: {self.tfsetting_obj.value}'
 
     BoxLayout:
         orientation: 'horizontal'
@@ -35,13 +35,13 @@
             icon: 'pencil'
             #theme_text_color: 'Custom'
             #text_color: app.theme_cls.primary_color
-            on_release: root.list_obj.show_dialog_rename_song(root)
+            on_release: root.list_obj.show_dialog_edit_setting(root)
 
         MDIconButton:
             icon: 'question'
             #theme_text_color: 'Custom'
             #text_color: app.theme_cls.primary_color
-            on_release: root.list_obj.show_dialog_remove_song(root)
+            on_release: root.list_obj.show_dialog_restore_factory_setting(root)
 
 <TFSettings>
     id: id_tfsettings
