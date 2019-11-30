@@ -6,7 +6,7 @@ import pathlib as pl
 from datetime import datetime
 
 from kivy.app import App
-from kivy.metrics import dp
+from kivy.lang import Builder
 from kivy.utils import get_hex_from_color
 from kivy.uix.screenmanager import Screen
 from kivy.uix.modalview import ModalView
@@ -26,7 +26,9 @@ class Songs(Screen):
     app = None
 
     def __init__(self, **kwargs):
+        Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(Songs.__name__).with_suffix(".kv")).name))
         super(Songs, self).__init__(name=type(self).__name__, **kwargs)
+
         Songs.app = App.get_running_app()
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
         self._context_menus = {"Add Song Location": lambda x: {self.show_filemanager_add_songs_location()},

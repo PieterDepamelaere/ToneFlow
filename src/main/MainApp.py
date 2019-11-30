@@ -54,29 +54,26 @@ class MainApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        # Create ToneFlow-settings object and corresponding settings:
-        CU.tfs = TFSettings()
-        Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(TFSettings.__name__).with_suffix(".kv")).name))
-        self.main_widget.ids.scr_mngr.add_widget(CU.tfs)
-
+        self._main_widget = None
         self._exception_counter = 0
         self._context_menus = None
-        MainApp.title = CU.tfs.dic['APP_NAME'].value + " - v" + CU.tfs.dic['MAJOR_MINOR_VERSION'].value
-
         # self.Window = Window
+
+        # Create ToneFlow-settings object and corresponding settings:
+        kv_file_main_widget = str(curr_file.parents[1] / "view" / (curr_file.with_suffix(".kv")).name)
+        TFSettings(kv_file_main_widget)
 
     def build(self):
         self.icon = str(pl.Path(CU.tfs.dic['IMG_DIR_PATH'].value) / "ToneFlow_Logo_TaskBarIcon.png")
-        self.main_widget = Builder.load_file(str(curr_file.parents[1] / "view" / (curr_file.with_suffix(".kv")).name))
         # self.Window.bind(on_request_close= lambda x:self.on_stop())
 
-        self.main_widget.ids.scr_mngr.add_widget(CU.tfs)
+        self._main_widget.ids.scr_mngr.add_widget(CU.tfs)
 
-        return self.main_widget
+        return self._main_widget
 
     def create_uninstantiated_screen(self, screen_class):
         class_name = screen_class.__name__
-        Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(class_name).with_suffix(".kv")).name))
+        # Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(class_name).with_suffix(".kv")).name))
         screen_object = screen_class()
         return screen_object
 
@@ -108,6 +105,13 @@ class MainApp(App):
         else:
             self._context_menus = None
 
+    def get_main_widget(self):
+        return self._main_widget
+
+    def set_main_widget(self, main_widget):
+        self._main_widget = main_widget
+
+    main_widget = property(get_main_widget, set_main_widget)
     context_menus = property(get_context_menus, set_context_menus)
 
     def on_pause(self):
@@ -155,11 +159,11 @@ class MainApp(App):
 
     def set_title_toolbar(self, title):
         """Set string title in MDToolbar for the whole application."""
-        self.main_widget.ids.toolbar.title = title
+        self._main_widget.ids.toolbar.title = title
 
     def show_screen(self, screen_property, theme_primary_color, theme_accent_color):
         # Get a shorter alias for the screen_manager object:
-        scr_mngr = self.main_widget.ids.scr_mngr
+        scr_mngr = self._main_widget.ids.scr_mngr
         # Extract class & class_name:
         screen_class = screen_property.value
         class_name = screen_class.__name__

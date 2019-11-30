@@ -10,7 +10,6 @@ from datetime import datetime
 
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.metrics import dp
 from kivy.utils import get_hex_from_color
 from kivy.uix.screenmanager import Screen
 from kivy.properties import NumericProperty
@@ -30,11 +29,29 @@ from src.model.CommonUtils import CommonUtils as CU
 class TFSettings(Screen):
 
     app = None
-    EXPLANATION_PLAYLIST_NAME = f"(Only alphanumeric characters & \"_-\", leave blank to cancel.){os.linesep}"
 
-    def __init__(self, **kwargs):
-        super(TFSettings, self).__init__(name=type(self).__name__, **kwargs)
+    def __init__(self, kv_file_main_widget=None, **kwargs):
+        self._dic = dict()
+        self.initialize_tfsettings_dict()
+
+        # Add only the editable TFSettings to the _editable_list
+        # [value for key, value in self._dic.items() if value.is_editable]
+        self._editable_list = list()
+
+        # Make the settings public & update the app's title:
+        CU.tfs = self
         TFSettings.app = App.get_running_app()
+        TFSettings.app.title = CU.tfs.dic['APP_NAME'].value + " - v" + CU.tfs.dic['MAJOR_MINOR_VERSION'].value
+
+        if kv_file_main_widget is not None and len(kv_file_main_widget) > 0:
+            # Create the main widget here in TFSettings because it already needs tfs settings:
+            TFSettings.app.set_main_widget(Builder.load_file(kv_file_main_widget))
+
+        # Create TFSettings widget and underlying base-object:
+        Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(TFSettings.__name__).with_suffix(".kv")).name))
+        super(TFSettings, self).__init__(name=type(self).__name__, **kwargs)
+
+
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
         self._context_menus = {"Clear Input": lambda x: {self.clear_search_pattern()},
                                "Sort Settings": lambda x: {self.sort_editable_list()},
@@ -42,16 +59,6 @@ class TFSettings(Screen):
                                "Restore Factory Settings": lambda x: toast("TODO: WIP"),
                                "Help": lambda x: toast("TODO: WIP")}
         # TODO: Implement the other context menus
-
-        self._dic = dict()
-
-        self.initialize_tfsettings_dict()
-
-
-
-        # Add only the editable TFSettings to the _editable_list
-        # [value for key, value in self._dic.items() if value.is_editable]
-        self._editable_list = list()
 
     def get_dic(self):
         return self._dic
