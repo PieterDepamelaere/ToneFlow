@@ -51,7 +51,6 @@ class TFSettings(Screen):
         Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(TFSettings.__name__).with_suffix(".kv")).name))
         super(TFSettings, self).__init__(name=type(self).__name__, **kwargs)
 
-
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
         self._context_menus = {"Clear Input": lambda x: {self.clear_search_pattern()},
                                "Sort Settings": lambda x: {self.sort_editable_list()},
