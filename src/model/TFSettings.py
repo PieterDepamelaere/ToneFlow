@@ -77,10 +77,12 @@ class TFSettings(Screen):
     context_menus = property(get_context_menus)
 
     def cb_create_load_tf_workspace(self, tf_workspace_path):
+        tf_workspace_path = str(tf_workspace_path)
+
         # Without whitespace the length of ans_user should be bigger than 0, also make sure that when the tf_workspace_path's description is returned, that :
         if ((tf_workspace_path is not None) and (len(str(tf_workspace_path).strip()) > 0) and (str(tf_workspace_path) != self._dic['tf_workspace_path'].description)):
             # If user didn't omit the explanation on the workspace's path, then auto-ignore it:
-            tf_workspace_path = str(tf_workspace_path).replace(f"{self._dic['EXPLANATION_WORKSPACE_PATH'].value}", "")
+            tf_workspace_path = str(tf_workspace_path).replace(f"{self._dic['EXPLANATION_WORKSPACE_PATH'].value}{os.linesep}", "")
             # Again check whether the remaining path is not empty:
             if (len(str(tf_workspace_path).strip()) > 0):
                 tf_workspace_path = pl.Path(tf_workspace_path)
@@ -145,8 +147,8 @@ class TFSettings(Screen):
         self._dic['CONFIG_FILE_PATH'] = TFSetting("Path to Config File", None, curr_file.parents[2] / "Config_TF.json", None, False, None)
         self._dic['IMG_DIR_PATH'] = TFSetting("Internal Directory of Images", None, curr_file.parents[2] / "img", None, False, None)
         self._dic['WORKSPACE_NAME'] = TFSetting("Name of Workspace", None, "Workspace_TF", None, False, None)
-        self._dic['EXPLANATION_PLAYLIST_SONG_NAME'] = TFSetting("Explanation Playlist Song Name", None, f"(No spaces, only alphanumeric characters & \"_-\". Leave blank to cancel.){os.linesep}", None, False, None)
-        self._dic['EXPLANATION_WORKSPACE_PATH'] = TFSetting("Explanation Workspace Name", None, f"(Preferably choose path on external device like flash drive){os.linesep}", None, False, None)
+        self._dic['EXPLANATION_PLAYLIST_SONG_NAME'] = TFSetting("Explanation Playlist Song Name", None, f"(No spaces, only alphanumeric characters & \"_-\". Leave blank to cancel.)", None, False, None)
+        self._dic['EXPLANATION_WORKSPACE_PATH'] = TFSetting("Explanation Workspace Name", None, f"(Preferably choose path on external device like flash drive)", None, False, None)
         self._dic['FILE_SEP_TEXT'] = TFSetting("Exportable File Separator", None, "/FS/", None, False, None)
         self._dic['IMAGES_VIDEOS_DIR_NAME'] = TFSetting("Name of Images_Videos Folder in Workspace", None, "Images_Videos", None, False, None)
         self._dic['PLAYLISTS_DIR_NAME'] = TFSetting("Name of Playlists Folder in Workspace", None, "Playlists", None, False, None)
@@ -160,7 +162,7 @@ class TFSettings(Screen):
         self._dic['THEME_BACKGROUND_HUE'] = TFSetting("Background hue influencing text color", None, '500', False, None)
 
         # Add user editable ones:
-        self._dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self._dic['WORKSPACE_NAME'].value}", f"{self._dic['EXPLANATION_WORKSPACE_PATH'].value}???{os.sep}{self._dic['WORKSPACE_NAME'].value}", True, lambda value: self.cb_create_load_tf_workspace(value))
+        self._dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self._dic['WORKSPACE_NAME'].value}", f"{self._dic['EXPLANATION_WORKSPACE_PATH'].value}{os.linesep}???{os.sep}{self._dic['WORKSPACE_NAME'].value}", True, lambda value: self.cb_create_load_tf_workspace(value))
 
         # TODO: When saving a path to json make sure to do in platform indep fashion so that is is recoverable on other system, yet the config file is never meant to be ported across platform
         # TODO: Config file itself can not be saved to workspace, because one of it's props is the location of the workspace

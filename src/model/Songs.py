@@ -74,7 +74,7 @@ class Songs(Screen):
         :return:
         """
         # Omit the provided explanation-text in case it was not omitted:
-        new_name_song = str(new_name_song).replace(f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}", "")
+        new_name_song = str(CU.with_consistent_linesep(new_name_song)).replace(f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}", "")
 
         # Check the new_name_song by means of a regular expression:
         # Only allow names entirely consisting of alphanumeric characters, dashes and underscores
@@ -250,7 +250,7 @@ class Songs(Screen):
         :param song_rowview:
         :return:
         """
-        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}" \
+        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}" \
             f"{str(song_rowview.song_entry_obj.file_path.stem)}"
 
         CU.show_input_dialog(title=f"Enter New Name for Song",

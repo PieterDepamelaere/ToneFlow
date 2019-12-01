@@ -40,12 +40,17 @@ class TFSetting:
         # Check if the type of the new value matches with the type of the default value, try safe_casting:
         if (isinstance(self._default_value, pl.Path)):
             # When it's a pl.Path, then the exportable FILE_SEP_TEXT should be replaced:
-            value = str(value).replace(f"{CU.tfs.dic['FILE_SEP_TEXT'].value}",f"{os.sep}")
+            value = str(value).replace(f"{CU.tfs.dic['FILE_SEP_TEXT'].value}", f"{os.sep}")
+        if (isinstance(value, str)):
+            value = CU.with_consistent_linesep(value)
 
-        value = CU.safe_cast(value, type(self._default_value), "")
-
-        value = self._callback_on_set(value)
-        self._value = value
+        # The callback can do some extra checking of the value while its for instance still string, and order of doing the safe cast and calling the callback used to be the other way around, but the pathlib library uses other windows-lineseparator when casting back to string, but then it's not possible to omit an explanation
+        processed_value = self._callback_on_set(value)
+        if processed_value is not None:
+            self._value = CU.safe_cast(processed_value, type(self._default_value), "")
+        else:
+            # The previous _value is left unchanged.
+            raise ValueError(f"Value \"{value}\" was not valid for setting \"{self.name}\"")
 
 
     def get_default_value(self):

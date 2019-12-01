@@ -68,7 +68,7 @@ class PlayLists(Screen):
         :return:
         """
         # Omit the provided explanation-text in case it was not omitted:
-        name_new_playlist = str(name_new_playlist).replace(f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}", "")
+        name_new_playlist = str(CU.with_consistent_linesep(name_new_playlist)).replace(f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}", "")
 
         # Check the name_new_playlist by means of a regular expression:
         # Only allow names entirely consisting of alphanumeric characters, dashes and underscores
@@ -107,7 +107,7 @@ class PlayLists(Screen):
         :return:
         """
         # Omit the provided explanation-text in case it was not omitted:
-        new_name_playlist = str(new_name_playlist).replace(f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}", "")
+        new_name_playlist = str(CU.with_consistent_linesep(new_name_playlist)).replace(f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}", "")
 
         # Check the new_name_playlist by means of a regular expression:
         # Only allow names entirely consisting of alphanumeric characters, dashes and underscores
@@ -232,7 +232,7 @@ class PlayLists(Screen):
         """
         creation_time = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}Concert_{creation_time}"
+        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}Concert_{creation_time}"
 
         CU.show_input_dialog(title=f"Enter Name of New Playlist",
                              hint_text=dialog_text,
@@ -247,7 +247,7 @@ class PlayLists(Screen):
         :param playlist_rowview:
         :return:
         """
-        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}" \
+        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}" \
             f"{str(playlist_rowview.playlist_obj.file_path.stem)}"
 
         CU.show_input_dialog(title=f"Enter New Name for Playlist",

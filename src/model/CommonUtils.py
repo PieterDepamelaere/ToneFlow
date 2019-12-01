@@ -75,13 +75,29 @@ class CommonUtils:
         input_dialog.open()
         return input_dialog
 
-    @classmethod
-    def switch_screen(cls, choice):
+    @staticmethod
+    def with_consistent_linesep(text):
         """
-        Python mechanism to mimic a switch-case-structure, that activates the execution of the intended method.
-        :param choice: The choice of the user.
-        :return: the result of the invoked function.
+        Making lineseparators consistent, no matter what machine ToneFlow is run on.
+        :param text:
+        :return:
         """
+        text = CommonUtils.safe_cast(text, str, "")
+        # It turns out that when an input is received from a textfield (in a inputdialog) enters are always returned as \n, whilst running ToneFlow on a Windows machine, one would expect \r\n, therefore conversion:
+        text = text.replace(f"\r\n", f"{os.linesep}")
+        # Old Apple-compatibility (now, it also uses \n like linux):
+        text = text.replace(f"\r", f"{os.linesep}")
+        # Windows-compatibility (allows to change \n into \r\n):
+        text = text.replace(f"\n", f"{os.linesep}")
+        return text
 
-        func = cls.dic_screen_switch.get(choice, lambda: "ERROR: Unvalid choice")
-        return func()
+    # @classmethod
+    # def switch_screen(cls, choice):
+    #     """
+    #     Python mechanism to mimic a switch-case-structure, that activates the execution of the intended method.
+    #     :param choice: The choice of the user.
+    #     :return: the result of the invoked function.
+    #     """
+    #
+    #     func = cls.dic_screen_switch.get(choice, lambda: "ERROR: Unvalid choice")
+    #     return func()
