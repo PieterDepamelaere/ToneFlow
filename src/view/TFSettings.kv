@@ -16,7 +16,7 @@
     list_obj: None
     tfsetting_obj: None
     on_release: toast(self.text) #root.callback(root.icon)
-    text: '' if self.tfsetting_obj is None else f'{self.tfsetting_obj.name}: {self.tfsetting_obj.value}'
+    text: '' if self.tfsetting_obj is None else f'{self.tfsetting_obj.name}'
 
     BoxLayout:
         orientation: 'horizontal'
@@ -29,14 +29,25 @@
             icon: root.icon
             on_release: toast(root.text) #root.on_release()
 
-        Widget:
+        BoxLayout:
+            orientation: 'vertical'
+            #size_hint_y: None
+            #height: '56'
+            spacing: '5dp'
+            pos_hint: {'center_x': 0.0}
+
+            Widget:
+            #MDLabel:
+             #   id: md_label
+              #  text: root.text
 
             MDTextField:
                 id: setting_field
-                hint_text: f"Search {CU.tfs.dic['APP_NAME'].value} settings"
+                hint_text: '' if root.tfsetting_obj is None else f'{root.tfsetting_obj.name}'
+                text: '' if root.tfsetting_obj is None else f'{root.tfsetting_obj.value}'
                 color_mode: 'primary' #'primary', options=['primary', 'accent', 'custom']
-                on_text_validate: toast(f'Setting \"{tfsetting_obj.name}\" changed')
-                helper_text: 'Enter a small snippet of the name of the intended song'
+                on_text_validate: toast(f'Setting \"{root.tfsetting_obj.name}\" changed')
+                helper_text: '' if root.tfsetting_obj is None else f'{root.tfsetting_obj.description}'
                 helper_text_mode: 'on_focus'
 
         MDIconButton:

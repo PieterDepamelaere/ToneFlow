@@ -163,17 +163,20 @@ class TFSettings(Screen):
 
         # Add user editable ones:
         self._dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self._dic['WORKSPACE_NAME'].value}", f"{self._dic['EXPLANATION_WORKSPACE_PATH'].value}{os.linesep}???{os.sep}{self._dic['WORKSPACE_NAME'].value}", True, lambda value: self.cb_create_load_tf_workspace(value))
+        self._dic['overall_speedfactor'] = TFSetting("Overall Speedfactor", None, 1.0, f"Premultiplied speedfactor that affects the overall speed of the flowing tones.", True, None)
+        self._dic['low_pitch_limit'] = TFSetting("Low Pitch Limit", None, "C4", f"This is the applied pitch-underbound while preprocessing the Song's MIDI-file. f.e. \'C4\' means central C.", True, None)
+        self._dic['high_pitch_limit'] = TFSetting("High Pitch Limit", None, "E5", f"This is the applied pitch-upperbound while preprocessing the Song's MIDI-file. f.e. \'C4\' means central C.", True, None)
+        # TODO: Invent a color_scheme object, try a dictionary for this?
+        self._dic['tone_color_scheme'] = TFSetting("Tone Color Scheme", None, dict(), f"The color scheme maps every tone to a color.", True, None)
+        self._dic['show_gridlines'] = TFSetting("Show Gridlines", None, True, f"Toggle Gridlines during playback.", True, None)
+
+        # TODO: This setting is probably way to difficult to implement, and not even usefull:
+        self._dic['tone_flow_orientation'] = TFSetting("Flowing Direction", None, "Vertical", f"Flowing direction of the tones, either \'Vertical\' or \'Horizontal\'.", True, None)
+        self._dic['overall_mute_play_along'] = TFSetting("Mute Play Along", None, True, f"Mute the song's audio while performing", True, None)
 
         # TODO: When saving a path to json make sure to do in platform indep fashion so that is is recoverable on other system, yet the config file is never meant to be ported across platform
         # TODO: Config file itself can not be saved to workspace, because one of it's props is the location of the workspace
         # TODO: Implement settings:
-        # overall_speedfactor
-        # low_pitch_limit
-        # high_pitch_limit
-        # tone_color_sheme
-        # show_gridlines_concert_mode
-        # tone_flow_direction
-        # _overall_mute_play_along
 
     # def add_setting(self, name_new_setting):
     #     """

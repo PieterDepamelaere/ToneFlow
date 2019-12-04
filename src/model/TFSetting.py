@@ -45,7 +45,11 @@ class TFSetting:
             value = CU.with_consistent_linesep(value)
 
         # The callback can do some extra checking of the value while its for instance still string, and order of doing the safe cast and calling the callback used to be the other way around, but the pathlib library uses other windows-lineseparator when casting back to string, but then it's not possible to omit an explanation
-        processed_value = self._callback_on_set(value)
+        if (self._callback_on_set is not None):
+            processed_value = self._callback_on_set(value)
+        else:
+            processed_value = value
+
         if processed_value is not None:
             self._value = CU.safe_cast(processed_value, type(self._default_value), "")
         else:
