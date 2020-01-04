@@ -16,7 +16,7 @@
     list_obj: None
     tfsetting_obj: None
     on_release: toast(self.text) #root.callback(root.icon)
-    text: '' if self.tfsetting_obj is None else f'{self.tfsetting_obj.name}'
+    tfsetting_name: '' if self.tfsetting_obj is None else f'{self.tfsetting_obj.name}'
 
     BoxLayout:
         orientation: 'horizontal'
@@ -29,26 +29,26 @@
             icon: root.icon
             on_release: toast(root.text) #root.on_release()
 
-        BoxLayout:
-            orientation: 'vertical'
+        #BoxLayout:
+         #   orientation: 'vertical'
             #size_hint_y: None
             #height: '56'
             spacing: '5dp'
-            pos_hint: {'center_x': 0.0}
+          #  pos_hint: {'center_x': 0.0}
 
-            Widget:
-            #MDLabel:
-             #   id: md_label
-              #  text: root.text
+        #Widget:
+        MDLabel:
+            id: md_label
+            text: root.tfsetting_name
 
-            MDTextField:
-                id: setting_field
-                hint_text: '' if root.tfsetting_obj is None else f'{root.tfsetting_obj.name}'
-                text: '' if root.tfsetting_obj is None else f'{root.tfsetting_obj.value}'
-                color_mode: 'primary' #'primary', options=['primary', 'accent', 'custom']
-                on_text_validate: toast(f'Setting \"{root.tfsetting_obj.name}\" changed')
-                helper_text: '' if root.tfsetting_obj is None else f'{root.tfsetting_obj.description}'
-                helper_text_mode: 'on_focus'
+        MDTextField:
+            id: setting_field
+            hint_text: '' if root.tfsetting_obj is None else f'{root.tfsetting_obj.name}'
+            text: '' if root.tfsetting_obj is None else f'{root.tfsetting_obj.value}'
+            color_mode: 'primary' #'primary', options=['primary', 'accent', 'custom']
+            on_text_validate: toast(f'Setting \"{root.tfsetting_obj.name}\" changed')
+            helper_text: '' if root.tfsetting_obj is None else f'{root.tfsetting_obj.description.replace(os.linesep," ")}'
+            helper_text_mode: 'on_focus'
 
         MDIconButton:
             icon: 'pencil'
@@ -120,7 +120,7 @@
                     padding: dp(10)
                     default_size: None, dp(48)
                     default_size_hint: 1, None
-                    size_hint_y: None
+                    #size_hint_y: None
                     height: self.minimum_height
                     orientation: 'vertical'
 
