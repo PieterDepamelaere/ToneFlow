@@ -13,7 +13,7 @@
     icon: 'playlist-music' # One can code an if-statement after this
     list_obj: None
     playlist_obj: None
-    on_release: toast(self.text) #root.callback(root.icon)
+    on_release: self.list_obj.show_modal_view_playlist(self.playlist_obj)
     text: '' if self.playlist_obj is None else self.playlist_obj.file_path.stem
 
     BoxLayout:
@@ -25,7 +25,7 @@
 
         MDIconButton:
             icon: root.icon
-            on_release: toast(root.text) #root.on_release()
+            on_release: root.list_obj.show_modal_view_playlist(root.playlist_obj)
 
         Widget:
 

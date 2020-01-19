@@ -9,6 +9,8 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.utils import get_hex_from_color
 from kivy.uix.screenmanager import Screen
+from kivy.uix.modalview import ModalView
+from kivy.uix.label import Label
 from kivy.properties import NumericProperty
 
 from kivymd.utils import asynckivy
@@ -271,6 +273,13 @@ class PlayLists(Screen):
                                  text_button_ok="Remove",
                                  text_button_cancel="Cancel",
                                  callback=lambda *args: {self.remove_playlist(playlist_rowview, *args), self.refresh_list()})
+
+    def show_modal_view_playlist(self, playlist):
+        # When auto_dismiss==True, then you can escape the modal view with [ESC]
+        modal_view = ModalView(size_hint=(1, 1), auto_dismiss=True)
+        modal_view.add_widget(Label(text=f"{playlist.file_path.stem}"))
+        modal_view.open()
+    #     modal_view.dismiss(animation=True)
 
     def sort_list(self):
         """
