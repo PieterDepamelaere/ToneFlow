@@ -5,6 +5,7 @@
 #:import CU src.model.CommonUtils.CommonUtils
 #:import NoTransition kivy.uix.screenmanager.NoTransition
 #:import toast kivymd.toast.toast
+#:import TFNavigationDrawer src.view.custom_uix.TFNavigationDrawer
 
 #set primary_color str(app.theme_cls.primary_palette)
 #set accent_color str(app.theme_cls.accent_palette)
@@ -39,15 +40,16 @@
             size_hint_y: 0.4
             on_press: root.dismiss()
 
-<ContentNavigationDrawer@MDNavigationDrawer>:
+
+<ContentNavigationDrawer@TFMDNavigationDrawer>:
 
     drawer_logo: str(CU.tfs.dic['IMG_DIR_PATH'].value / 'ToneFlow_Logo_Drawer.png')
     #drawer_title: 'Menu:'
 
-    NavigationDrawerSubheader:
+    TFNavigationDrawerSubheader:
         text: 'Menus:'
 
-    NavigationDrawerIconButton:
+    TFNavigationDrawerIconButton:
         icon: 'playlist-music'
         text: str(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'].name)
         badge_text: '!'
@@ -56,7 +58,7 @@
         on_release:
             app.show_screen(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'], self.theme_primary_color, self.theme_accent_color)
 
-    NavigationDrawerIconButton:
+    TFNavigationDrawerIconButton:
         icon: 'music-note'
         text: str(CU.tfs.dic['SCREEN_SONGS_CLASS'].name)
         badge_text: '!'
@@ -65,12 +67,12 @@
         on_release:
             app.show_screen(CU.tfs.dic['SCREEN_SONGS_CLASS'], self.theme_primary_color, self.theme_accent_color)
 
-    NavigationDrawerDivider
+    TFNavigationDrawerDivider
 
-    NavigationDrawerSubheader:
+    TFNavigationDrawerSubheader:
         text: 'Basics:'
 
-    NavigationDrawerIconButton:
+    TFNavigationDrawerIconButton:
         icon: 'settings'
         text: str(CU.tfs.dic['SCREEN_SETTINGS_CLASS'].name)
         theme_primary_color: 'LightGreen'
@@ -78,7 +80,7 @@
         on_release:
             app.show_screen(CU.tfs.dic['SCREEN_SETTINGS_CLASS'], self.theme_primary_color, self.theme_accent_color)
 
-    NavigationDrawerIconButton:
+    TFNavigationDrawerIconButton:
         icon: 'lifebuoy'
         text: str(CU.tfs.dic['SCREEN_HELP_CLASS'].name)
         theme_primary_color: 'Pink'
@@ -87,15 +89,14 @@
             app.show_screen(CU.tfs.dic['SCREEN_HELP_CLASS'], self.theme_primary_color, self.theme_accent_color)
 
 
-    NavigationDrawerIconButton:
+    TFNavigationDrawerIconButton:
         icon: 'power'
         text: 'Quit'
         on_release:
             app.on_stop()
 
 
-
-NavigationLayout:
+TFNavigationLayout:
     id: nav_layout
 
     ContentNavigationDrawer:

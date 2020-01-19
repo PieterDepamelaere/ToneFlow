@@ -17,20 +17,25 @@ import kivy
 kivy.require('1.11.1') # replace with your current kivy version!
 import pyperclip
 
-from kivy.app import App
+# from kivy.app import App
 from kivy.lang import Builder
 from kivy.core.window import Window
+from kivy.properties import ListProperty
 from kivy.utils import get_hex_from_color
+from kivy.utils import get_color_from_hex
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 
+from kivymd.app import MDApp
 from kivymd.utils import asynckivy
-from kivymd.uix.navigationdrawer import NavigationDrawerIconButton
+# from kivymd.uix.navigationdrawer import NavigationDrawerIconButton
 from kivymd.theming import ThemeManager
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.toast import toast
 from kivymd.color_definitions import palette
+from kivymd.theming_dynamic_text import get_contrast_text_color
+from kivymd.color_definitions import colors
 
 from src.main.TFExceptionHandler import TFExceptionHandler
 from src.model.CommonUtils import CommonUtils as CU
@@ -39,19 +44,18 @@ from src.model.TFSettings import TFSettings
 from kivy.base import ExceptionManager
 
 
-class MainApp(App):
+class MainApp(MDApp):
     """
 
     """
     # Foresee custom handling of errors, user can bypass them (maybe own mistake) or quit the app, but he sees pop up of the error:
     ExceptionManager.add_handler(TFExceptionHandler())
 
-    theme_cls = ThemeManager()
-    theme_cls.primary_palette = "Brown"
-    theme_cls.accent_palette = "LightGreen"
-    theme_cls.theme_style = "Light"
-
     def __init__(self, **kwargs):
+        self.theme_cls.theme_style = "Light"
+        self.theme_cls.primary_palette = "Brown"
+        self.theme_cls.accent_palette = "LightGreen"
+
         super().__init__(**kwargs)
 
         self._main_widget = None
@@ -78,7 +82,7 @@ class MainApp(App):
         return screen_object
 
     def decide_stop_or_not(self, *args):
-        # TODO: Stop warning is not shown yet when you close via closing the window by itself.
+        # TODO: Stop warning is not shown yet when you close by closing the window with the 'x'-button.
         if args[0] is not None:
             # print(f"args0 {str(args[0])}")
             if (CU.safe_cast(args[0], str, "")).lower() == "yes":
@@ -98,6 +102,7 @@ class MainApp(App):
                 {
                     "viewclass": "MDMenuItem",
                     "text": f"{key}",
+                    "text_color": get_contrast_text_color(self.theme_cls.primary_color, True),
                     "callback": items[key]
                 }
                 for key in items
@@ -140,7 +145,7 @@ class MainApp(App):
 
     def open_context_menu(self, instance):
         if (self.context_menus != None):
-            MDDropdownMenu(items=self.context_menus, width_mult=3).open(instance)
+            mddm = MDDropdownMenu(items=self.context_menus, width_mult=3).open(instance)
 
     def open_settings(self, *args):
         # TODO: Experiment in later stage with kivy settings, because it might ruin the setup
@@ -154,8 +159,8 @@ class MainApp(App):
 
             if (primary_color in palette) and (accent_color in palette):
                 # Update the primary and accent colors
-                MainApp.theme_cls.primary_palette = primary_color
-                MainApp.theme_cls.accent_palette = accent_color
+                self.theme_cls.primary_palette = primary_color
+                self.theme_cls.accent_palette = accent_color
 
     def set_title_toolbar(self, title):
         """Set string title in MDToolbar for the whole application."""

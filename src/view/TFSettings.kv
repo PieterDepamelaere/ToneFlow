@@ -20,7 +20,7 @@
 
     BoxLayout:
         orientation: 'horizontal'
-        #size_hint_y: None
+        size_hint_y: None
         #height: '56'
         spacing: '5dp'
         pos_hint: {'center_y': 0.5}
@@ -40,6 +40,14 @@
         MDLabel:
             id: md_label
             text: root.tfsetting_name
+            #text_size: None, len(root.tfsetting_name*15)
+            #halign: 'left'
+            #valign: 'middle'
+            default_size: 1, None
+            default_size_hint: None, None
+            size_hint_x: None
+            #with: self.minimum_height
+
 
         MDTextField:
             id: setting_field
@@ -118,9 +126,9 @@
 
                 RecycleBoxLayout:
                     padding: dp(10)
-                    default_size: None, dp(48)
+                    default_size: None, dp(56)
                     default_size_hint: 1, None
-                    #size_hint_y: None
+                    size_hint_y: None
                     height: self.minimum_height
                     orientation: 'vertical'
 
