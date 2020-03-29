@@ -10,6 +10,7 @@ sys.path.insert(0, str(curr_file.parents[2]))
 from functools import partial
 from kivymd.uix.dialog import MDDialog, MDInputDialog
 
+
 class CommonUtils:
 
     # tfs

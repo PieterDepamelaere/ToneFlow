@@ -61,7 +61,8 @@ class MainApp(MDApp):
         self._main_widget = None
         self._exception_counter = 0
         self._context_menus = None
-        # self.Window = Window
+        # To prevent the window from closing, when 'X' is pressed on the windows itself:
+        Window.bind(on_request_close=self.on_stop)
 
         # Create ToneFlow-settings object and corresponding settings:
         kv_file_main_widget = str(curr_file.parents[1] / "view" / (curr_file.with_suffix(".kv")).name)
@@ -139,9 +140,9 @@ class MainApp(MDApp):
                                callback=lambda text_button, instance: {CU.tfs.dic['tf_workspace_path'].set_value(instance.text_field.text),
                                                                                toast(str(CU.tfs.dic['tf_workspace_path'].value))})
 
-
-    def on_stop(self):
+    def on_stop(self, *args):
         CU.show_ok_cancel_dialog(title="Confirmation dialog", text=f"Are you sure you want to [color={get_hex_from_color(self.theme_cls.primary_color)}][b]quit[/b][/color] {CU.tfs.dic['APP_NAME'].value}?", size_hint=(0.5, 0.3), text_button_ok="Yes", text_button_cancel="No", callback=lambda *args: self.decide_stop_or_not(*args))
+        return True
 
     def open_context_menu(self, instance):
         if (self.context_menus != None):
@@ -217,9 +218,6 @@ if __name__ == "__main__":
 
         except Exception as e:
             print(f"-> {CU.tfs.dic['APP_NAME'].value} encountered unexpected error during the final saving of the workspace.")
-
-
-
 
 
 

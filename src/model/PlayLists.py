@@ -27,6 +27,7 @@ class PlayLists(Screen):
 
     def __init__(self, **kwargs):
         Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(PlayLists.__name__).with_suffix(".kv")).name))
+        Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(PlayList.__name__).with_suffix(".kv")).name))
         super(PlayLists, self).__init__(name=type(self).__name__, **kwargs)
 
         PlayLists.app = App.get_running_app()
@@ -276,8 +277,11 @@ class PlayLists(Screen):
 
     def show_modal_view_playlist(self, playlist):
         # When auto_dismiss==True, then you can escape the modal view with [ESC]
-        modal_view = ModalView(size_hint=(1, 1), auto_dismiss=True)
-        modal_view.add_widget(Label(text=f"{playlist.file_path.stem}"))
+        modal_view = ModalView(size_hint=(1, 1), pos_hint={'center_x': 0.5, 'center_y': 0.5}, background_color=(1, 1, 1, 1), auto_dismiss=True)
+        # 'center_x': .75, 'center_y': .5
+        # can be argument in ModalView Constructor border = (16, 16, 16, 16),
+
+        modal_view.add_widget(playlist)
         modal_view.open()
     #     modal_view.dismiss(animation=True)
 
