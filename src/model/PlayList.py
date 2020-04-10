@@ -30,6 +30,8 @@ class PlayList(Screen):
         # TODO: Implement the other context menus
 
         self._file_path = CU.safe_cast(file_path, pl.Path, None)
+
+
         # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
         self._list = list()  # ObservableList(None, object, list())
 

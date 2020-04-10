@@ -27,7 +27,7 @@ class PlayLists(Screen):
 
     def __init__(self, **kwargs):
         Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(PlayLists.__name__).with_suffix(".kv")).name))
-        Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(PlayList.__name__).with_suffix(".kv")).name))
+        # Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(PlayList.__name__).with_suffix(".kv")).name))
         super(PlayLists, self).__init__(name=type(self).__name__, **kwargs)
 
         PlayLists.app = App.get_running_app()
