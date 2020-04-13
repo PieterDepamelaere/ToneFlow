@@ -29,6 +29,7 @@ from src.model.CommonUtils import CommonUtils as CU
 class TFSettings(Screen):
 
     app = None
+    is_kv_loaded = False
 
     def __init__(self, kv_file_main_widget=None, **kwargs):
         self._dic = dict()
@@ -48,7 +49,11 @@ class TFSettings(Screen):
             TFSettings.app.set_main_widget(Builder.load_file(kv_file_main_widget))
 
         # Create TFSettings widget and underlying base-object:
-        Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(TFSettings.__name__).with_suffix(".kv")).name))
+        if (not TFSettings.is_kv_loaded):
+            # Make sure it's only loaded once:
+            Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(TFSettings.__name__).with_suffix(".kv")).name))
+            TFSettings.is_kv_loaded = True
+
         super(TFSettings, self).__init__(name=type(self).__name__, **kwargs)
 
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks

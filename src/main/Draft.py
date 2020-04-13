@@ -24,16 +24,21 @@ import sys
 from mido import MidiFile
 
 if __name__ == '__main__':
-    filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
+    # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
     # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
+    filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Game_of_Thrones_Easy_piano.mid'
 
     midi_file = MidiFile(filename)
+
 
     for i, track in enumerate(midi_file.tracks):
         sys.stdout.write('=== Track {}\n'.format(i))
         for message in track:
             sys.stdout.write('  {!r}\n'.format(message))
 
+
+    for msg in midi_file.play():
+        print(f"Test PDP: {msg}")
 
 
 

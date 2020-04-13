@@ -18,16 +18,20 @@ from kivymd.toast import toast
 
 curr_file = pl.Path(os.path.realpath(__file__))
 
-from src.model.PlayList import PlayList
+from src.model.PlayList import PlayListProvider
 from src.model.CommonUtils import CommonUtils as CU
 
 class PlayLists(Screen):
 
     app = None
+    is_kv_loaded = False
 
     def __init__(self, **kwargs):
-        Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(PlayLists.__name__).with_suffix(".kv")).name))
-        # Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(PlayList.__name__).with_suffix(".kv")).name))
+        if (not PlayLists.is_kv_loaded):
+            # Make sure it's only loaded once:
+            Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(PlayLists.__name__).with_suffix(".kv")).name))
+            PlayLists.is_kv_loaded = True
+
         super(PlayLists, self).__init__(name=type(self).__name__, **kwargs)
 
         PlayLists.app = App.get_running_app()
@@ -187,15 +191,15 @@ class PlayLists(Screen):
         # print(f"search pattern is {search_pattern}")
         self.ids.rv.data = []
 
-        for playlist in self._list:
-            playlist_name = str(playlist.file_path.stem)
+        for playlist_provider in self._list:
+            playlist_name = str(playlist_provider.file_path.stem)
             if (len(search_pattern) == 0 or ((len(search_pattern) > 0) and (search_pattern.lower() in playlist_name.lower()))):
 
                 self.ids.rv.data.append(
                     {
                         "viewclass": "PlayListRowView",
                         "list_obj": self,
-                        "playlist_obj": playlist,
+                        "playlist_obj": playlist_provider,
                         "callback": None
                     }
                 )
@@ -206,7 +210,7 @@ class PlayLists(Screen):
         Fires async method to refresh the internal list.
         :return:
         """
-        # Clear existing list<PlayList>:
+        # Clear existing list<PlayListProvider>:
         self._list.clear()
 
         asynckivy.start(self.async_refresh_list())
@@ -219,9 +223,9 @@ class PlayLists(Screen):
         # Depending on the amount of time it takes to run through the refresh, the spinner will be more/longer visible:
         for file_path in pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).rglob("*.json"):
 
-            playlist = PlayList(file_path)
+            playlist_provider = PlayListProvider(file_path)
 
-            self._list.append(playlist)
+            self._list.append(playlist_provider)
             await asynckivy.sleep(0)
 
         # TODO: Make overscroll easier than it is now, in fact scrollbar should be always visible
@@ -275,21 +279,15 @@ class PlayLists(Screen):
                                  text_button_cancel="Cancel",
                                  callback=lambda *args: {self.remove_playlist(playlist_rowview, *args), self.refresh_list()})
 
-    def show_modal_view_playlist(self, playlist):
-        # When auto_dismiss==True, then you can escape the modal view with [ESC]
-        modal_view = ModalView(size_hint=(1, 1), pos_hint={'center_x': 0.5, 'center_y': 0.5}, background_color=(1, 1, 1, 1), auto_dismiss=True)
-        # 'center_x': .75, 'center_y': .5
-        # can be argument in ModalView Constructor border = (16, 16, 16, 16),
-
-        modal_view.add_widget(playlist)
-        modal_view.open()
-    #     modal_view.dismiss(animation=True)
+    def show_modal_view_playlist(self, playlist_provider):
+        if playlist_provider is not None:
+            playlist_provider.get_modal_view().open()
 
     def sort_list(self):
         """
         Will sort the internal list in alphabetic order.
         :return:
         """
-        self.set_list(sorted(self._list, key=lambda playlist: str(playlist.file_path.stem)))
+        self.set_list(sorted(self._list, key=lambda playlist_provider: str(playlist_provider.file_path.stem)))
         self.filter_list()
         toast("Playlists sorted")

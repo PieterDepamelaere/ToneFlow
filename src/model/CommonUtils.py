@@ -59,7 +59,7 @@ class CommonUtils:
             text=text,
             text_button_ok=text_button_ok,
             text_button_cancel=text_button_cancel,
-            events_callback=callback
+            events_callback=callback,
         )
         ok_cancel_dialog.open()
         return ok_cancel_dialog

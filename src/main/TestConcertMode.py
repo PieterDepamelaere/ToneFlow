@@ -9,6 +9,8 @@ from kivy.graphics import Rectangle
 
 #from pipe import Pipe
 
+# TODO intersting link multithreading: https://github.com/kivy/kivy/wiki/Working-with-Python-threads-inside-a-Kivy-application
+
 main_widget_kv = """
 FloatLayout:
     Background:
@@ -19,11 +21,19 @@ FloatLayout:
                 #pos: self.pos
                 #source: "sky.png"
             Color:
-                rgba: 1, 1, 0, 1
+                rgba: 1, 1, 1, 1
             Rectangle:
                 size: self.width, 10
                 pos: self.pos[0], self.pos[1] + self.height - 138
                 #texture: self.cloud_texture
+                
+            Color:
+                rgba: 1, 1, 0, 1
+            RoundedRectangle:
+                size: 50, 160
+                pos: self.pos[0]+60, self.pos[1] + 20
+                segments: 15
+                radius: [15]
             
             Color:
                 rgba: 1, .3, .8, .5

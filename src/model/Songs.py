@@ -24,9 +24,14 @@ from src.model.CommonUtils import CommonUtils as CU
 class Songs(Screen):
 
     app = None
+    is_kv_loaded = False
 
     def __init__(self, **kwargs):
-        Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(Songs.__name__).with_suffix(".kv")).name))
+        if (not Songs.is_kv_loaded):
+            # Make sure it's only loaded once:
+            Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(Songs.__name__).with_suffix(".kv")).name))
+            Songs.is_kv_loaded = True
+
         super(Songs, self).__init__(name=type(self).__name__, **kwargs)
 
         Songs.app = App.get_running_app()

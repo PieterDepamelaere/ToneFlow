@@ -5,11 +5,16 @@ import aiofiles
 import pathlib as pl
 from datetime import datetime
 
+from kivy.factory import Factory
 from kivy.lang import Builder
 from kivy.utils import get_hex_from_color
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObservableList, ListProperty
+from kivymd.uix.useranimationcard import MDUserAnimationCard
+from kivy.uix.modalview import ModalView
+from kivymd.uix.label import MDLabel
+
 
 from kivymd.utils import asynckivy
 from kivymd.toast import toast
@@ -18,29 +23,68 @@ curr_file = pl.Path(os.path.realpath(__file__))
 
 from src.model.CommonUtils import CommonUtils as CU
 
-class PlayList(Screen):
+
+class PlayListProvider:
     def __init__(self, file_path, **kwargs):
-        super(PlayList, self).__init__(name=type(self).__name__, **kwargs)
-
-
-        # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
-        self._context_menus = {"Clear Input": lambda x: self.clear_search_pattern(),
-                               "Refresh": lambda x: self.refresh_list(),
-                               "Help": lambda y: toast("TODO: WIP")}
-        # TODO: Implement the other context menus
 
         self._file_path = CU.safe_cast(file_path, pl.Path, None)
 
-
-        # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
-        self._list = list()  # ObservableList(None, object, list())
+        # I chose to store the modal view locally when created, so it does not need to be created over and over again:
+        self._modal_view = None
 
     def get_file_path(self):
         return self._file_path
 
     def set_file_path(self, file_path):
         file_path = CU.safe_cast(file_path, pl.Path, None)
+
+        if self._file_path != file_path:
+            self._file_path = file_path
+            # Reset modal view when the file path changed, just to be sure it's recreated when needed next time:
+            self._modal_view = None
+
+    def get_modal_view(self):
+        if self._modal_view is None:
+            # Create modal view only if asked for (to save computational power):
+            self._modal_view = PlayList(self._file_path)
+
+        return self._modal_view
+
+    file_path = property(get_file_path, set_file_path)
+    modal_view = property(get_modal_view)
+
+
+class PlayList(ModalView):
+
+    is_kv_loaded = False
+
+    def __init__(self, file_path, **kwargs):
+        if (not PlayList.is_kv_loaded):
+            # Make sure it's only loaded once:
+            Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(PlayList.__name__).with_suffix(".kv")).name))
+            PlayList.is_kv_loaded = True
+        # super(PlayList, self).__init__(name=type(self).__name__, **kwargs)
+        super(PlayList, self).__init__(**kwargs)
+
+        # Initializing properties of ModalView:
+        self.size_hint = (1, 1)
+        self.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
+        self.background_color = (1, 1, 1, 1)
+        # When auto_dismiss==True, then you can escape the modal view with [ESC]
+        self.auto_dismiss = True
+        # can be argument in ModalView Constructor border = (16, 16, 16, 16)
+
         self._file_path = file_path
+
+        # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
+        self._list = list()  # ObservableList(None, object, list())
+
+        # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
+        self._context_menus = {"Clear Input": lambda x: self.clear_search_pattern(),
+                               "Refresh": lambda x: self.refresh_list(),
+                               "Help": lambda x: toast("TODO: WIP"),
+                               "Save Playlist": lambda x: toast("TODO: WIP")}
+        # TODO: Implement the other context menus
 
     def get_list(self):
         return self._list
@@ -52,11 +96,10 @@ class PlayList(Screen):
     def get_context_menus(self):
         return self._context_menus
 
-    file_path = property(get_file_path, set_file_path)
     list = property(get_list, set_list)
     context_menus = property(get_context_menus)
 
-    def parse_from_json(self):
+    def load_from_json(self):
         # TODO
         pass
 
@@ -100,6 +143,12 @@ class PlayList(Screen):
         else:
             toast(f"Name cannot be empty nor contain{os.linesep}non-alphanumeric characters except for \"-_\")")
         await asynckivy.sleep(0)
+
+    def can_modal_view_close(self):
+        stay_open = False
+
+        toast(f"{self.file_path}")
+        return stay_open
 
     # def rename_lineup_entry(self, lineup_entry_rowview, new_name_lineup_entry):
     #     """
