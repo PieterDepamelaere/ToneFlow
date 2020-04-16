@@ -21,6 +21,7 @@ from src.model.TFSetting import TFSetting
 from src.model.PlayList import PlayList
 from src.model.PlayLists import PlayLists
 from src.model.Songs import Songs
+from src.model.Help import Help
 
 curr_file = pl.Path(os.path.realpath(__file__))
 
@@ -30,6 +31,8 @@ class TFSettings(Screen):
 
     app = None
     is_kv_loaded = False
+    theme_primary_color = 'LightGreen'  # 'LightGreen'
+    theme_accent_color = 'Green'  # Lime
 
     def __init__(self, kv_file_main_widget=None, **kwargs):
         self._dic = dict()
@@ -159,7 +162,7 @@ class TFSettings(Screen):
         self._dic['PLAYLISTS_DIR_NAME'] = TFSetting("Name of Playlists Folder in Workspace", None, "Playlists", None, False, None)
         self._dic['PREP_MIDI_DIR_NAME'] = TFSetting("Name of Prep_MIDI Folder in Workspace", None, "Songs_Prep_MIDI", None, False, None)
         self._dic['RAW_MIDI_DIR_NAME'] = TFSetting("Name of Raw_MIDI Folder in Workspace", None, "Songs_Raw_MIDI", None, False, None)
-        self._dic['SCREEN_HELP_CLASS'] = TFSetting("Help", None, None, False, None)
+        self._dic['SCREEN_HELP_CLASS'] = TFSetting("Help", None, Help, False, None)
         self._dic['SCREEN_PLAYLIST_CLASS'] = TFSetting("Lineup", None, PlayList, False, None)
         self._dic['SCREEN_PLAYLISTS_CLASS'] = TFSetting("Playlists", None, PlayLists, False, None)
         self._dic['SCREEN_SETTINGS_CLASS'] = TFSetting("Settings", None, TFSettings, False, None)

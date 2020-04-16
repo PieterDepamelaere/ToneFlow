@@ -47,12 +47,9 @@
     id: id_playlist
     name: CU.tfs.dic['SCREEN_PLAYLIST_CLASS'].value.__name__
     toolbar_title: CU.tfs.dic['SCREEN_PLAYLIST_CLASS'].name
-
-        #on_enter:
-            #self.refresh_list()
-            # Override needed overscroll to refresh the screen to the bare minimum:
-            #refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)
-            # make sure prim and accent colors are good when entering exiting
+    playlist_name: '<Title not available>'
+    theme_primary_color: 'Indigo'
+    theme_accent_color: 'Gray' #'DeepOrange'
 
     BoxLayout:
         orientation: 'vertical'
@@ -67,13 +64,11 @@
                 pos: 	self.pos
 
         MDToolbar:
-            playlist_name: '<Title not available>'
-            # if (root is None or root._file_path is None) else root._file_path.stem
             id: toolbar
             type: 'top'
             mode: 'center' #['free-end', 'free-center', 'end', 'center']
-            title: f'{root.toolbar_title}: {self.playlist_name}'
-            md_bg_color: get_color_from_hex(colors['Indigo']['A400'])
+            title: root.toolbar_title + ': ' + root.playlist_name
+            md_bg_color: get_color_from_hex(colors[f'{root.theme_primary_color}']['A400'])
             #background_palette: 'DeepPurple'
             #background_hue: 'A400'
             left_action_items: [['arrow-left', lambda x: toast(f"x")]]

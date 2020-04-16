@@ -53,19 +53,15 @@
         icon: 'playlist-music'
         text: str(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'].name)
         badge_text: '!'
-        theme_primary_color: 'Red'
-        theme_accent_color: 'Gray' #'Gray'
         on_release:
-            app.show_screen(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'], self.theme_primary_color, self.theme_accent_color)
+            app.show_screen(CU.tfs.dic['SCREEN_PLAYLISTS_CLASS'])
 
     TFNavigationDrawerIconButton:
         icon: 'music-note'
         text: str(CU.tfs.dic['SCREEN_SONGS_CLASS'].name)
         badge_text: '!'
-        theme_primary_color: 'Amber'
-        theme_accent_color: 'Gray' #'DeepOrange'
         on_release:
-            app.show_screen(CU.tfs.dic['SCREEN_SONGS_CLASS'], self.theme_primary_color, self.theme_accent_color)
+            app.show_screen(CU.tfs.dic['SCREEN_SONGS_CLASS'])
 
     TFNavigationDrawerDivider
 
@@ -75,18 +71,16 @@
     TFNavigationDrawerIconButton:
         icon: 'settings'
         text: str(CU.tfs.dic['SCREEN_SETTINGS_CLASS'].name)
-        theme_primary_color: 'LightGreen'
-        theme_accent_color: 'Green' #Lime
+        badge_text: '[WIP]'
         on_release:
-            app.show_screen(CU.tfs.dic['SCREEN_SETTINGS_CLASS'], self.theme_primary_color, self.theme_accent_color)
+            app.show_screen(CU.tfs.dic['SCREEN_SETTINGS_CLASS'])
 
     TFNavigationDrawerIconButton:
         icon: 'lifebuoy'
         text: str(CU.tfs.dic['SCREEN_HELP_CLASS'].name)
-        theme_primary_color: 'Pink'
-        theme_accent_color: 'DeepPurple'
+        badge_text: '[WIP]'
         on_release:
-            app.show_screen(CU.tfs.dic['SCREEN_HELP_CLASS'], self.theme_primary_color, self.theme_accent_color)
+            app.show_screen(CU.tfs.dic['SCREEN_HELP_CLASS'])
 
 
     TFNavigationDrawerIconButton:

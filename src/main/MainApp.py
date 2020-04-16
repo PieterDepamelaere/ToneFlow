@@ -155,8 +155,6 @@ class MainApp(MDApp):
     def set_theme_toolbar(self, primary_color, accent_color):
         if (primary_color is not None and accent_color is not None):
             primary_color, accent_color = str(primary_color), str(accent_color)
-            # Print test below to illustrate the number of times it is fired:
-            # print(f"Primary color: {primary_color}")
 
             if (primary_color in palette) and (accent_color in palette):
                 # Update the primary and accent colors
@@ -167,7 +165,7 @@ class MainApp(MDApp):
         """Set string title in MDToolbar for the whole application."""
         self._main_widget.ids.toolbar.title = title
 
-    def show_screen(self, screen_property, theme_primary_color, theme_accent_color):
+    def show_screen(self, screen_property):
         # Get a shorter alias for the screen_manager object:
         scr_mngr = self._main_widget.ids.scr_mngr
         # Extract class & class_name:
@@ -176,7 +174,7 @@ class MainApp(MDApp):
 
         # Update the title, theme:
         self.set_title_toolbar(screen_property.name)
-        self.set_theme_toolbar(theme_primary_color, theme_accent_color)
+        self.set_theme_toolbar(screen_class.theme_primary_color, screen_class.theme_accent_color)
 
         # If the scr_mngr doesn't have such screen yet, make one:
         if(not scr_mngr.has_screen(class_name)):

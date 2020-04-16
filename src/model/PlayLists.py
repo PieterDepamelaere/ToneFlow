@@ -23,8 +23,10 @@ from src.model.CommonUtils import CommonUtils as CU
 
 class PlayLists(Screen):
 
-    app = None
+    # app = None
     is_kv_loaded = False
+    theme_primary_color = 'Red'
+    theme_accent_color = 'Gray'
 
     def __init__(self, **kwargs):
         if (not PlayLists.is_kv_loaded):
@@ -34,7 +36,8 @@ class PlayLists(Screen):
 
         super(PlayLists, self).__init__(name=type(self).__name__, **kwargs)
 
-        PlayLists.app = App.get_running_app()
+        # PlayLists.app = App.get_running_app()
+
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
         self._context_menus = {"Add Playlist": lambda x: {self.show_dialog_add_playlist()},
                                "Clear Input": lambda x: {self.clear_search_pattern()},
@@ -281,7 +284,7 @@ class PlayLists(Screen):
 
     def show_modal_view_playlist(self, playlist_provider):
         if playlist_provider is not None:
-            playlist_provider.get_modal_view().open()
+            playlist_provider.get_modal_view().open(animation=True)
 
     def sort_list(self):
         """

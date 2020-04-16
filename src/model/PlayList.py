@@ -5,12 +5,13 @@ import aiofiles
 import pathlib as pl
 from datetime import datetime
 
+from kivy.app import App
 from kivy.factory import Factory
 from kivy.lang import Builder
 from kivy.utils import get_hex_from_color
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.screenmanager import Screen
-from kivy.properties import ObservableList, ListProperty
+from kivy.properties import ObservableList, ListProperty, StringProperty
 from kivymd.uix.useranimationcard import MDUserAnimationCard
 from kivy.uix.modalview import ModalView
 from kivymd.uix.label import MDLabel
@@ -55,15 +56,15 @@ class PlayListProvider:
 
 
 class PlayList(ModalView):
-
+    app = None
     is_kv_loaded = False
 
     def __init__(self, file_path, **kwargs):
         if (not PlayList.is_kv_loaded):
             # Make sure it's only loaded once:
             Builder.load_file(str(curr_file.parents[1] / "view" / (pl.Path(PlayList.__name__).with_suffix(".kv")).name))
+            PlayList.app = App.get_running_app()
             PlayList.is_kv_loaded = True
-        # super(PlayList, self).__init__(name=type(self).__name__, **kwargs)
         super(PlayList, self).__init__(**kwargs)
 
         # Initializing properties of ModalView:
@@ -74,10 +75,12 @@ class PlayList(ModalView):
         self.auto_dismiss = True
         # can be argument in ModalView Constructor border = (16, 16, 16, 16)
 
-        self._file_path = file_path
-
-        # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
-        self._list = list()  # ObservableList(None, object, list())
+        # Binding events that come with the ModalView ('on_pre_open', 'on_open', 'on_pre_dismiss', 'on_dismiss') to
+        # their respective static methods:
+        self.bind(on_pre_open=PlayList.on_pre_open_callback)
+        self.bind(on_open=PlayList.on_open_callback)
+        self.bind(on_pre_dismiss=PlayList.on_pre_dismiss_callback)
+        self.bind(on_dismiss=PlayList.on_dismiss_callback)
 
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
         self._context_menus = {"Clear Input": lambda x: self.clear_search_pattern(),
@@ -85,6 +88,14 @@ class PlayList(ModalView):
                                "Help": lambda x: toast("TODO: WIP"),
                                "Save Playlist": lambda x: toast("TODO: WIP")}
         # TODO: Implement the other context menus
+
+        # Initializing custom properties:
+        self._block_close = False
+        self._file_path = file_path
+
+        # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
+        self._list = list()  # ObservableList(None, object, list())
+
 
     def get_list(self):
         return self._list
@@ -96,8 +107,19 @@ class PlayList(ModalView):
     def get_context_menus(self):
         return self._context_menus
 
+    def get_file_path(self):
+        return self._file_path
+
+    def get_block_close(self):
+        return self._block_close
+
+    def set_block_close(self, block_close):
+        self._block_close = block_close
+
     list = property(get_list, set_list)
     context_menus = property(get_context_menus)
+    file_path = property(get_file_path)
+    block_close = property(get_block_close, set_block_close)
 
     def load_from_json(self):
         # TODO
@@ -144,11 +166,7 @@ class PlayList(ModalView):
             toast(f"Name cannot be empty nor contain{os.linesep}non-alphanumeric characters except for \"-_\")")
         await asynckivy.sleep(0)
 
-    def can_modal_view_close(self):
-        stay_open = False
 
-        toast(f"{self.file_path}")
-        return stay_open
 
     # def rename_lineup_entry(self, lineup_entry_rowview, new_name_lineup_entry):
     #     """
@@ -332,13 +350,6 @@ class PlayList(ModalView):
                                  text_button_cancel="Cancel",
                                  callback=lambda *args: {self.remove_lineup_entry(lineup_entry_rowview, *args), self.refresh_list()})
 
-    # def show_modal_view_lineup_entry(self, lineup_entry):
-    #     # When auto_dismiss==True, then you can escape the modal view with [ESC]
-    #     modal_view = ModalView(size_hint=(1, 1), auto_dismiss=True)
-    #     modal_view.add_widget(Label(text=f"{lineup_entry.file_path.stem}"))
-    #     modal_view.open()
-    # #     modal_view.dismiss(animation=True)
-
     def sort_list(self):
         """
         Will sort the internal list in alphabetic order.
@@ -347,3 +358,52 @@ class PlayList(ModalView):
         self.set_list(sorted(self._list, key=lambda lineup_entry: str(lineup_entry.file_path.stem)))
         self.filter_list()
         toast("Playlists sorted")
+
+    @staticmethod
+    def on_pre_open_callback(instance):
+        """
+        Callback fired just before the PlayList ModalView is opened
+        :param instance:
+        :return:
+        """
+        # KivyProperties must made at class level/kv-rule not within __init__()-method. On pre open the title is updated:
+        instance.playlist_name = '<Title not available>' if instance.file_path is None else instance.file_path.stem
+
+        PlayList.app.set_theme_toolbar(instance.theme_primary_color, instance.theme_accent_color)
+        PlayList.app.context_menus = instance.context_menus
+
+        # Override needed overscroll to refresh the screen to the bare minimum:
+        # refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)
+
+
+    @staticmethod
+    def on_open_callback(instance):
+        """
+        Callback fired after the PlayList ModalView is opened
+        :param instance:
+        :return:
+        """
+        # self.refresh_list()
+        toast(f"{type(instance).__name__}")
+
+    @staticmethod
+    def on_pre_dismiss_callback(instance):
+        """
+        Callback fired on pre-dismissal of the PlayList ModalView
+        :param instance: the instance of the ModalView itself, a non-static implementation would have passed 'self'
+        :return:
+        """
+        # Warn display popup not to leave with unsaved progress:
+        pass
+
+    @staticmethod
+    def on_dismiss_callback(instance):
+        """
+        Callback fired on dismissal of the PlayList ModalView
+        :param instance: the instance of the ModalView itself, a non-static implementation would have passed 'self'
+        :return: True prevents the modal view from closing
+        """
+        if instance.block_close:
+            toast(f"Blocked closing")
+        return instance.block_close
+
