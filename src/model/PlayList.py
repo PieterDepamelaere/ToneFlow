@@ -58,6 +58,8 @@ class PlayListProvider:
 class PlayList(ModalView):
     app = None
     is_kv_loaded = False
+    theme_primary_color = 'Indigo'
+    theme_accent_color = 'Gray'
 
     def __init__(self, file_path, **kwargs):
         if (not PlayList.is_kv_loaded):
@@ -92,6 +94,9 @@ class PlayList(ModalView):
         # Initializing custom properties:
         self._block_close = False
         self._file_path = file_path
+
+        self._former_primary_palette, self._former_accent_palette = PlayList.app.theme_cls.primary_palette, PlayList.app.theme_cls.accent_palette
+        self._former_context_menus = PlayList.app.context_menus
 
         # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
         self._list = list()  # ObservableList(None, object, list())
@@ -288,7 +293,7 @@ class PlayList(ModalView):
 
     async def async_refresh_list(self):
         """
-        Scan the workspace-Playlists folder for lineup_entrys.
+        Scan the workspace-Playlists folder for lineup_entries.
         :return:
         """
         # Depending on the amount of time it takes to run through the refresh, the spinner will be more/longer visible:
@@ -302,6 +307,14 @@ class PlayList(ModalView):
         # TODO: Make overscroll easier than it is now, in fact scrollbar should be always visible
         await self.async_filter_list()
         self.ids.refresh_layout.refresh_done()
+
+    def restore_former_theme_context_menus(self):
+        """
+        Restoring the former theme_cls and context_menus, so the modal-calling-screen gets its proper look/functionality
+        :return:
+        """
+        PlayList.app.set_theme_toolbar(self._former_primary_palette, self._former_accent_palette)
+        PlayList.app.context_menus = self._former_context_menus
 
     def show_dialog_add_lineup_entry(self):
         """
@@ -369,8 +382,8 @@ class PlayList(ModalView):
         # KivyProperties must made at class level/kv-rule not within __init__()-method. On pre open the title is updated:
         instance.playlist_name = '<Title not available>' if instance.file_path is None else instance.file_path.stem
 
-        PlayList.app.set_theme_toolbar(instance.theme_primary_color, instance.theme_accent_color)
-        PlayList.app.context_menus = instance.context_menus
+        PlayList.app.set_theme_toolbar(PlayList.theme_primary_color, PlayList.theme_accent_color)
+        PlayList.app.convert_dict_to_context_menus(instance.context_menus)
 
         # Override needed overscroll to refresh the screen to the bare minimum:
         # refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)
@@ -405,5 +418,8 @@ class PlayList(ModalView):
         """
         if instance.block_close:
             toast(f"Blocked closing")
+        else:
+            instance.restore_former_theme_context_menus()
+
         return instance.block_close
 

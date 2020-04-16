@@ -48,8 +48,6 @@
     name: CU.tfs.dic['SCREEN_PLAYLIST_CLASS'].value.__name__
     toolbar_title: CU.tfs.dic['SCREEN_PLAYLIST_CLASS'].name
     playlist_name: '<Title not available>'
-    theme_primary_color: 'Indigo'
-    theme_accent_color: 'Gray' #'DeepOrange'
 
     BoxLayout:
         orientation: 'vertical'
@@ -66,12 +64,10 @@
         MDToolbar:
             id: toolbar
             type: 'top'
-            mode: 'center' #['free-end', 'free-center', 'end', 'center']
+            mode: 'center' # options ['free-end', 'free-center', 'end', 'center']
             title: root.toolbar_title + ': ' + root.playlist_name
             md_bg_color: get_color_from_hex(colors[f'{root.theme_primary_color}']['A400'])
-            #background_palette: 'DeepPurple'
-            #background_hue: 'A400'
-            left_action_items: [['arrow-left', lambda x: toast(f"x")]]
+            left_action_items: [['arrow-left', lambda x: root.dismiss(animation=True)]]
             right_action_items: [['dots-vertical', lambda x: app.open_context_menu(x)]]
 
         BoxLayout:

@@ -64,6 +64,11 @@ class MainApp(MDApp):
         # To prevent the window from closing, when 'X' is pressed on the windows itself:
         Window.bind(on_request_close=self.on_stop)
 
+        # TODO: Test how fullscreen must be used decently:
+        # Window.fullscreen = 'auto' '0' '1' 'auto' fake' are the possibilities: https://kivy.org/doc/stable/api-kivy.config.html#module-kivy.config
+        Window.exit_on_escape = 1
+
+
         # Create ToneFlow-settings object and corresponding settings:
         kv_file_main_widget = str(curr_file.parents[1] / "view" / (curr_file.with_suffix(".kv")).name)
         TFSettings(kv_file_main_widget)
@@ -96,20 +101,8 @@ class MainApp(MDApp):
     def get_context_menus(self):
         return self._context_menus
 
-    def set_context_menus(self, items):
-        # Depending on the screen other context oriented options should appear under the three vertical dots
-        if (items is not None):
-            self._context_menus = [
-                {
-                    "viewclass": "MDMenuItem",
-                    "text": f"{key}",
-                    "text_color": get_contrast_text_color(self.theme_cls.primary_color, True),
-                    "callback": items[key]
-                }
-                for key in items
-            ]
-        else:
-            self._context_menus = None
+    def set_context_menus(self, context_menus):
+        self._context_menus = context_menus
 
     def get_main_widget(self):
         return self._main_widget
@@ -119,6 +112,21 @@ class MainApp(MDApp):
 
     main_widget = property(get_main_widget, set_main_widget)
     context_menus = property(get_context_menus, set_context_menus)
+
+    def convert_dict_to_context_menus(self, items):
+        # Depending on the screen other context oriented options should appear under the three vertical dots
+        if (items is not None):
+            self.context_menus = [
+                {
+                    "viewclass": "MDMenuItem",
+                    "text": f"{key}",
+                    "text_color": get_contrast_text_color(self.theme_cls.primary_color, True),
+                    "callback": items[key]
+                }
+                for key in items
+            ]
+        else:
+            self.context_menus = None
 
     def on_pause(self):
         return True
@@ -140,7 +148,10 @@ class MainApp(MDApp):
                                callback=lambda text_button, instance: {CU.tfs.dic['tf_workspace_path'].set_value(instance.text_field.text),
                                                                                toast(str(CU.tfs.dic['tf_workspace_path'].value))})
 
-    def on_stop(self, *args):
+    def on_stop(self, *args, **kwargs):
+        # Important: *args and **kwargs can both be passed to a method, *args takes care of all unexpected
+        # (variable amount) of positional arguments and **kwargs takes care of all unexpected (variable amount)
+        # of named arguments.
         CU.show_ok_cancel_dialog(title="Confirmation dialog", text=f"Are you sure you want to [color={get_hex_from_color(self.theme_cls.primary_color)}][b]quit[/b][/color] {CU.tfs.dic['APP_NAME'].value}?", size_hint=(0.5, 0.3), text_button_ok="Yes", text_button_cancel="No", callback=lambda *args: self.decide_stop_or_not(*args))
         return True
 
@@ -181,7 +192,7 @@ class MainApp(MDApp):
             scr_mngr.add_widget(self.create_uninstantiated_screen(screen_class))
 
         # Update the context menu's and finally show toast when ready:
-        self.context_menus = scr_mngr.get_screen(class_name).context_menus
+        self.convert_dict_to_context_menus(scr_mngr.get_screen(class_name).context_menus)
         scr_mngr.current = class_name
         toast(class_name)
 
