@@ -63,10 +63,19 @@ class MainApp(MDApp):
         self._context_menus = None
         # To prevent the window from closing, when 'X' is pressed on the windows itself:
         Window.bind(on_request_close=self.on_stop)
-
-        # TODO: Test how fullscreen must be used decently:
-        # Window.fullscreen = 'auto' '0' '1' 'auto' fake' are the possibilities: https://kivy.org/doc/stable/api-kivy.config.html#module-kivy.config
         Window.exit_on_escape = 1
+
+        # TODO: Test how fullscreen must be used decently: fullscreen option has been deprecated, use Window.borderless or the borderless Config option instead
+
+        #Window.fullscreen = 'fake' # False, True, 'auto', 'fake' are the possibilities: https://kivy.org/doc/stable/api-kivy.config.html#module-kivy.config he ‘fake’ option has been deprecated, use the borderless property instead.
+        Window.maximize()
+
+        # Linux way to kill fullscreen app when it doesn't want to close:
+        # Ctrl+Alt+F1 > tty1 client (login, remember that numeric extension of keyboard does not work here) next try to
+        # {ps aux | less} or {top}, then you will see the list of processes currently active, find the python process
+        # {kill -9 27890} (this command sends SIGKILL next return to cinnamon GUI with {Ctrl+Alt+F7}
+
+
 
 
         # Create ToneFlow-settings object and corresponding settings:

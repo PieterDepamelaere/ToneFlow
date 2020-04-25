@@ -12,6 +12,8 @@ from kivy.graphics import Rectangle
 # TODO intersting link multithreading: https://github.com/kivy/kivy/wiki/Working-with-Python-threads-inside-a-Kivy-application
 
 main_widget_kv = """
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+
 FloatLayout:
     Background:
         id: background
@@ -20,6 +22,38 @@ FloatLayout:
                 #size: self.size
                 #pos: self.pos
                 #source: "sky.png"
+            
+            Color:
+                rgba: get_color_from_hex('#111111')
+            Rectangle:
+                size: 50, self.height
+                pos: 100, 0
+                
+            Color:
+                rgba: get_color_from_hex('#111111')
+            Rectangle:
+                size: 50, self.height
+                pos: 200, 0
+                
+            Color:
+                rgba: get_color_from_hex('#111111')
+            Rectangle:
+                size: 50, self.height
+                pos: 300, 0
+                
+            Color:
+                rgba: get_color_from_hex('#111111')
+            Rectangle:
+                size: 400, self.height
+                pos: 0, 0                                                
+            
+            
+            #Rectangle:
+                #size: self.width, 96
+                #pos: self.pos[0], self.pos[1]
+                #"texture: self.floor_texture
+        
+        canvas:
             Color:
                 rgba: 1, 1, 1, 1
             Rectangle:
@@ -39,11 +73,6 @@ FloatLayout:
                 rgba: 1, .3, .8, .5
             Line:
                 points: 0,0,110,150 #zip(self.data.x, self.data.y)
-            
-            #Rectangle:
-                #size: self.width, 96
-                #pos: self.pos[0], self.pos[1]
-                #"texture: self.floor_texture
                 
         
     Label:

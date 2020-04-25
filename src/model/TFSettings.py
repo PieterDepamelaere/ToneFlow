@@ -124,8 +124,6 @@ class TFSettings(Screen):
         prep_midi_dir.mkdir(exist_ok=True, parents=True)
         raw_midi_dir.mkdir(exist_ok=True, parents=True)
 
-        # TODO: Load workspace (playlists, songcollection)
-
         # Finally return the value to set in the setter (Because there's a chance that it got modified along the way):
         return pl.Path(tf_workspace_path)
 
