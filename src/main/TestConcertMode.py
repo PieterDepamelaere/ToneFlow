@@ -14,88 +14,91 @@ from kivy.graphics import Rectangle
 main_widget_kv = """
 #:import get_color_from_hex kivy.utils.get_color_from_hex
 
-FloatLayout:
+#FloatLayout:
+BoxLayout:
+    orientation: 'vertical'    
     Background:
         id: background
-        canvas.before:
-            #Rectangle:
-                #size: self.size
-                #pos: self.pos
-                #source: "sky.png"
-            
-            Color:
-                rgba: get_color_from_hex('#111111')
-            Rectangle:
-                size: 50, self.height
-                pos: 100, 0
-                
-            Color:
-                rgba: get_color_from_hex('#111111')
-            Rectangle:
-                size: 50, self.height
-                pos: 200, 0
-                
-            Color:
-                rgba: get_color_from_hex('#111111')
-            Rectangle:
-                size: 50, self.height
-                pos: 300, 0
-                
-            Color:
-                rgba: get_color_from_hex('#111111')
-            Rectangle:
-                size: 400, self.height
-                pos: 0, 0                                                
-            
-            
-            #Rectangle:
-                #size: self.width, 96
-                #pos: self.pos[0], self.pos[1]
-                #"texture: self.floor_texture
         
-        canvas:
-            Color:
-                rgba: 1, 1, 1, 1
-            Rectangle:
-                size: self.width, 10
-                pos: self.pos[0], self.pos[1] + self.height - 138
-                #texture: self.cloud_texture
-                
-            Color:
-                rgba: 1, 1, 0, 1
-            RoundedRectangle:
-                size: 50, 160
-                pos: self.pos[0]+60, self.pos[1] + 20
-                segments: 15
-                radius: [15]
+        BoxLayout:
+            orientation: 'vertical'
             
-            Color:
-                rgba: 1, .3, .8, .5
-            Line:
-                points: 0,0,110,150 #zip(self.data.x, self.data.y)
+            Splitter:
+                sizable_from: 'bottom'
                 
-        
-    Label:
-        id: score
-        size_hint_y: None
-        height: 96
-        text: "0"
-        font_size: 40
-    Button:
-        text: "Start game"
-        #background_normal: "transparent.png"
-        #background_down: "transparent.png"
-        id: start_button
-        on_release:
-            self.disabled = True
-            self.opacity = 0
-            app.start_game()
-    #Bird:
-    #    source: "bird1.png"
-     #   size_hint: None, None
-      #  size: 46, 34
-       # pos: 20, (root.height - 96) / 2.0
-        #id: bird
+                BoxLayout:
+                    orientation: 'vertical'  
+            
+                    canvas.before:
+                        #Rectangle:
+                            #size: self.size
+                            #pos: self.pos
+                            #source: "sky.png"
+                        
+                        Color:
+                            rgba: get_color_from_hex('#111111')
+                        Rectangle:
+                            size: 50, self.height
+                            pos: 0, 0
+                            
+                        Color:
+                            rgba: get_color_from_hex('#111111')
+                        Rectangle:
+                            size: 50, self.height
+                            pos: 100, 0
+                        
+                        #Rectangle:
+                            #size: self.width, 96
+                            #pos: self.pos[0], self.pos[1]
+                            #"texture: self.floor_texture
+                    
+                    canvas:
+                            
+                        Color:
+                            rgba: 1, 1, 0, 1
+                        RoundedRectangle:
+                            size: 50, 160
+                            pos: self.pos[0]+0, self.pos[1] -350
+                            segments: 15
+                            radius: [15]
+                    
+                    canvas.after:
+                        Color:
+                            rgba: 1, 1, 1, 0.7
+                        Rectangle:
+                            size: self.width, 10.0
+                            pos: 0,self.height * 0.20  #self.pos[0], self.pos[1] + self.height - 138
+                            #texture: self.cloud_texture
+                    
+                        Color:
+                            rgba: 0, 0, 0, 1.0
+                        Line:
+                            width: 1
+                            points: 0,self.height * 0.20,self.width,self.height * 0.20 #zip(self.data.x, self.data.y)
+                        
+
+            
+            #Label:
+             #   id: score
+             #   size_hint_y: None
+             #   height: 96
+             #   text: "0"
+             #   font_size: 40
+            Button:
+                text: "Start game"
+                #background_normal: "transparent.png"
+                #background_down: "transparent.png"
+                id: start_button
+                on_release:
+                    self.disabled = True
+                    self.opacity = 0
+                    app.start_game()
+            #Bird:
+            #    source: "bird1.png"
+             #   size_hint: None, None
+              #  size: 46, 34
+               # pos: 20, (root.height - 96) / 2.0
+                #id: bird
 """
 
 class Background(Widget):
