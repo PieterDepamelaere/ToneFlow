@@ -104,7 +104,7 @@ BoxLayout:
     Splitter:
         sizable_from: 'bottom'
         max_size: root.height
-        min_size: root.height*0.60
+        min_size: 0 #root.height*0.60
         strip_size: 5
         keep_within_parent: True
         rescale_with_parent: True

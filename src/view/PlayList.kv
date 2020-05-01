@@ -7,8 +7,11 @@
 #:import toast kivymd.toast.toast
 #:import ILeftBodyTouch kivymd.uix.list.ILeftBodyTouch
 #:import MDIconButton kivymd.uix.button.MDIconButton
+#:import MDRoundFlatIconButton kivymd.uix.button.MDRoundFlatIconButton
+#:import MDFloatingActionButtonSpeedDial kivymd.uix.button.MDFloatingActionButtonSpeedDial
 #:import text_colors kivymd.color_definitions.text_colors
 #:import colors kivymd.color_definitions.colors
+
 
 <LineupEntryRowView@OneLineIconListItem>:
     icon: 'music-note' # One can code an if-statement after this
@@ -27,6 +30,11 @@
         MDIconButton:
             icon: root.icon
             on_release: root.list_obj.show_modal_view_playlist(root.playlist_obj)
+
+        MDRoundFlatIconButton:
+            icon: "music-note"
+            text: "START CONCERT FROM HERE"
+            width: dp(250)
 
         Widget:
 
@@ -84,22 +92,26 @@
                 MDList:
                     id: ml
 
-                    MDTextField:
-                        id: search_field
-                        hint_text: 'This is a test'
+                    LineupEntryRowView:
+                        icon: 'image'
+                        text: u''
 
-                    #OneLineIconListItem:
-                    #    text: "Song 1"
-                    #    IconLeftSampleWidget:
-                    #        id: li_icon_1
-                    #        icon: 'music-note'
+#                    MDTextField:
+#                        id: search_field
+#                        hint_text: 'This is a test'
 
-                    #TwoLineIconListItem:
-                    #    text: "Image"
-                    #    secondary_text: "Image Entry"
-                    #    IconLeftSampleWidget:
-                    #        id: li_icon_2
-                    #        icon: 'image'
+#                    OneLineIconListItem:
+#                        text: "Song 1"
+#                        IconLeftSampleWidget:
+#                            id: li_icon_1
+#                            icon: 'music-note'
+#
+#                    TwoLineIconListItem:
+#                        text: "Image"
+#                        secondary_text: "Image Entry"
+#                        IconLeftSampleWidget:
+#                            id: li_icon_2
+#                            icon: 'image'
 
     #            MDIconButton:
     #                id: magnifier_button
@@ -147,12 +159,26 @@
     #                    height: self.minimum_height
     #                    orientation: 'vertical'
 
-    #    MDFloatingActionButton:
-    #        id: floating_action_button
-    #        icon: 'plus'
-    #        elevation_normal: 8
-    #        x: Window.width - self.width - dp(25)
-    #        y: dp(25)
-    #        md_bg_color: app.theme_cls.primary_color
-    #        specific_text_color: get_color_from_hex(text_colors[app.theme_cls.primary_palette][CU.tfs.dic['THEME_BACKGROUND_HUE'].value])
-    #        on_release: root.show_dialog_add_playlist()
+
+        MDFloatingActionButtonSpeedDial:
+            id: floating_action_button
+            icon: 'plus'
+            elevation_normal: 8
+            x: Window.width - self.width - dp(20) #Position is fixed at 20, 20 from the bottom-right corner, even this code does not work to reposition it
+            y: dp(20) #Position is fixed at 20, 20 from the bottom-right corner, even this code does not work to reposition it
+
+            data: root.add_options
+            #bg_hint_color: (1, 0, 0, 1) #Background color of the hint texts next to the stacked buttons, same as button by default
+            label_text_color: get_color_from_hex(text_colors[app.theme_cls.primary_palette][CU.tfs.dic['THEME_BACKGROUND_HUE'].value]) #Foreground color of the hint text next to the stacked buttons
+
+            #bg_color_root_button: #Background color of the root button, by default, it adopts the theme
+            #bg_color_stack_button: #Background color of the stacked buttons, by default, it adopts the theme
+
+            color_icon_root_button: get_color_from_hex(text_colors[app.theme_cls.primary_palette][CU.tfs.dic['THEME_BACKGROUND_HUE'].value]) #Front color of the root button, override it to white
+            color_icon_stack_button: get_color_from_hex(text_colors[app.theme_cls.primary_palette][CU.tfs.dic['THEME_BACKGROUND_HUE'].value]) #Front color of the stack buttons, override it to white
+
+            rotation_root_button: False
+            hint_animation: True
+            right_pad: True #To allow the stacked buttons to scale a bit when hovered over
+
+            callback: lambda x: toast(f'je suis une fleur & you pressed {x}')

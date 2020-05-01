@@ -61,6 +61,12 @@ class PlayList(ModalView):
     theme_primary_color = 'Indigo'
     theme_accent_color = 'Gray'
 
+    add_options = {
+        "music-note-plus": "Add song",
+        "image-plus": "Add image",
+        "video-plus": "Add movie"
+    }
+
     def __init__(self, file_path, **kwargs):
         if (not PlayList.is_kv_loaded):
             # Make sure it's only loaded once:
