@@ -1,250 +1,323 @@
+import kivy
+
+kivy.require('1.11.1')
+
 from kivy.app import App
-from kivy.uix.widget import Widget
-from kivy.properties import ObjectProperty
-from kivy.uix.image import Image
-from kivy.core.window import Window
-from kivy.clock import Clock
 from kivy.lang import Builder
-from kivy.graphics import Rectangle
+from kivy.graphics import *
 
-#from pipe import Pipe
-
-# TODO intersting link multithreading: https://github.com/kivy/kivy/wiki/Working-with-Python-threads-inside-a-Kivy-application
-
-main_widget_kv = """
+root = Builder.load_string('''
 #:import get_color_from_hex kivy.utils.get_color_from_hex
 
-#FloatLayout:
+#<SplitterStrip>:
+#    border: self.parent.border if self.parent else (3, 3, 3, 3)
+#    horizontal: '_h' if self.parent and self.parent.sizable_from[0] in  ('t', 'b') else ''
+#    background_normal: '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/Documentation/Logos/Blank.png'
+#    background_down: '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/Documentation/Logos/Blank.png'
+
+<SplitterStrip>:
+    border: (1, 1, 1, 1) #self.parent.border if self.parent else (3, 3, 3, 3)
+    horizontal: '_h' if self.parent and self.parent.sizable_from[0] in  ('t', 'b') else ''
+
+    #Playing around with background properties does not work, so it gets overlayed with stretched white image.
+    #background_normal: '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/ToneFlow/img/Blank.png' #'atlas://data/images/defaulttheme/splitter{}{}'.format('_disabled' if self.disabled else '', self.horizontal)
+    #background_down: '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/ToneFlow/img/Blank.png' #'atlas://data/images/defaulttheme/splitter_down{}{}'.format('_disabled' if self.disabled else '', self.horizontal)
+    Image:
+        pos: root.pos
+        size: root.size
+        allow_stretch: True
+        keep_ratio: False
+        source: '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/ToneFlow/img/WhiteSquare.png' #'atlas://data/images/defaulttheme/splitter_grip' + root.horizontal
+
+
 BoxLayout:
-    orientation: 'vertical'    
-    Background:
-        id: background
-        
+
+    id: background
+    orientation: 'vertical'
+
+    canvas.before:
+        Color:
+            rgba: get_color_from_hex('#111111FF')
+        Rectangle:
+            size: 60, self.height
+            pos: self.pos[0], self.pos[1]
+
+        Rectangle:
+            size: 60, self.height
+            pos: self.pos[0]+90, self.pos[1]
+
+        Rectangle:
+            size: 120, self.height
+            pos: self.pos[0]+180, self.pos[1]
+
+        Rectangle:
+            size: 60, self.height
+            pos: self.pos[0]+330, self.pos[1]
+
+        Rectangle:
+            size: 60, self.height
+            pos: self.pos[0]+420, self.pos[1]
+
+        Rectangle:
+            size: 60, self.height
+            pos: self.pos[0]+510, self.pos[1]
+
+
+    Splitter:
+        sizable_from: 'bottom'
+        max_size: root.height
+        min_size: 0 #root.height*0.60
+        strip_size: 5
+        keep_within_parent: True
+        rescale_with_parent: True
+        #border: (4, 4, 4, 4)
+
         BoxLayout:
             orientation: 'vertical'
-            
-            Splitter:
-                sizable_from: 'bottom'
-                
-                BoxLayout:
-                    orientation: 'vertical'  
-            
-                    canvas.before:
-                        #Rectangle:
-                            #size: self.size
-                            #pos: self.pos
-                            #source: "sky.png"
-                        
-                        Color:
-                            rgba: get_color_from_hex('#111111')
-                        Rectangle:
-                            size: 50, self.height
-                            pos: 0, 0
-                            
-                        Color:
-                            rgba: get_color_from_hex('#111111')
-                        Rectangle:
-                            size: 50, self.height
-                            pos: 100, 0
-                        
-                        #Rectangle:
-                            #size: self.width, 96
-                            #pos: self.pos[0], self.pos[1]
-                            #"texture: self.floor_texture
-                    
-                    canvas:
-                            
-                        Color:
-                            rgba: 1, 1, 0, 1
-                        RoundedRectangle:
-                            size: 50, 160
-                            pos: self.pos[0]+0, self.pos[1] -350
-                            segments: 15
-                            radius: [15]
-                    
-                    canvas.after:
-                        Color:
-                            rgba: 1, 1, 1, 0.7
-                        Rectangle:
-                            size: self.width, 10.0
-                            pos: 0,self.height * 0.20  #self.pos[0], self.pos[1] + self.height - 138
-                            #texture: self.cloud_texture
-                    
-                        Color:
-                            rgba: 0, 0, 0, 1.0
-                        Line:
-                            width: 1
-                            points: 0,self.height * 0.20,self.width,self.height * 0.20 #zip(self.data.x, self.data.y)
-                        
 
-            
+            Label:
+                text: 'Projected score'
+
+                canvas.before:
+                    StencilPush:
+                    Rectangle:
+                        pos: self.pos
+                        size: self.width, self.height
+                    StencilUse:
+                    Color:
+                        rgba: 1, 1, 1, 1.0
+                    Rectangle:
+                        size: self.width, 10.0
+                        pos: 0,self.height * 0.20  #self.pos[0], self.pos[1] + self.height - 142
+                        #texture: self.cloud_texture
+
+                canvas:           
+
+                    #C
+                    Color:
+                        rgba: get_color_from_hex('#FC0020FF')
+                    RoundedRectangle:
+                        size: 60, 160
+                        pos: self.pos[0], self.pos[1] -50
+                        segments: 15
+                        radius: [15]
+
+                    #C#  
+                    Color:
+                        rgba: get_color_from_hex('#FA6D1EFF')
+                    RoundedRectangle:
+                        size: 30, 20
+                        pos: self.pos[0]+60, self.pos[1] +50
+                        segments: 15
+                        radius: [15]
+
+                    #D
+                    Color:
+                        rgba: get_color_from_hex('#F7930AFF')
+                    RoundedRectangle:
+                        size: 60, 40
+                        pos: self.pos[0]+90, self.pos[1]
+                        segments: 15
+                        radius: [15]
+
+                    #D#  
+                    Color:
+                        rgba: get_color_from_hex('#FFC000FF')
+                    RoundedRectangle:
+                        size: 30, 120
+                        pos: self.pos[0]+150, self.pos[1] +175
+                        segments: 15
+                        radius: [15]
+
+                    #E
+                    Color:
+                        rgba: get_color_from_hex('#FFFE03FF')
+                    RoundedRectangle:
+                        size: 60, 20
+                        pos: self.pos[0]+180, self.pos[1] -75
+                        segments: 15
+                        radius: [15]
+
+                    #F
+                    Color:
+                        rgba: get_color_from_hex('#93D250FF')
+                    RoundedRectangle:
+                        size: 60, 30
+                        pos: self.pos[0]+240, self.pos[1] +0
+                        segments: 15
+                        radius: [15]
+
+                    #F#  
+                    Color:
+                        rgba: get_color_from_hex('#00AF50FF')
+                    RoundedRectangle:
+                        size: 30, 40
+                        pos: self.pos[0]+300, self.pos[1] +275
+                        segments: 15
+                        radius: [15]
+
+                    #G
+                    Color:
+                        rgba: get_color_from_hex('#10A192FF')
+                    RoundedRectangle:
+                        size: 60, 160
+                        pos: self.pos[0]+330, self.pos[1] -25
+                        segments: 15
+                        radius: [15]
+
+                    #G#  
+                    Color:
+                        rgba: get_color_from_hex('#0329E4FF')
+                    RoundedRectangle:
+                        size: 30, 40
+                        pos: self.pos[0]+390, self.pos[1] +75
+                        segments: 15
+                        radius: [15]
+
+                    #A
+                    Color:
+                        rgba: get_color_from_hex('#7900F1FF')
+                    RoundedRectangle:
+                        size: 60, 120
+                        pos: self.pos[0]+420, self.pos[1] +125
+                        segments: 15
+                        radius: [15]
+
+                    #A#  
+                    Color:
+                        rgba: get_color_from_hex('#AF5DFFFF')
+                    RoundedRectangle:
+                        size: 30, 160
+                        pos: self.pos[0]+480, self.pos[1] +50
+                        segments: 15
+                        radius: [15]
+
+                    #B
+                    Color:
+                        rgba: get_color_from_hex('#CB00CBFF')
+                    RoundedRectangle:
+                        size: 60, 20
+                        pos: self.pos[0]+510, self.pos[1]
+                        segments: 15
+                        radius: [15]                        
+
+
+                canvas.after:                
+                    Color:
+                        rgba: 0, 0, 0, 1.0
+                    Line:
+                        width: 1
+                        points: 0,self.height * 0.20 +5,self.width,self.height * 0.20 +5 #zip(self.data.x, self.data.y)
+
+                    StencilUnUse:
+                    StencilPop:
             #Label:
-             #   id: score
-             #   size_hint_y: None
-             #   height: 96
-             #   text: "0"
-             #   font_size: 40
-            Button:
-                text: "Start game"
-                #background_normal: "transparent.png"
-                #background_down: "transparent.png"
-                id: start_button
-                on_release:
-                    self.disabled = True
-                    self.opacity = 0
-                    app.start_game()
-            #Bird:
-            #    source: "bird1.png"
-             #   size_hint: None, None
-              #  size: 46, 34
-               # pos: 20, (root.height - 96) / 2.0
-                #id: bird
-"""
+                #text: 'something2'
 
-class Background(Widget):
-    cloud_texture = ObjectProperty(None)
-    floor_texture = ObjectProperty(None)
+    Label:
+        text: 'Volume area'
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        canvas:
 
-        # # Create textures
-        # self.cloud_texture = Image(source="cloud.png").texture
-        # self.cloud_texture.wrap = 'repeat'
-        # self.cloud_texture.uvsize = (Window.width / self.cloud_texture.width, -1)
-        #
-        # self.floor_texture = Image(source="floor.png").texture
-        # self.floor_texture.wrap = 'repeat'
-        # self.floor_texture.uvsize = (Window.width / self.floor_texture.width, -1)
+            #C
+            Color:
+                rgba: get_color_from_hex('#FC0020FF')
+            Rectangle:
+                size: 60, 0.90 * self.height
+                pos: self.pos[0], self.pos[1]
 
-    # def on_size(self, *args):
-        # self.cloud_texture.uvsize = (self.width / self.cloud_texture.width, -1)
-        # self.floor_texture.uvsize = (self.width / self.floor_texture.width, -1)
+            #C#  
+            Color:
+                rgba: get_color_from_hex('#FA6D1EFF')
+            Rectangle:
+                size: 30, 0.05 * self.height
+                pos: self.pos[0]+60, self.pos[1]
 
-    # def scroll_textures(self, time_passed):
-        # Update the uvpos of the texture
-        # self.cloud_texture.uvpos = ( (self.cloud_texture.uvpos[0] + time_passed/2.0)%Window.width , self.cloud_texture.uvpos[1])
-        # self.floor_texture.uvpos = ( (self.floor_texture.uvpos[0] + time_passed)%Window.width, self.floor_texture.uvpos[1])
+            #D
+            Color:
+                rgba: get_color_from_hex('#F7930AFF')
+            Rectangle:
+                size: 60, 0.15 * self.height
+                pos: self.pos[0]+90, self.pos[1]
 
-        # # Redraw the texture
-        # texture = self.property('cloud_texture')
-        # texture.dispatch(self)
-        #
-        # texture = self.property('floor_texture')
-        # texture.dispatch(self)
+            #D#  
+            Color:
+                rgba: get_color_from_hex('#FFC000FF')
+            Rectangle:
+                size: 30, 0.23 * self.height
+                pos: self.pos[0]+150, self.pos[1]
 
-from random import randint
-from kivy.properties import NumericProperty
+            #E
+            Color:
+                rgba: get_color_from_hex('#FFFE03FF')
+            Rectangle:
+                size: 60, 0.80 * self.height
+                pos: self.pos[0] +180, self.pos[1]
 
-# class Bird(Image):
-#     velocity = NumericProperty(0)
-#
-#     def on_touch_down(self, touch):
-#         self.source = "bird2.png"
-#         self.velocity = 150
-#         super().on_touch_down(touch)
-#
-#     def on_touch_up(self, touch):
-#         self.source = "bird1.png"
-#         super().on_touch_up(touch)
+            #F
+            Color:
+                rgba: get_color_from_hex('#93D250FF')
+            Rectangle:
+                size: 60, 0.50 * self.height
+                pos: self.pos[0] +240, self.pos[1]
+
+            #F#  
+            Color:
+                rgba: get_color_from_hex('#00AF50FF')
+            Rectangle:
+                size: 30, 0.10 * self.height
+                pos: self.pos[0]+300, self.pos[1]
+
+            #G
+            Color:
+                rgba: get_color_from_hex('#10A192FF')
+            Rectangle:
+                size: 60, 1.0 * self.height
+                pos: self.pos[0]+330, self.pos[1]
+
+            #G#  
+            Color:
+                rgba: get_color_from_hex('#0329E4FF')
+            Rectangle:
+                size: 30, 0.05 * self.height
+                pos: self.pos[0] +390, self.pos[1]
+
+            #A
+            Color:
+                rgba: get_color_from_hex('#7900F1FF')
+            Rectangle:
+                size: 60, 1.0 * self.height
+                pos: self.pos[0]+420, self.pos[1]
+
+            #A#  
+            Color:
+                rgba: get_color_from_hex('#AF5DFFFF')
+            Rectangle:
+                size: 30, 0.25 * self.height
+                pos: self.pos[0] +480, self.pos[1]
+
+            #B
+            Color:
+                rgba: get_color_from_hex('#CB00CBFF')
+            Rectangle:
+                size: 60, 0.75 * self.height
+                pos: self.pos[0]+510, self.pos[1]
+
+    #Button:
+        #text: 'Alarm'
+''')
 
 
-
-class MainApp(App):
-
-    pipes = []
-    GRAVITY = 300
-    was_colliding = False
-
-    #def on_start(self):
-    #    Clock.schedule_interval(self.root.ids.background.scroll_textures, 1/60.)
-
+class TestApp(App):
     def build(self):
-        self.main_widget = Builder.load_string(main_widget_kv)
-        return self.main_widget
-
-    def move_bird(self, time_passed):
-        bird = self.root.ids.bird
-        bird.y = bird.y + bird.velocity * time_passed
-        bird.velocity = bird.velocity - self.GRAVITY * time_passed
-        self.check_collision()
-
-    def check_collision(self):
-        bird = self.root.ids.bird
-        # Go through each pipe and check if it collides
-        is_colliding = False
-        for pipe in self.pipes:
-            if pipe.collide_widget(bird):
-                is_colliding = True
-                # Check if bird is between the gap
-                if bird.y < (pipe.pipe_center - pipe.GAP_SIZE/2.0):
-                    self.game_over()
-                if bird.top > (pipe.pipe_center + pipe.GAP_SIZE/2.0):
-                    self.game_over()
-        if bird.y < 96:
-            self.game_over()
-        if bird.top > Window.height:
-            self.game_over()
-
-        if self.was_colliding and not is_colliding:
-            self.root.ids.score.text = str(int(self.root.ids.score.text)+1)
-        self.was_colliding = is_colliding
-
-    def game_over(self):
-        self.root.ids.bird.pos = (20, (self.root.height - 96) / 2.0)
-        for pipe in self.pipes:
-            self.root.remove_widget(pipe)
-        self.frames.cancel()
-        self.root.ids.start_button.disabled = False
-        self.root.ids.start_button.opacity = 1
+        return root
 
 
-    def next_frame(self, time_passed):
-        pass
-        # self.move_bird(time_passed)
-        #self.move_pipes(time_passed)
-        #self.root.ids.background.scroll_textures(time_passed)
+if __name__ == '__main__':
+    testapp = TestApp()
 
-    def start_game(self):
-        self.root.ids.score.text = "0"
-        self.was_colliding = False
-        self.pipes = []
-        #Clock.schedule_interval(self.move_bird, 1/60.)
-        self.frames = Clock.schedule_interval(self.next_frame, 1/60.)
+    main_widget = testapp.build()
+    #
+    # main_widget.ids.add_widget(Rectangle())
 
-        # # Create the pipes
-        # num_pipes = 5
-        # distance_between_pipes = Window.width / (num_pipes - 1)
-        # for i in range(num_pipes):
-        #     pipe = Rectangle()
-        #     pipe.pipe_center = randint(96 + 100, self.root.height - 100)
-        #     pipe.size_hint = (None, None)
-        #     pipe.pos = (Window.width + i*distance_between_pipes, 96)
-        #     pipe.size = (64, self.root.height - 96)
-        #
-        #     self.pipes.append(pipe)
-        #     self.root.add_widget(pipe)
-        #
-        # # Move the pipes
-        # #Clock.schedule_interval(self.move_pipes, 1/60.)
-
-    def move_pipes(self, time_passed):
-        # Move pipes
-        for pipe in self.pipes:
-            pipe.x -= time_passed * 100
-
-        # Check if we need to reposition the pipe at the right side
-        num_pipes = 5
-        distance_between_pipes = Window.width / (num_pipes - 1)
-        pipe_xs = list(map(lambda pipe: pipe.x, self.pipes))
-        right_most_x = max(pipe_xs)
-        if right_most_x <= Window.width - distance_between_pipes:
-            most_left_pipe = self.pipes[pipe_xs.index(min(pipe_xs))]
-            most_left_pipe.x = Window.width
-
-
-
-
-if __name__ == "__main__":
-
-    MainApp().run()
+    testapp.run()

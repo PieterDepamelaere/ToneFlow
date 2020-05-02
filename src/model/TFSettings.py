@@ -22,6 +22,7 @@ from src.model.PlayList import PlayList
 from src.model.PlayLists import PlayLists
 from src.model.Songs import Songs
 from src.model.Help import Help
+from src.model.ToneFlower import ToneFlower
 
 curr_file = pl.Path(os.path.realpath(__file__))
 
@@ -165,6 +166,7 @@ class TFSettings(Screen):
         self._dic['SCREEN_PLAYLISTS_CLASS'] = TFSetting("Playlists", None, PlayLists, False, None)
         self._dic['SCREEN_SETTINGS_CLASS'] = TFSetting("Settings", None, TFSettings, False, None)
         self._dic['SCREEN_SONGS_CLASS'] = TFSetting("Songs", None, Songs, False, None)
+        self._dic['SCREEN_TONEFLOWER_CLASS'] = TFSetting(" ToneFlower", None, ToneFlower, False, None)
         self._dic['THEME_BACKGROUND_HUE'] = TFSetting("Background hue influencing text color", None, '500', False, None)
 
         # Add user editable ones:

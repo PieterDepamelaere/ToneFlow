@@ -23,6 +23,7 @@ from kivymd.toast import toast
 curr_file = pl.Path(os.path.realpath(__file__))
 
 from src.model.CommonUtils import CommonUtils as CU
+from src.model.ToneFlower import ToneFlower
 
 
 class PlayListProvider:
@@ -368,6 +369,19 @@ class PlayList(ModalView):
                                  text_button_ok="Remove",
                                  text_button_cancel="Cancel",
                                  callback=lambda *args: {self.remove_lineup_entry(lineup_entry_rowview, *args), self.refresh_list()})
+
+    def show_modal_view_toneflower(self, selected_lineup_entry, *args, **kwargs):
+        if CU.tf is None:
+            # Assign a toneflower instance to the static variable tf in the CU-store:
+            CU.tf = ToneFlower(self)
+        else:
+            # Update the playlist Toneflower uses by passing itself + the selected entry:
+            CU.tf.playlist = self
+
+        # TODO: pass selected_lineup_entry
+        toast(f'Selected lineup entry: {selected_lineup_entry}')
+
+        CU.tf.open(animation=True)
 
     def sort_list(self):
         """

@@ -13,7 +13,10 @@ from kivymd.uix.dialog import MDDialog, MDInputDialog
 
 class CommonUtils:
 
-    # tfs
+    # ToneFlower-instance
+    tf = None
+
+    # TFSettings-instance
     tfs = None
 
     # dic_screen_switch = {

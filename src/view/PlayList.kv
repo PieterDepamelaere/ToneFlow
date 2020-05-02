@@ -16,7 +16,7 @@
 <LineupEntryRowView@OneLineIconListItem>:
     icon: 'music-note' # One can code an if-statement after this
     #list_obj: None
-    #playlist_obj: None
+    playlist_obj: None
     #on_release: self.list_obj.show_modal_view_playlist(self.playlist_obj)
     #txt: '' if self.playlist_obj is None else self.playlist_obj.file_path.stem
 
@@ -35,6 +35,8 @@
             icon: "music-note"
             text: "START CONCERT FROM HERE"
             width: dp(250)
+            text_color: app.theme_cls.primary_color
+            on_release: root.playlist_obj.show_modal_view_toneflower(selected_lineup_entry=root)
 
         Widget:
 
@@ -60,9 +62,9 @@
     BoxLayout:
         orientation: 'vertical'
 
-        # The Canvas ensures the white background
-        canvas:
-            Clear:
+        # The canvas in the wrapping BoxLayout ensures the white background and that the modal view configured as size (1, 1) is actually fullscreen
+        canvas.before:
+#            Clear:
             Color:
                 rgba: 	app.theme_cls.bg_light
             Rectangle:
@@ -84,7 +86,6 @@
             spacing: dp(10)
             padding: dp(20)
 
-
             ScrollView:
                 do_scroll_x: False
                 size_hint: 1, 1
@@ -95,6 +96,7 @@
                     LineupEntryRowView:
                         icon: 'image'
                         text: u''
+                        playlist_obj: root
 
 #                    MDTextField:
 #                        id: search_field
@@ -181,4 +183,4 @@
             hint_animation: True
             right_pad: True #To allow the stacked buttons to scale a bit when hovered over
 
-            callback: lambda x: toast(f'je suis une fleur & you pressed {x}')
+            callback: lambda x: toast(f'{x}')
