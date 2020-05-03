@@ -20,63 +20,33 @@
 
 #############################################################
 
-import mido
-import pygame
-
-
-def play_with_pygame(song):
-    # https://gist.github.com/naotokui/29073690279056e9354e6259efbf8f30
-    # https://stackoverflow.com/questions/27279864/generate-midi-file-and-play-it-without-saving-it-to-disk
-    pygame.init()
-    freq = 44100  # audio CD quality
-    bitsize = -16  # unsigned 16 bit
-    channels = 2  # 1 is mono, 2 is stereo
-    buffer = 1024  # number of samples
-    pygame.mixer.init(freq, bitsize, channels, buffer)
-    # optional volume 0 to 1.0
-    pygame.mixer.music.set_volume(0.8)
-
-    pygame.mixer.music.load(song)
-    length = pygame.time.get_ticks()
-    pygame.mixer.music.play()
-    while pygame.mixer.music.get_busy():
-        pygame.time.wait(length)
-
-
-def main():
-    mid = mido.MidiFile()
-    track = mido.MidiTrack()
-    mid.tracks.append(track)
-    track.append(mido.MetaMessage('set_tempo', tempo=500000, time=3840))
-    track.append(mido.MetaMessage('end_of_track', time=0))
-    track = mido.MidiTrack()
-    mid.tracks.append(track)
-    track.append(mido.Message('note_on', channel=0, note=60, velocity=100, time=0))
-    track.append(mido.Message('note_on', channel=0, note=62, velocity=100, time=960))
-    track.append(mido.Message('note_on', channel=0, note=64, velocity=100, time=960))
-    track.append(mido.Message('note_on', channel=0, note=65, velocity=100, time=960))
-    track.append(mido.Message('program_change', channel=0, program=123, time=960))
-    track.append(mido.Message('note_on', channel=0, note=67, velocity=100, time=0))
-    track.append(mido.Message('note_on', channel=0, note=69, velocity=100, time=960))
-    track.append(mido.Message('note_on', channel=0, note=71, velocity=100, time=960))
-    track.append(mido.Message('note_on', channel=0, note=72, velocity=100, time=960))
-    track.append(mido.Message('note_off', channel=0, note=60, velocity=100, time=2880))
-    track.append(mido.Message('note_off', channel=0, note=62, velocity=100, time=960))
-    track.append(mido.Message('note_off', channel=0, note=64, velocity=100, time=960))
-    track.append(mido.Message('note_off', channel=0, note=65, velocity=100, time=960))
-    track.append(mido.Message('note_off', channel=0, note=67, velocity=100, time=960))
-    track.append(mido.Message('note_off', channel=0, note=69, velocity=100, time=960))
-    track.append(mido.Message('note_off', channel=0, note=71, velocity=100, time=960))
-    track.append(mido.Message('note_off', channel=0, note=72, velocity=100, time=960))
-    track.append(mido.MetaMessage('end_of_track', time=0))
-
-    mid.save('new_song.mid')
-
-    play_with_pygame('new_song.mid')
-
-
-if __name__ == '__main__':
-    main()
+# import mido
+# import pygame
+#
+#
+# def play_with_pygame(song):
+#     # https://gist.github.com/naotokui/29073690279056e9354e6259efbf8f30
+#     # https://stackoverflow.com/questions/27279864/generate-midi-file-and-play-it-without-saving-it-to-disk
+#     pygame.init()
+#     freq = 44100  # audio CD quality
+#     bitsize = -16  # unsigned 16 bit
+#     channels = 2  # 1 is mono, 2 is stereo
+#     buffer = 1024  # number of samples
+#     pygame.mixer.init(freq, bitsize, channels, buffer)
+#     # optional volume 0 to 1.0
+#     pygame.mixer.music.set_volume(0.8)
+#
+#     pygame.mixer.music.load(song)
+#     length = pygame.time.get_ticks()
+#     pygame.mixer.music.play()
+#     while pygame.mixer.music.get_busy():
+#         pygame.time.wait(length)
+#
+#
+#
+#
+# if __name__ == '__main__':
+#     main()
 
 #############################################################
 

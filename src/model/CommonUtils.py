@@ -80,6 +80,21 @@ class CommonUtils:
         return input_dialog
 
     @staticmethod
+    def split_letters_from_digits(text):
+
+        letter_text = ''
+        digit_text = ''
+
+        for character in text:
+            if(character.isdigit()):
+                digit_text.join(character)
+            else:
+                letter_text.join(character)
+
+        return letter_text, digit_text
+
+
+    @staticmethod
     def with_consistent_linesep(text):
         """
         Making lineseparators consistent, no matter what machine ToneFlow is run on.
