@@ -125,7 +125,8 @@ class MusicTheoryCoreUtils:
         return msgwithtempos
 
     @staticmethod
-    def do_shit(mid_file, all_messages):  # for each track (then message) do the following
+    def do_shit(mid_file):  # for each track (then message) do the following
+        all_messages = []
         msgwithtempos = []
         for i, track in enumerate(mid_file.tracks):
             current_time = 0
@@ -146,13 +147,13 @@ class MusicTheoryCoreUtils:
 
     @staticmethod
     def preprocess_midi_file(midi_file):  # for each midi file do the following
-        all_messages = []
+        final_messages = None
         midi_file = MidiFile(midi_file)
         if not MTCU.remove_type_2(midi_file):
-            all_messages, msgwithtempos = MTCU.do_shit(midi_file, all_messages)
+            all_messages, msgwithtempos = MTCU.do_shit(midi_file)
             final_messages = all_messages + msgwithtempos
             final_messages = sorted(final_messages, key=lambda x: x[1])
-        print(final_messages)
+        # print(final_messages)
         return final_messages
 
     @staticmethod

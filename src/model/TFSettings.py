@@ -172,8 +172,9 @@ class TFSettings(Screen):
         # Add user editable ones:
         self._dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self._dic['WORKSPACE_NAME'].value}", f"{self._dic['EXPLANATION_WORKSPACE_PATH'].value}{os.linesep}???{os.sep}{self._dic['WORKSPACE_NAME'].value}", True, lambda value: self.cb_create_load_tf_workspace(value))
         self._dic['overall_speedfactor'] = TFSetting("Overall Speedfactor", None, 1.0, f"Premultiplied speedfactor that affects the overall speed of the flowing tones.", True, None)
-        self._dic['low_pitch_limit'] = TFSetting("Low Pitch Limit", None, "C4", f"This is the applied pitch-underbound while preprocessing the Song's MIDI-file. f.e. \'C4\' means central C.", True, None)
-        self._dic['high_pitch_limit'] = TFSetting("High Pitch Limit", None, "E5", f"This is the applied pitch-upperbound while preprocessing the Song's MIDI-file. f.e. \'C4\' means central C.", True, None)
+        # TODO: Provide callback that pushes changes in low/high_pitch_limit to toneflower for example.
+        self._dic['low_pitch_limit'] = TFSetting("Low Pitch Limit", None, "C4", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)
+        self._dic['high_pitch_limit'] = TFSetting("High Pitch Limit", None, "E5", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)
         # TODO: Invent a color_scheme object, try a dictionary for this?
         self._dic['tone_color_scheme'] = TFSetting("Tone Color Scheme", None, dict(), f"The color scheme maps every tone to a color.", True, None)
         self._dic['show_gridlines'] = TFSetting("Show Gridlines", None, True, f"Toggle Gridlines during playback.", True, None)

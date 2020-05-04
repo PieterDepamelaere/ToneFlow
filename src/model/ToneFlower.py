@@ -89,6 +89,7 @@ class ToneFlower(ModalView):
         self._block_close = False
         self._playlist = playlist
 
+
         self._former_primary_palette, self._former_accent_palette = ToneFlower.app.theme_cls.primary_palette, ToneFlower.app.theme_cls.accent_palette
         self._former_context_menus = ToneFlower.app.context_menus
 

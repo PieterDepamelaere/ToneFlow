@@ -8,10 +8,15 @@ sys.path.insert(0, str(curr_file.parents[1]))
 sys.path.insert(0, str(curr_file.parents[2]))
 
 from functools import partial
-from kivymd.uix.dialog import MDDialog, MDInputDialog
+from kivy.app import App
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.button import *
 
 
 class CommonUtils:
+
+    # App
+    app = None
 
     # ToneFlower-instance
     tf = None
@@ -55,28 +60,62 @@ class CommonUtils:
             return default
 
     @staticmethod
-    def show_ok_cancel_dialog(title, text, size_hint=(.8, .4), text_button_ok="Ok", text_button_cancel="Cancel", callback=None):
+    def show_ok_cancel_dialog(title, text, size_hint=(.8, .4), text_button_ok="OK", text_button_cancel="CANCEL", callback=None):
+
+        # TODO: Eliminate Quick Fix code, initialisation of app should happen somwhere else
+        if CommonUtils.app is None:
+            CommonUtils.app = App.get_running_app()
+
         ok_cancel_dialog = MDDialog(
             title=title,
+            type= 'simple', # Options are: ‘alert’, ‘simple’, ‘confirmation’, ‘custom’
             size_hint=size_hint,
             text=text,
-            text_button_ok=text_button_ok,
-            text_button_cancel=text_button_cancel,
-            events_callback=callback,
+            buttons=[
+                MDFillRoundFlatButton(text=text_button_ok.upper(), md_bg_color= CommonUtils.App.theme_cls.primary_color, on_release= lambda *args, **kwargs: callback(args, kwargs)),
+                # MDRaisedButton (text, md_bg_color),
+
+                MDRoundFlatButton(text=text_button_cancel.upper(), text_color= CommonUtils.App.theme_cls.primary_color)
+                # MDFlatButton()
+            ]
+
+            #events_callback=callback
         )
         ok_cancel_dialog.open()
         return ok_cancel_dialog
 
     @staticmethod
-    def show_input_dialog(title="Please Enter", hint_text=None, text="Type here", size_hint=(.8, .4), text_button_ok="Ok", callback=None):
-        input_dialog = MDInputDialog(
+    def show_input_dialog(title="Please Enter", content_cls=None, size_hint=(.8, .4), text_button_ok="OK", text_button_cancel="CANCEL", callback_set=None):
+
+        # TODO: Eliminate Quick Fix code, initialisation of app should happen somewhere else
+        if CommonUtils.app is None:
+            CommonUtils.app = App.get_running_app()
+
+        input_dialog = MDDialog(
             title=title,
-            hint_text=hint_text,
+            type='custom',  # Type 'custom' is needed to be able to provide content class. Options are: ‘alert’, ‘simple’, ‘confirmation’, ‘custom’
+            content_cls=content_cls(),
             size_hint=size_hint,
-            text_button_ok=text_button_ok,
-            events_callback=callback)
-        input_dialog.text_field.text = text
+
+            buttons=[
+                MDFillRoundFlatButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
+                                      on_release=lambda *args, **kwargs: (callback_set(*args, **kwargs), print("wow inside"), input_dialog.dismiss())),
+                # MDRaisedButton (text, md_bg_color),
+
+                MDRoundFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color, on_release=lambda *args, **kwargs: input_dialog.dismiss())
+                # MDFlatButton()
+            ]
+
+            # events_callback=callback
+        )
+        # input_dialog.text_field.text = text
+
+
         input_dialog.open()
+
+        print(input_dialog.content_cls.ids.city_field.text)
+
+
         return input_dialog
 
     @staticmethod

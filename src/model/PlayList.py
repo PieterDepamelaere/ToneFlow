@@ -99,7 +99,7 @@ class PlayList(ModalView):
         # TODO: Implement the other context menus
 
         # Initializing custom properties:
-        self._block_close = False
+        self._block_close = True
         self._file_path = file_path
 
         self._former_primary_palette, self._former_accent_palette = PlayList.app.theme_cls.primary_palette, PlayList.app.theme_cls.accent_palette

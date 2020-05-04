@@ -1,3 +1,77 @@
+from kivy.lang import Builder
+from kivy.uix.boxlayout import BoxLayout
+
+from kivymd.app import MDApp
+from kivymd.uix.button import MDFlatButton
+from kivymd.uix.dialog import MDDialog
+from src.model.CommonUtils import CommonUtils as CU
+from kivymd.toast import toast
+
+KV = '''
+<NewDraftContent>
+    orientation: "vertical"
+    spacing: "12dp"
+    size_hint_y: None
+    height: "120dp"
+
+    MDTextField:
+        id: city_field
+        hint_text: "City"
+
+    MDTextField:
+        id: street_field
+        hint_text: "Street"
+
+
+FloatLayout:
+
+    MDFlatButton:
+        text: "ALERT DIALOG"
+        pos_hint: {'center_x': .5, 'center_y': .5}
+        on_release: app.show_confirmation_dialog()
+'''
+
+class NewDraftContent(BoxLayout):
+    pass
+
+class Example(MDApp):
+    dialog = None
+
+    def build(self):
+        return Builder.load_string(KV)
+
+    def callback_like_never_before(self, *args, **kwargs):
+        print(args[0])
+
+
+    def show_confirmation_dialog(self):
+
+        CU.show_input_dialog(title="Please Enter", content_cls=NewDraftContent, size_hint=(.8, .4),
+                              text_button_ok="OK", text_button_cancel="CANCEL", callback_set=lambda *args, **kwargs: (print(f'wow outside {args[0]}'), self.callback_like_never_before(args, kwargs)))
+            # , lambda *args, **kwargs: toast(f"koebelle")
+
+            # toast(f"{args[0]}"), toast(f"{args[1]}", 3)
+
+
+            # self.dialog = MDDialog(
+            #     title="Address:",
+            #     type="custom",
+            #     content_cls=Content(),
+            #     buttons=[
+            #         MDFlatButton(
+            #             text="CANCEL", text_color=self.theme_cls.primary_color
+            #         ),
+            #         MDFlatButton(
+            #             text="OK", text_color=self.theme_cls.primary_color
+            #         ),
+            #     ],
+            # )
+
+
+Example().run()
+
+########################################"
+
 # import sys
 # import json
 # import mido
