@@ -60,32 +60,37 @@ class CommonUtils:
             return default
 
     @staticmethod
-    def show_ok_cancel_dialog(title, text, size_hint=(.8, .4), text_button_ok="OK", text_button_cancel="CANCEL", callback=None):
+    def show_ok_cancel_dialog(title, text, size_hint=(.8, .4), text_button_ok="OK", text_button_cancel="CANCEL", ok_callback_set=lambda *args, **kwargs: None, cancel_callback_set=lambda *args, **kwargs: None):
 
-        # TODO: Eliminate Quick Fix code, initialisation of app should happen somwhere else
+        # TODO: Eliminate Quick Fix code, initialisation of app should happen somewhere else
         if CommonUtils.app is None:
             CommonUtils.app = App.get_running_app()
 
         ok_cancel_dialog = MDDialog(
             title=title,
-            type= 'simple', # Options are: ‘alert’, ‘simple’, ‘confirmation’, ‘custom’
-            size_hint=size_hint,
+            # radius=[20, 20, 20, 20],
+            type='alert', # Options are: ‘alert’, ‘simple’, ‘confirmation’, ‘custom’
+            # size_hint=size_hint,
             text=text,
             buttons=[
-                MDFillRoundFlatButton(text=text_button_ok.upper(), md_bg_color= CommonUtils.App.theme_cls.primary_color, on_release= lambda *args, **kwargs: callback(args, kwargs)),
-                # MDRaisedButton (text, md_bg_color),
+                # MDFillRoundFlatButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
+                #                       on_release=lambda *args, **kwargs: (ok_callback_set(args, kwargs), ok_cancel_dialog.dismiss())),
+                MDRaisedButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
+                               on_release=lambda *args, **kwargs: (ok_callback_set(args, kwargs), ok_cancel_dialog.dismiss())),
 
-                MDRoundFlatButton(text=text_button_cancel.upper(), text_color= CommonUtils.App.theme_cls.primary_color)
-                # MDFlatButton()
-            ]
+                # MDRoundFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color,
+            #                       on_release=lambda *args, **kwargs: (cancel_callback_set(args, kwargs), ok_cancel_dialog.dismiss()))
+                MDFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color,
+                             on_release=lambda *args, **kwargs: (cancel_callback_set(args, kwargs), ok_cancel_dialog.dismiss()))
+            ],
+            auto_dismiss=False
 
             #events_callback=callback
         )
         ok_cancel_dialog.open()
-        return ok_cancel_dialog
 
     @staticmethod
-    def show_input_dialog(title="Please Enter", content_cls=None, size_hint=(.8, .4), text_button_ok="OK", text_button_cancel="CANCEL", callback_set=None):
+    def show_input_dialog(title="Please Enter", content_obj=None, size_hint=(.8, .4), text_button_ok="OK", text_button_cancel="CANCEL", ok_callback_set=lambda *args, **kwargs: None, cancel_callback_set=lambda *args, **kwargs: None):
 
         # TODO: Eliminate Quick Fix code, initialisation of app should happen somewhere else
         if CommonUtils.app is None:
@@ -93,30 +98,28 @@ class CommonUtils:
 
         input_dialog = MDDialog(
             title=title,
+            # radius=[20, 20, 20, 20],
             type='custom',  # Type 'custom' is needed to be able to provide content class. Options are: ‘alert’, ‘simple’, ‘confirmation’, ‘custom’
-            content_cls=content_cls(),
-            size_hint=size_hint,
+            content_cls=content_obj,
+            # size_hint=size_hint,
 
             buttons=[
-                MDFillRoundFlatButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
-                                      on_release=lambda *args, **kwargs: (callback_set(*args, **kwargs), print("wow inside"), input_dialog.dismiss())),
-                # MDRaisedButton (text, md_bg_color),
+                # MDFillRoundFlatButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
+                #                       on_release=lambda *args, **kwargs: (ok_callback_set(content_obj, *args, **kwargs), input_dialog.dismiss())),
+                MDRaisedButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
+                               on_release=lambda *args, **kwargs: (ok_callback_set(content_obj, *args, **kwargs), input_dialog.dismiss())),
 
-                MDRoundFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color, on_release=lambda *args, **kwargs: input_dialog.dismiss())
-                # MDFlatButton()
-            ]
+                # MDRoundFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color,
+            #                       on_release=lambda *args, **kwargs: (cancel_callback_set(args, kwargs), input_dialog.dismiss()))
+                MDFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color,
+                             on_release=lambda *args, **kwargs: (cancel_callback_set(args, kwargs), input_dialog.dismiss()))
+            ],
+            auto_dismiss=False
 
             # events_callback=callback
         )
-        # input_dialog.text_field.text = text
-
 
         input_dialog.open()
-
-        print(input_dialog.content_cls.ids.city_field.text)
-
-
-        return input_dialog
 
     @staticmethod
     def split_letters_from_digits(text):

@@ -25,13 +25,15 @@ from kivy.utils import get_hex_from_color
 from kivy.utils import get_color_from_hex
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.popup import Popup
-from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
 
 from kivymd.app import MDApp
 from kivymd.utils import asynckivy
 # from kivymd.uix.navigationdrawer import NavigationDrawerIconButton
 from kivymd.theming import ThemeManager
 from kivymd.uix.menu import MDDropdownMenu
+from kivymd.uix.label import MDLabel
+from kivymd.uix.textfield import MDTextField
 from kivymd.toast import toast
 from kivymd.color_definitions import palette
 from kivymd.theming_dynamic_text import get_contrast_text_color
@@ -99,17 +101,6 @@ class MainApp(MDApp):
         screen_object = screen_class()
         return screen_object
 
-    def decide_stop_or_not(self, *args):
-        # TODO: Stop warning is not shown yet when you close by closing the window with the 'x'-button.
-        if args[0] is not None:
-            # print(f"args0 {str(args[0])}")
-            if (CU.safe_cast(args[0], str, "")).lower() == "yes":
-                self.stop()
-            else:
-                toast("Not quitting")
-        else:
-            toast("Not quitting")
-
     def get_context_menus(self):
         return self._context_menus
 
@@ -146,25 +137,53 @@ class MainApp(MDApp):
     def on_start(self):
         # As a proposal, the actual (default)value of the tf_workspace_path-param is copied to the clipboard:
         workspace_path_proposal = CU.tfs.dic['tf_workspace_path'].default_value
-
-        dialog_text = f"{CU.tfs.dic['tf_workspace_path'].description}"
-        if (CU.tfs.dic['tf_workspace_path'].default_value != CU.tfs.dic['tf_workspace_path'].value):
-            # This means that the user did configure a customized path:
-            dialog_text =f"{CU.tfs.dic['tf_workspace_path'].value}"
-
         pyperclip.copy(str(workspace_path_proposal))
-        CU.show_input_dialog(title=f"Enter Path to \"{CU.tfs.dic['WORKSPACE_NAME'].value}\"-Folder or to its Parent Folder",
-                               hint_text=f"{CU.tfs.dic['tf_workspace_path'].description}",
-                               text=dialog_text,
-                               size_hint=(.8, .4), text_button_ok="Load/Create",
-                               callback=lambda text_button, instance: {CU.tfs.dic['tf_workspace_path'].set_value(instance.text_field.text),
-                                                                               toast(str(CU.tfs.dic['tf_workspace_path'].value))})
+
+        # In case the user did configure a customized path, that path will be filled in:
+        text = "" if (CU.tfs.dic['tf_workspace_path'].default_value == CU.tfs.dic['tf_workspace_path'].value) else f"{CU.tfs.dic['tf_workspace_path'].value}"
+
+        content_obj = BoxLayout(orientation='vertical', spacing="12dp", size_hint_y=None, height="120dp")
+
+        # mdlbl1 = MDLabel(text=str(CU.tfs.dic['EXPLANATION_WORKSPACE_PATH'].value))
+
+        mdtf1 = MDTextField()
+
+        mdtf1.text = text
+        mdtf1.hint_text = f"{CU.tfs.dic['tf_workspace_path'].description}"
+        mdtf1.helper_text = str(CU.tfs.dic['EXPLANATION_WORKSPACE_PATH'].value)
+        mdtf1.helper_text_mode = "on_focus"
+
+        # content_obj.add_widget(mdlbl1)
+        content_obj.add_widget(mdtf1)
+
+        CU.show_input_dialog(
+
+            title=f"Enter Path to \"{CU.tfs.dic['WORKSPACE_NAME'].value}\"-Folder or to its Parent Folder",
+            content_obj=content_obj,
+            # hint_text=f"{CU.tfs.dic['tf_workspace_path'].description}",
+
+            # size_hint=(.8, .4),
+            text_button_ok="Load/Create",
+            text_button_cancel="Cancel",
+            ok_callback_set=lambda *args, **kwargs: (CU.tfs.dic['tf_workspace_path'].set_value(mdtf1.text),
+                                                     toast(str(CU.tfs.dic['tf_workspace_path'].value))),
+            cancel_callback_set=lambda *args, **kwargs: toast(f"{CU.tfs.dic['WORKSPACE_NAME'].value} can still be changed anytime from the settings")
+        )
 
     def on_stop(self, *args, **kwargs):
         # Important: *args and **kwargs can both be passed to a method, *args takes care of all unexpected
         # (variable amount) of positional arguments and **kwargs takes care of all unexpected (variable amount)
         # of named arguments.
-        CU.show_ok_cancel_dialog(title="Confirmation dialog", text=f"Are you sure you want to [color={get_hex_from_color(self.theme_cls.primary_color)}][b]quit[/b][/color] {CU.tfs.dic['APP_NAME'].value}?", size_hint=(0.5, 0.3), text_button_ok="Yes", text_button_cancel="No", callback=lambda *args: self.decide_stop_or_not(*args))
+        CU.show_ok_cancel_dialog(
+            title="Confirmation dialog",
+            text=f"Are you sure you want to [color={get_hex_from_color(self.theme_cls.primary_color)}][b]quit[/b][/color] {CU.tfs.dic['APP_NAME'].value}?",
+            size_hint=(0.5, 0.3),
+            text_button_ok="Yes",
+            text_button_cancel="No",
+            ok_callback_set=lambda *args, **kwargs: self.stop(),
+            cancel_callback_set=lambda *args, **kwargs: toast("Not quitting")
+        )
+
         return True
 
     def open_context_menu(self, instance):
@@ -248,4 +267,3 @@ if __name__ == "__main__":
     # TODO: Make mouse scrollwheel tempo/speed-control in concert mode.
 
 
-    

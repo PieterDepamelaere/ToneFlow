@@ -1,14 +1,21 @@
+#######################################################
+
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import StringProperty
 
 from kivymd.app import MDApp
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from src.model.CommonUtils import CommonUtils as CU
 from kivymd.toast import toast
+from kivymd.uix.label import MDLabel
+from kivymd.uix.textfield import MDTextField
+from kivymd.uix.textfield import MDTextFieldRound
 
 KV = '''
 <NewDraftContent>
+    id: id_content
     orientation: "vertical"
     spacing: "12dp"
     size_hint_y: None
@@ -16,7 +23,7 @@ KV = '''
 
     MDTextField:
         id: city_field
-        hint_text: "City"
+        hint_text: "City" 
 
     MDTextField:
         id: street_field
@@ -40,32 +47,37 @@ class Example(MDApp):
     def build(self):
         return Builder.load_string(KV)
 
-    def callback_like_never_before(self, *args, **kwargs):
+    def callback_like_never_before(self, content_obj, *args, **kwargs):
+        print(f"callback fires")
+        # print(content_obj[0].ids['city_field'].text)
+
+        # content_obj[0][0].text
+        print("printing args")
         print(args[0])
 
 
     def show_confirmation_dialog(self):
 
-        CU.show_input_dialog(title="Please Enter", content_cls=NewDraftContent, size_hint=(.8, .4),
-                              text_button_ok="OK", text_button_cancel="CANCEL", callback_set=lambda *args, **kwargs: (print(f'wow outside {args[0]}'), self.callback_like_never_before(args, kwargs)))
-            # , lambda *args, **kwargs: toast(f"koebelle")
+        dialog_text=f"foo bar"
+        content_obj = BoxLayout(orientation='vertical', spacing="12dp", size_hint_y=None, height="120dp")
 
-            # toast(f"{args[0]}"), toast(f"{args[1]}", 3)
+        mdlbl1 = MDLabel(text=f"This is explanation label")
 
+        mdtf1 = MDTextField()
 
-            # self.dialog = MDDialog(
-            #     title="Address:",
-            #     type="custom",
-            #     content_cls=Content(),
-            #     buttons=[
-            #         MDFlatButton(
-            #             text="CANCEL", text_color=self.theme_cls.primary_color
-            #         ),
-            #         MDFlatButton(
-            #             text="OK", text_color=self.theme_cls.primary_color
-            #         ),
-            #     ],
-            # )
+        mdtf1.hint_text="override"
+        mdtf1.helper_text = "wqsdf"
+        mdtf1.helper_text_mode = "on_focus"
+
+        content_obj.add_widget(mdlbl1)
+        content_obj.add_widget(mdtf1)
+
+        CU.show_input_dialog(title="Please Enter", content_obj=content_obj, size_hint=(.8, .4),
+                              text_button_ok="OK", text_button_cancel="CANCEL", ok_callback_set=lambda *args, **kwargs: (print(f'wow outside {args[0]}'), self.callback_like_never_before(args, kwargs)))
+
+        # CU.show_ok_cancel_dialog(f"This is the title", "Do you agree with this", size_hint=(.8, .4), text_button_ok="Yes", text_button_cancel="No", callback_set=lambda *args, **kwargs: self.callback_like_never_before(args, kwargs))
+
+        print(f"from outside after dialog call")
 
 
 Example().run()

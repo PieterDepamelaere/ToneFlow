@@ -91,9 +91,11 @@ class TFSettings(Screen):
         # Without whitespace the length of ans_user should be bigger than 0, also make sure that when the tf_workspace_path's description is returned, that :
         if ((tf_workspace_path is not None) and (len(str(tf_workspace_path).strip()) > 0) and (str(tf_workspace_path) != self._dic['tf_workspace_path'].description)):
             # If user didn't omit the explanation on the workspace's path, then auto-ignore it:
-            tf_workspace_path = str(tf_workspace_path).replace(f"{self._dic['EXPLANATION_WORKSPACE_PATH'].value}{os.linesep}", "")
+            tf_workspace_path = str(tf_workspace_path).replace(f"{self._dic['tf_workspace_path'].description}", "")
+
             # Again check whether the remaining path is not empty:
             if (len(str(tf_workspace_path).strip()) > 0):
+                # Not a stripped tf_workspace_path is stored, this allows for people that have folders with trailing whitspace (although strongly discouraged).
                 tf_workspace_path = pl.Path(tf_workspace_path)
             else:
                 # In case of trivial tf_workspace_path, the original proposal is used:
@@ -120,6 +122,7 @@ class TFSettings(Screen):
         raw_midi_dir = tf_workspace_path / self._dic['RAW_MIDI_DIR_NAME'].value
 
         # There's no explicit creation of the tf_workspace_path folder itself because parents will be auto-created, while creating its children:
+        # If this workspace with these subfolders already exists, then it doesn't get overridden:
         images_videos_dir.mkdir(exist_ok=True, parents=True)
         playlists_dir.mkdir(exist_ok=True, parents=True)
         prep_midi_dir.mkdir(exist_ok=True, parents=True)
@@ -155,7 +158,7 @@ class TFSettings(Screen):
         self._dic['IMG_DIR_PATH'] = TFSetting("Internal Directory of Images", None, curr_file.parents[2] / "img", None, False, None)
         self._dic['WORKSPACE_NAME'] = TFSetting("Name of Workspace", None, "Workspace_TF", None, False, None)
         self._dic['EXPLANATION_PLAYLIST_SONG_NAME'] = TFSetting("Explanation Playlist Song Name", None, f"(No spaces, only alphanumeric characters & \"_-\". Leave blank to cancel.)", None, False, None)
-        self._dic['EXPLANATION_WORKSPACE_PATH'] = TFSetting("Explanation Workspace Name", None, f"(Preferably choose path on external device like flash drive)", None, False, None)
+        self._dic['EXPLANATION_WORKSPACE_PATH'] = TFSetting("Explanation Workspace Name", None, f"Preferably choose path on external device like USB flash drive", None, False, None)
         self._dic['FILE_SEP_TEXT'] = TFSetting("Exportable File Separator", None, "/FS/", None, False, None)
         self._dic['IMAGES_VIDEOS_DIR_NAME'] = TFSetting("Name of Images_Videos Folder in Workspace", None, "Images_Videos", None, False, None)
         self._dic['PLAYLISTS_DIR_NAME'] = TFSetting("Name of Playlists Folder in Workspace", None, "Playlists", None, False, None)
@@ -170,7 +173,7 @@ class TFSettings(Screen):
         self._dic['THEME_BACKGROUND_HUE'] = TFSetting("Background hue influencing text color", None, '500', False, None)
 
         # Add user editable ones:
-        self._dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self._dic['WORKSPACE_NAME'].value}", f"{self._dic['EXPLANATION_WORKSPACE_PATH'].value}{os.linesep}???{os.sep}{self._dic['WORKSPACE_NAME'].value}", True, lambda value: self.cb_create_load_tf_workspace(value))
+        self._dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self._dic['WORKSPACE_NAME'].value}", f"???{os.sep}{self._dic['WORKSPACE_NAME'].value}", True, lambda value: self.cb_create_load_tf_workspace(value))
         self._dic['overall_speedfactor'] = TFSetting("Overall Speedfactor", None, 1.0, f"Premultiplied speedfactor that affects the overall speed of the flowing tones.", True, None)
         # TODO: Provide callback that pushes changes in low/high_pitch_limit to toneflower for example.
         self._dic['low_pitch_limit'] = TFSetting("Low Pitch Limit", None, "C4", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)

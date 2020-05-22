@@ -30,7 +30,6 @@ class TFExceptionHandler(ExceptionHandler):
             if self._error_dialog is None:
                 self._current_exception = exception
                 self._error_dialog = CU.show_ok_cancel_dialog(
-                    # title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
                     title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
                     text=f"[color={get_hex_from_color((1, 0, 0))}][i]{str(self._current_exception)}[/i][/color]{os.linesep}{os.linesep}"
                     f"[b]-> Our apologies for the inconvenience, please consult the stack trace below:[/b]{os.linesep}"
@@ -38,13 +37,13 @@ class TFExceptionHandler(ExceptionHandler):
                     size_hint=(.8, .6),
                     text_button_ok="Quit",
                     text_button_cancel="Proceed @ Own Risk",
-                    callback=lambda *args: self.decide_raise_or_pass(*args)
+                    callback_set=lambda *args, **kwargs: self.decide_raise_or_pass(*args, **kwargs)
                 )
 
         return self._PASS_or_RAISE
 
 
-    def decide_raise_or_pass(self, *args):
+    def decide_raise_or_pass(self, *args, **kwargs):
 
         # Interpret user's choice:
         if args[0] is not None:

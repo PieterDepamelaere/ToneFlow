@@ -257,15 +257,16 @@ class Help(Screen):
         :param help_rowview:
         :return:
         """
-        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}" \
-            f"{str(help_rowview.help_entry_obj.file_path.stem)}"
-
-        CU.show_input_dialog(title=f"Enter New Name for Help",
-                             hint_text=dialog_text,
-                             text=dialog_text,
-                             size_hint=(.7, .4),
-                             text_button_ok="Update",
-                             callback=lambda text_button, instance, *args: {self.rename_help(help_rowview, instance.text_field.text), self.refresh_list()})
+        pass
+        # dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}" \
+        #     f"{str(help_rowview.help_entry_obj.file_path.stem)}"
+        #
+        # CU.show_input_dialog(title=f"Enter New Name for Help",
+        #                      hint_text=dialog_text,
+        #                      text=dialog_text,
+        #                      size_hint=(.7, .4),
+        #                      text_button_ok="Update",
+        #                      callback=lambda text_button, instance, *args: {self.rename_help(help_rowview, instance.text_field.text), self.refresh_list()})
 
     def show_dialog_remove_help(self, help_rowview):
         """
@@ -273,14 +274,15 @@ class Help(Screen):
         :param help_rowview:
         :return:
         """
-        dialog_text=f"Are you sure want to remove [color={get_hex_from_color(Help.app.theme_cls.primary_color)}][b]{str(help_rowview.help_entry_obj.file_path.stem)}[/b][/color] from the list? This action cannot be undone."
-
-        CU.show_ok_cancel_dialog(title=f"Are You Sure?",
-                                 text=dialog_text,
-                                 size_hint=(.7, .4),
-                                 text_button_ok="Remove",
-                                 text_button_cancel="Cancel",
-                                 callback=lambda *args: {self.remove_help(help_rowview, *args), self.refresh_list()})
+        pass
+        # dialog_text=f"Are you sure want to remove [color={get_hex_from_color(Help.app.theme_cls.primary_color)}][b]{str(help_rowview.help_entry_obj.file_path.stem)}[/b][/color] from the list? This action cannot be undone."
+        #
+        # CU.show_ok_cancel_dialog(title=f"Are You Sure?",
+        #                          text=dialog_text,
+        #                          size_hint=(.7, .4),
+        #                          text_button_ok="Remove",
+        #                          text_button_cancel="Cancel",
+        #                          callback=lambda *args: {self.remove_help(help_rowview, *args), self.refresh_list()})
 
     def sort_list(self):
         """
