@@ -124,9 +124,9 @@ TFNavigationLayout:
                 background_hue: CU.tfs.dic['THEME_BACKGROUND_HUE'].value
                 elevation: 10
                 left_action_items:
-                    [['menu', lambda x: app.root.toggle_nav_drawer()]]
+                    [['menu', lambda *args, **kwargs: app.root.toggle_nav_drawer()]]
                 right_action_items:
-                    [['dots-vertical', lambda x: app.open_context_menu(x)]]
+                    [['dots-vertical', lambda *args, **kwargs: app._mddm.open()]]
 
             ScreenManager:
                 id: scr_mngr

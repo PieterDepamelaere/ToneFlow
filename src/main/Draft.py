@@ -72,10 +72,10 @@ class Example(MDApp):
         content_obj.add_widget(mdlbl1)
         content_obj.add_widget(mdtf1)
 
-        CU.show_input_dialog(title="Please Enter", content_obj=content_obj, size_hint=(.8, .4),
-                              text_button_ok="OK", text_button_cancel="CANCEL", ok_callback_set=lambda *args, **kwargs: (print(f'wow outside {args[0]}'), self.callback_like_never_before(args, kwargs)))
+        # CU.show_input_dialog(title="Please Enter", content_obj=content_obj, size_hint=(.8, .4),
+          #                    text_button_ok="OK", text_button_cancel="CANCEL", ok_callback_set=lambda *args, **kwargs: (print(f'wow outside {args[0]}'), self.callback_like_never_before(args, kwargs)))
 
-        # CU.show_ok_cancel_dialog(f"This is the title", "Do you agree with this", size_hint=(.8, .4), text_button_ok="Yes", text_button_cancel="No", callback_set=lambda *args, **kwargs: self.callback_like_never_before(args, kwargs))
+        CU.show_ok_cancel_dialog(f"This is the title", "Do you agree with this", size_hint=(.8, .4), text_button_ok="Yes", text_button_cancel="No", ok_callback_set=lambda *args, **kwargs: self.callback_like_never_before(args, kwargs))
 
         print(f"from outside after dialog call")
 

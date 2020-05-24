@@ -62,9 +62,28 @@ class CommonUtils:
     @staticmethod
     def show_ok_cancel_dialog(title, text, size_hint=(.8, .4), text_button_ok="OK", text_button_cancel="CANCEL", ok_callback_set=lambda *args, **kwargs: None, cancel_callback_set=lambda *args, **kwargs: None):
 
-        # TODO: Eliminate Quick Fix code, initialisation of app should happen somewhere else
-        if CommonUtils.app is None:
-            CommonUtils.app = App.get_running_app()
+        # # TODO: Eliminate Quick Fix code, initialisation of app should happen somewhere else
+        # if CommonUtils.app is None:
+        #     CommonUtils.app = App.get_running_app()
+
+        # "OK"-button will always be added to the dialog
+        button_list = [
+            # MDFillRoundFlatButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
+            #                       on_release=lambda *args, **kwargs: (ok_callback_set(args, kwargs), ok_cancel_dialog.dismiss())),
+            MDRaisedButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
+                           on_release=lambda *args, **kwargs: (
+                               ok_callback_set(args, kwargs), ok_cancel_dialog.dismiss()))
+        ]
+
+        # Decide whether to add a cancel button:
+        if ((text_button_cancel is not None) and (len(str(text_button_cancel).strip()) > 0)):
+            button_list.append(
+                # MDRoundFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color,
+                #                       on_release=lambda *args, **kwargs: (cancel_callback_set(args, kwargs), ok_cancel_dialog.dismiss()))
+                MDFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color,
+                             on_release=lambda *args, **kwargs: (
+                                 cancel_callback_set(args, kwargs), ok_cancel_dialog.dismiss()))
+            )
 
         ok_cancel_dialog = MDDialog(
             title=title,
@@ -72,29 +91,39 @@ class CommonUtils:
             type='alert', # Options are: ‘alert’, ‘simple’, ‘confirmation’, ‘custom’
             # size_hint=size_hint,
             text=text,
-            buttons=[
-                # MDFillRoundFlatButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
-                #                       on_release=lambda *args, **kwargs: (ok_callback_set(args, kwargs), ok_cancel_dialog.dismiss())),
-                MDRaisedButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
-                               on_release=lambda *args, **kwargs: (ok_callback_set(args, kwargs), ok_cancel_dialog.dismiss())),
-
-                # MDRoundFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color,
-            #                       on_release=lambda *args, **kwargs: (cancel_callback_set(args, kwargs), ok_cancel_dialog.dismiss()))
-                MDFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color,
-                             on_release=lambda *args, **kwargs: (cancel_callback_set(args, kwargs), ok_cancel_dialog.dismiss()))
-            ],
+            buttons=button_list,
             auto_dismiss=False
 
             #events_callback=callback
         )
+
         ok_cancel_dialog.open()
 
     @staticmethod
     def show_input_dialog(title="Please Enter", content_obj=None, size_hint=(.8, .4), text_button_ok="OK", text_button_cancel="CANCEL", ok_callback_set=lambda *args, **kwargs: None, cancel_callback_set=lambda *args, **kwargs: None):
 
-        # TODO: Eliminate Quick Fix code, initialisation of app should happen somewhere else
-        if CommonUtils.app is None:
-            CommonUtils.app = App.get_running_app()
+        # # TODO: Eliminate Quick Fix code, initialisation of app should happen somewhere else
+        # if CommonUtils.app is None:
+        #     CommonUtils.app = App.get_running_app()
+
+        # "OK"-button will always be added to the dialog
+        button_list = [
+            # MDFillRoundFlatButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
+            #                       on_release=lambda *args, **kwargs: (ok_callback_set(args, kwargs), ok_cancel_dialog.dismiss())),
+            MDRaisedButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
+                           on_release=lambda *args, **kwargs: (
+                               ok_callback_set(args, kwargs), input_dialog.dismiss()))
+        ]
+
+        # Decide whether to add a cancel button:
+        if ((text_button_cancel is not None) and (len(str(text_button_cancel).strip()) > 0)):
+            button_list.append(
+                # MDRoundFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color,
+                #                       on_release=lambda *args, **kwargs: (cancel_callback_set(args, kwargs), ok_cancel_dialog.dismiss()))
+                MDFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color,
+                             on_release=lambda *args, **kwargs: (
+                                 cancel_callback_set(args, kwargs), input_dialog.dismiss()))
+            )
 
         input_dialog = MDDialog(
             title=title,

@@ -46,6 +46,7 @@ class TFSettings(Screen):
         # Make the settings public & update the app's title:
         CU.tfs = self
         TFSettings.app = App.get_running_app()
+        CU.app = TFSettings.app
         TFSettings.app.title = CU.tfs.dic['APP_NAME'].value + " - v" + CU.tfs.dic['MAJOR_MINOR_VERSION'].value
 
         if kv_file_main_widget is not None and len(kv_file_main_widget) > 0:
@@ -85,7 +86,7 @@ class TFSettings(Screen):
     editable_list = property(get_editable_list, set_editable_list)
     context_menus = property(get_context_menus)
 
-    def cb_create_load_tf_workspace(self, tf_workspace_path):
+    def create_load_tf_workspace(self, tf_workspace_path):
         tf_workspace_path = str(tf_workspace_path)
 
         # Without whitespace the length of ans_user should be bigger than 0, also make sure that when the tf_workspace_path's description is returned, that :
@@ -153,7 +154,7 @@ class TFSettings(Screen):
         """
         # Add non-user editable ones:
         self._dic['APP_NAME'] = TFSetting("Name of Application", None, str("ToneFlow" + u"\u00AE"), None, False, None)
-        self._dic['MAJOR_MINOR_VERSION'] = TFSetting(f"{self._dic['APP_NAME'].value} Version MAJOR.MINOR", None, "0.1", "In theory, an update of the minor version alone shouldn't induce breaking changes.", False, None)
+        self._dic['MAJOR_MINOR_VERSION'] = TFSetting(f"{self._dic['APP_NAME'].value} Version MAJOR.MINOR", None, "0.5", "In theory, an update of the minor version alone shouldn't induce breaking changes.", False, None)
         self._dic['CONFIG_FILE_PATH'] = TFSetting("Path to Config File", None, curr_file.parents[2] / "Config_TF.json", None, False, None)
         self._dic['IMG_DIR_PATH'] = TFSetting("Internal Directory of Images", None, curr_file.parents[2] / "img", None, False, None)
         self._dic['WORKSPACE_NAME'] = TFSetting("Name of Workspace", None, "Workspace_TF", None, False, None)
@@ -173,7 +174,7 @@ class TFSettings(Screen):
         self._dic['THEME_BACKGROUND_HUE'] = TFSetting("Background hue influencing text color", None, '500', False, None)
 
         # Add user editable ones:
-        self._dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self._dic['WORKSPACE_NAME'].value}", f"???{os.sep}{self._dic['WORKSPACE_NAME'].value}", True, lambda value: self.cb_create_load_tf_workspace(value))
+        self._dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self._dic['WORKSPACE_NAME'].value}", f"???{os.sep}{self._dic['WORKSPACE_NAME'].value}", True, lambda value: self.create_load_tf_workspace(value))
         self._dic['overall_speedfactor'] = TFSetting("Overall Speedfactor", None, 1.0, f"Premultiplied speedfactor that affects the overall speed of the flowing tones.", True, None)
         # TODO: Provide callback that pushes changes in low/high_pitch_limit to toneflower for example.
         self._dic['low_pitch_limit'] = TFSetting("Low Pitch Limit", None, "C4", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)

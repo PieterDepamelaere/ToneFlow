@@ -65,6 +65,7 @@ class MainApp(MDApp):
 
         self._main_widget = None
         self._exception_counter = 0
+        self._mddm = MDDropdownMenu()
         self._context_menus = None
         # To prevent the window from closing, when 'X' is pressed on the windows itself:
         Window.bind(on_request_close=self.on_stop)
@@ -81,17 +82,15 @@ class MainApp(MDApp):
         # {kill -9 27890} (this command sends SIGKILL next return to cinnamon GUI with {Ctrl+Alt+F7}
 
 
-
-
         # Create ToneFlow-settings object and corresponding settings:
         kv_file_main_widget = str(curr_file.parents[1] / "view" / (curr_file.with_suffix(".kv")).name)
         TFSettings(kv_file_main_widget)
 
     def build(self):
         self.icon = str(pl.Path(CU.tfs.dic['IMG_DIR_PATH'].value) / "ToneFlow_Logo_TaskBarIcon.png")
-        # self.Window.bind(on_request_close= lambda x:self.on_stop())
 
         self._main_widget.ids.scr_mngr.add_widget(CU.tfs)
+        # self._mddm.caller= self._main_widget.ids.
 
         return self._main_widget
 
@@ -106,6 +105,7 @@ class MainApp(MDApp):
 
     def set_context_menus(self, context_menus):
         self._context_menus = context_menus
+        self._mddm.items = self._context_menus
 
     def get_main_widget(self):
         return self._main_widget
@@ -142,7 +142,7 @@ class MainApp(MDApp):
         # In case the user did configure a customized path, that path will be filled in:
         text = "" if (CU.tfs.dic['tf_workspace_path'].default_value == CU.tfs.dic['tf_workspace_path'].value) else f"{CU.tfs.dic['tf_workspace_path'].value}"
 
-        content_obj = BoxLayout(orientation='vertical', spacing="12dp", size_hint_y=None, height="120dp")
+        content_obj = BoxLayout(orientation='vertical', spacing="12dp", size_hint_y=None)
 
         # mdlbl1 = MDLabel(text=str(CU.tfs.dic['EXPLANATION_WORKSPACE_PATH'].value))
 
@@ -186,9 +186,9 @@ class MainApp(MDApp):
 
         return True
 
-    def open_context_menu(self, instance):
-        if (self.context_menus != None):
-            mddm = MDDropdownMenu(items=self.context_menus, width_mult=3).open(instance)
+    # def open_context_menu(self, instance):
+    #     if (self.context_menus != None):
+    #         mddm = MDDropdownMenu(caller=self._main_widget.ids., items=self.context_menus, width_mult=3).open(instance)
 
     def open_settings(self, *args):
         # TODO: Experiment in later stage with kivy settings, because it might ruin the setup
