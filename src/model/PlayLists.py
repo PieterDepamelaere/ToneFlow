@@ -12,7 +12,10 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.modalview import ModalView
 from kivy.uix.label import Label
 from kivy.properties import NumericProperty
+from kivy.uix.boxlayout import BoxLayout
 
+from kivymd.uix.label import MDLabel
+from kivymd.uix.textfield import MDTextField
 from kivymd.utils import asynckivy
 from kivymd.toast import toast
 
@@ -242,14 +245,24 @@ class PlayLists(Screen):
         """
         creation_time = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}Concert_{creation_time}"
+        text = f"Concert_{creation_time}"
+
+        content_obj = BoxLayout(orientation='vertical', spacing="12dp", size_hint_y=None)
+
+        mdtf1 = MDTextField()
+        mdtf1.text = text
+        mdtf1.hint_text = f"Name of playlist"
+        mdtf1.helper_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}"
+        mdtf1.helper_text_mode = "on_focus"
+
+        content_obj.add_widget(mdtf1)
 
         CU.show_input_dialog(title=f"Enter Name of New Playlist",
-                             hint_text=dialog_text,
-                             text=dialog_text,
+                             content_obj=content_obj,
                              size_hint=(.7, .4),
                              text_button_ok="Add",
-                             callback=lambda text_button, instance, *args: {self.add_playlist(instance.text_field.text), self.refresh_list()})
+                             text_button_cancel="Cancel",
+                             ok_callback_set=lambda *args, **kwargs: (self.add_playlist(mdtf1.text), self.refresh_list()))
 
     def show_dialog_rename_playlist(self, playlist_rowview):
         """
@@ -257,15 +270,25 @@ class PlayLists(Screen):
         :param playlist_rowview:
         :return:
         """
-        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}" \
-            f"{str(playlist_rowview.playlist_obj.file_path.stem)}"
+
+        text = f"{str(playlist_rowview.playlist_obj.file_path.stem)}"
+
+        content_obj = BoxLayout(orientation='vertical', spacing="12dp", size_hint_y=None)
+
+        mdtf1 = MDTextField()
+        mdtf1.text = text
+        mdtf1.hint_text = f"Name of playlist"
+        mdtf1.helper_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}"
+        mdtf1.helper_text_mode = "on_focus"
+
+        content_obj.add_widget(mdtf1)
 
         CU.show_input_dialog(title=f"Enter New Name for Playlist",
-                             hint_text=dialog_text,
-                             text=dialog_text,
+                             content_obj=content_obj,
                              size_hint=(.7, .4),
                              text_button_ok="Update",
-                             callback=lambda text_button, instance, *args: {self.rename_playlist(playlist_rowview, instance.text_field.text), self.refresh_list()})
+                             text_button_cancel="Cancel",
+                             ok_callback_set=lambda *args, **kwargs: (self.rename_playlist(playlist_rowview, mdtf1.text), self.refresh_list()))
 
     def show_dialog_remove_playlist(self, playlist_rowview):
         """
@@ -280,7 +303,7 @@ class PlayLists(Screen):
                                  size_hint=(.7, .4),
                                  text_button_ok="Remove",
                                  text_button_cancel="Cancel",
-                                 callback=lambda *args: {self.remove_playlist(playlist_rowview, *args), self.refresh_list()})
+                                 ok_callback_set=lambda *args, **kwargs: (self.remove_playlist(playlist_rowview, args), self.refresh_list()))
 
     def show_modal_view_playlist(self, playlist_provider):
         if playlist_provider is not None:

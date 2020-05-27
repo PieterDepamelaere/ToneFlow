@@ -11,7 +11,10 @@ from kivy.utils import get_hex_from_color
 from kivy.uix.screenmanager import Screen
 from kivy.uix.modalview import ModalView
 from kivy.properties import NumericProperty
+from kivy.uix.boxlayout import BoxLayout
 
+from kivymd.uix.label import MDLabel
+from kivymd.uix.textfield import MDTextField
 from kivymd.utils import asynckivy
 from kivymd.toast import toast
 from kivymd.uix.filemanager import MDFileManager
@@ -257,15 +260,24 @@ class Songs(Screen):
         :param song_rowview:
         :return:
         """
-        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}" \
-            f"{str(song_rowview.song_entry_obj.file_path.stem)}"
+
+        text = f"{str(song_rowview.song_entry_obj.file_path.stem)}"
+        content_obj = BoxLayout(orientation='vertical', spacing="12dp", size_hint_y=None)
+
+        mdtf1 = MDTextField()
+        mdtf1.text = text
+        mdtf1.hint_text = f"Name of song"
+        mdtf1.helper_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}"
+        mdtf1.helper_text_mode = "on_focus"
+
+        content_obj.add_widget(mdtf1)
 
         CU.show_input_dialog(title=f"Enter New Name for Song",
-                             hint_text=dialog_text,
-                             text=dialog_text,
+                             content_obj=content_obj,
                              size_hint=(.7, .4),
                              text_button_ok="Update",
-                             callback=lambda text_button, instance, *args: {self.rename_song(song_rowview, instance.text_field.text), self.refresh_list()})
+                             text_button_cancel="Cancel",
+                             ok_callback_set=lambda *args, **kwargs: {self.rename_song(song_rowview, mdtf1.text), self.refresh_list()})
 
     def show_dialog_remove_song(self, song_rowview):
         """
@@ -273,14 +285,14 @@ class Songs(Screen):
         :param song_rowview:
         :return:
         """
-        dialog_text=f"Are you sure want to remove [color={get_hex_from_color(Songs.app.theme_cls.primary_color)}][b]{str(song_rowview.song_entry_obj.file_path.stem)}[/b][/color] from the list? This action cannot be undone."
+        text=f"Are you sure want to remove [color={get_hex_from_color(Songs.app.theme_cls.primary_color)}][b]{str(song_rowview.song_entry_obj.file_path.stem)}[/b][/color] from the list? This action cannot be undone."
 
         CU.show_ok_cancel_dialog(title=f"Are You Sure?",
-                                 text=dialog_text,
+                                 text=text,
                                  size_hint=(.7, .4),
                                  text_button_ok="Remove",
                                  text_button_cancel="Cancel",
-                                 callback=lambda *args: {self.remove_song(song_rowview, *args), self.refresh_list()})
+                                 ok_callback_set=lambda *args: (self.remove_song(song_rowview, args), self.refresh_list()))
 
     def sort_list(self):
         """

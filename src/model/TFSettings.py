@@ -158,8 +158,8 @@ class TFSettings(Screen):
         self._dic['CONFIG_FILE_PATH'] = TFSetting("Path to Config File", None, curr_file.parents[2] / "Config_TF.json", None, False, None)
         self._dic['IMG_DIR_PATH'] = TFSetting("Internal Directory of Images", None, curr_file.parents[2] / "img", None, False, None)
         self._dic['WORKSPACE_NAME'] = TFSetting("Name of Workspace", None, "Workspace_TF", None, False, None)
-        self._dic['EXPLANATION_PLAYLIST_SONG_NAME'] = TFSetting("Explanation Playlist Song Name", None, f"(No spaces, only alphanumeric characters & \"_-\". Leave blank to cancel.)", None, False, None)
-        self._dic['EXPLANATION_WORKSPACE_PATH'] = TFSetting("Explanation Workspace Name", None, f"Preferably choose path on external device like USB flash drive", None, False, None)
+        self._dic['EXPLANATION_PLAYLIST_SONG_NAME'] = TFSetting("Explanation Playlist Song Name", None, f"No spaces, only alphanumeric characters & \"_-\".", None, False, None)
+        self._dic['EXPLANATION_WORKSPACE_PATH'] = TFSetting("Explanation Workspace Name", None, f"Preferably choose path on external device like USB flash drive.", None, False, None)
         self._dic['FILE_SEP_TEXT'] = TFSetting("Exportable File Separator", None, "/FS/", None, False, None)
         self._dic['IMAGES_VIDEOS_DIR_NAME'] = TFSetting("Name of Images_Videos Folder in Workspace", None, "Images_Videos", None, False, None)
         self._dic['PLAYLISTS_DIR_NAME'] = TFSetting("Name of Playlists Folder in Workspace", None, "Playlists", None, False, None)
@@ -385,15 +385,16 @@ class TFSettings(Screen):
         :param setting_rowview:
         :return:
         """
-        dialog_text = f"{TFSettings.EXPLANATION_PLAYLIST_NAME}" \
-            f"{str(setting_rowview.setting_obj.file_path.stem)}"
-
-        CU.show_input_dialog(title=f"Enter New Name for Setting",
-                             hint_text=dialog_text,
-                             text=dialog_text,
-                             size_hint=(.7, .4),
-                             text_button_ok="Update",
-                             callback=lambda text_button, instance, *args: {self.edit_setting(setting_rowview, instance.text_field.text), self.refresh_editable_list()})
+        pass
+        # text = f"{TFSettings.EXPLANATION_PLAYLIST_NAME}" \
+        #     f"{str(setting_rowview.setting_obj.file_path.stem)}"
+        #
+        # CU.show_input_dialog(title=f"Enter New Name for Setting",
+        #                      hint_text=dialog_text,
+        #                      text=text,
+        #                      size_hint=(.7, .4),
+        #                      text_button_ok="Update",
+        #                      callback=lambda text_button, instance, *args, **kwargs: (self.edit_setting(setting_rowview, instance.text_field.text), self.refresh_editable_list()))
 
     def show_dialog_restore_factory_setting(self, setting_rowview):
         """
@@ -401,14 +402,14 @@ class TFSettings(Screen):
         :param setting_rowview:
         :return:
         """
-        dialog_text=f"Are you sure want to restore [color={get_hex_from_color(TFSettings.app.theme_cls.primary_color)}][b]{str(setting_rowview.setting_obj.file_path.stem)}[/b][/color] from the editable_list? This action cannot be undone."
+        text=f"Are you sure want to restore [color={get_hex_from_color(TFSettings.app.theme_cls.primary_color)}][b]{str(setting_rowview.setting_obj.file_path.stem)}[/b][/color] from the editable_list? This action cannot be undone."
 
         CU.show_ok_cancel_dialog(title=f"Are You Sure?",
-                                 text=dialog_text,
+                                 text=text,
                                  size_hint=(.7, .4),
-                                 text_button_ok="Remove",
+                                 text_button_ok="Ok",
                                  text_button_cancel="Cancel",
-                                 callback=lambda *args: {self.restore_factory_setting(setting_rowview, *args), self.refresh_editable_list()})
+                                 ok_callback_set=lambda *args, **kwargs: (self.restore_factory_setting(setting_rowview, args), self.refresh_editable_list()))
 
     def sort_editable_list(self):
         """

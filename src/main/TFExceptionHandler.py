@@ -44,7 +44,7 @@ class TFExceptionHandler(ExceptionHandler):
                 f"{os.linesep}{traceback.format_exc()}", size_hint=(1, None), markup=True)
 
                 # TODO: Rather try the .kv alternative also provided at "https://stackoverflow.com/questions/43666381/wrapping-the-text-of-a-kivy-label" and "https://kivy.org/doc/stable/api-kivy.uix.scrollview.html" that will cleaner and more maintainable
-                mdlbl1.bind(width=lambda *x, **kwargs: mdlbl1.setter('text_size')(mdlbl1, (mdlbl1.width, None)), texture_size=lambda *x, **kwargs: mdlbl1.setter('height')(mdlbl1,mdlbl1.texture_size[1]))
+                mdlbl1.bind(width=lambda *args, **kwargs: mdlbl1.setter('text_size')(mdlbl1, (mdlbl1.width, None)), texture_size=lambda *args, **kwargs: mdlbl1.setter('height')(mdlbl1,mdlbl1.texture_size[1]))
 
                 bl1.add_widget(mdlbl1)
 

@@ -12,13 +12,14 @@ from kivy.utils import get_hex_from_color
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObservableList, ListProperty, StringProperty
-from kivymd.uix.useranimationcard import MDUserAnimationCard
 from kivy.uix.modalview import ModalView
+from kivy.uix.boxlayout import BoxLayout
+
 from kivymd.uix.label import MDLabel
-
-
+from kivymd.uix.textfield import MDTextField
 from kivymd.utils import asynckivy
 from kivymd.toast import toast
+from kivymd.uix.useranimationcard import MDUserAnimationCard
 
 curr_file = pl.Path(os.path.realpath(__file__))
 
@@ -330,14 +331,28 @@ class PlayList(ModalView):
         """
         creation_time = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}Concert_{creation_time}"
+        text = f"Concert_{creation_time}"
 
-        CU.show_input_dialog(title=f"Enter Name of New Playlist",
-                             hint_text=dialog_text,
-                             text=dialog_text,
+        content_obj = BoxLayout(orientation='vertical', spacing="12dp", size_hint_y=None)
+
+        # mdlbl1 = MDLabel(text=str(CU.tfs.dic['EXPLANATION_WORKSPACE_PATH'].value))
+
+        mdtf1 = MDTextField()
+
+        mdtf1.text = text
+        mdtf1.hint_text = f"Name of song"
+        mdtf1.helper_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}"
+        mdtf1.helper_text_mode = "on_focus"
+
+        # content_obj.add_widget(mdlbl1)
+        content_obj.add_widget(mdtf1)
+
+        CU.show_input_dialog(title=f"Enter Name of New Songentry",
+
+                             content_obj=content_obj,
                              size_hint=(.7, .4),
                              text_button_ok="Add",
-                             callback=lambda text_button, instance, *args: {self.add_lineup_entry(instance.text_field.text), self.refresh_list()})
+                             ok_callback_set=lambda text_button, instance, *args, **kwargs: {self.add_lineup_entry(instance.text_field.text), self.refresh_list()})
 
     def show_dialog_rename_lineup_entry(self, lineup_entry_rowview):
         """
