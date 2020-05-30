@@ -100,7 +100,7 @@ class PlayList(ModalView):
         # TODO: Implement the other context menus
 
         # Initializing custom properties:
-        self._block_close = True
+        self._block_close = False
         self._file_path = file_path
 
         self._former_primary_palette, self._former_accent_palette = PlayList.app.theme_cls.primary_palette, PlayList.app.theme_cls.accent_palette
@@ -360,15 +360,16 @@ class PlayList(ModalView):
         :param lineup_entry_rowview:
         :return:
         """
-        dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}" \
-            f"{str(lineup_entry_rowview.lineup_entry_obj.file_path.stem)}"
-
-        CU.show_input_dialog(title=f"Enter New Name for Playlist",
-                             hint_text=dialog_text,
-                             text=dialog_text,
-                             size_hint=(.7, .4),
-                             text_button_ok="Update",
-                             callback=lambda text_button, instance, *args: {self.rename_lineup_entry(lineup_entry_rowview, instance.text_field.text), self.refresh_list()})
+        pass
+        # dialog_text = f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}" \
+        #     f"{str(lineup_entry_rowview.lineup_entry_obj.file_path.stem)}"
+        #
+        # CU.show_input_dialog(title=f"Enter New Name for Playlist",
+        #                      hint_text=dialog_text,
+        #                      text=dialog_text,
+        #                      size_hint=(.7, .4),
+        #                      text_button_ok="Update",
+        #                      callback=lambda text_button, instance, *args: {self.rename_lineup_entry(lineup_entry_rowview, instance.text_field.text), self.refresh_list()})
 
     def show_dialog_remove_lineup_entry(self, lineup_entry_rowview):
         """
@@ -376,14 +377,14 @@ class PlayList(ModalView):
         :param lineup_entry_rowview:
         :return:
         """
-        dialog_text=f"Are you sure want to remove [color={get_hex_from_color(PlayList.app.theme_cls.primary_color)}][b]{str(lineup_entry_rowview.lineup_entry_obj.file_path.stem)}[/b][/color] from the list? This action cannot be undone."
-
-        CU.show_ok_cancel_dialog(title=f"Are You Sure?",
-                                 text=dialog_text,
-                                 size_hint=(.7, .4),
-                                 text_button_ok="Remove",
-                                 text_button_cancel="Cancel",
-                                 callback=lambda *args: {self.remove_lineup_entry(lineup_entry_rowview, *args), self.refresh_list()})
+        # dialog_text=f"Are you sure want to remove [color={get_hex_from_color(PlayList.app.theme_cls.primary_color)}][b]{str(lineup_entry_rowview.lineup_entry_obj.file_path.stem)}[/b][/color] from the list? This action cannot be undone."
+        #
+        # CU.show_ok_cancel_dialog(title=f"Are You Sure?",
+        #                          text=dialog_text,
+        #                          size_hint=(.7, .4),
+        #                          text_button_ok="Remove",
+        #                          text_button_cancel="Cancel",
+        #                          callback=lambda *args: {self.remove_lineup_entry(lineup_entry_rowview, *args), self.refresh_list()})
 
     def show_modal_view_toneflower(self, selected_lineup_entry, *args, **kwargs):
         if CU.tf is None:

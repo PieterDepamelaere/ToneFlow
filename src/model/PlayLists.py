@@ -119,15 +119,12 @@ class PlayLists(Screen):
         :param new_name_playlist:
         :return:
         """
-        # Omit the provided explanation-text in case it was not omitted:
-        new_name_playlist = str(CU.with_consistent_linesep(new_name_playlist)).replace(f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}", "")
-
         # Check the new_name_playlist by means of a regular expression:
         # Only allow names entirely consisting of alphanumeric characters, dashes and underscores
         playlist_to_rename = playlist_rowview.playlist_obj
 
         if re.match("^[\w\d_-]+$", str(new_name_playlist)):
-            filename_playlist = f"{str(new_name_playlist)}.json"
+            filename_playlist = f"{str(new_name_playlist)}{playlist_to_rename.file_path.suffix}"
             if len(list(pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['PLAYLISTS_DIR_NAME'].value).glob(filename_playlist))) > 0:
                 toast(f"{new_name_playlist} already exists")
 
@@ -158,18 +155,15 @@ class PlayLists(Screen):
         :param args:
         :return:
         """
-        decision = args[0]
         playlist_to_delete = playlist_rowview.playlist_obj
 
-        if (str(decision).lower() == "remove"):
-            self._list.remove(playlist_to_delete)
+        self._list.remove(playlist_to_delete)
 
-            file_path_to_delete = playlist_to_delete.file_path
-            if (file_path_to_delete.exists() and file_path_to_delete.is_file()):
-                pl.Path(file_path_to_delete).unlink()
-            toast(f"{str(playlist_to_delete.file_path.stem)} successfully removed")
-        else:
-            toast(f"Canceled removal of {str(playlist_to_delete.file_path.stem)}")
+        file_path_to_delete = playlist_to_delete.file_path
+        if (file_path_to_delete.exists() and file_path_to_delete.is_file()):
+            pl.Path(file_path_to_delete).unlink()
+        toast(f"{str(playlist_to_delete.file_path.stem)} successfully removed")
+
         await asynckivy.sleep(0)
 
     def clear_search_pattern(self):
@@ -296,14 +290,15 @@ class PlayLists(Screen):
         :param playlist_rowview:
         :return:
         """
-        dialog_text=f"Are you sure want to remove [color={get_hex_from_color(PlayLists.app.theme_cls.primary_color)}][b]{str(playlist_rowview.playlist_obj.file_path.stem)}[/b][/color] from the list? This action cannot be undone."
+        text=f"Are you sure want to remove [color={get_hex_from_color(PlayLists.app.theme_cls.primary_color)}][b]{str(playlist_rowview.playlist_obj.file_path.stem)}[/b][/color] from the list? This action cannot be undone."
 
         CU.show_ok_cancel_dialog(title=f"Are You Sure?",
-                                 text=dialog_text,
+                                 text=text,
                                  size_hint=(.7, .4),
                                  text_button_ok="Remove",
                                  text_button_cancel="Cancel",
-                                 ok_callback_set=lambda *args, **kwargs: (self.remove_playlist(playlist_rowview, args), self.refresh_list()))
+                                 ok_callback_set=lambda *args, **kwargs: (self.remove_playlist(playlist_rowview, args), self.refresh_list()),
+                                 cancel_callback_set=lambda *args, **kwargs: (toast(f"Canceled removal of {playlist_rowview.playlist_obj.file_path.stem}")))
 
     def show_modal_view_playlist(self, playlist_provider):
         if playlist_provider is not None:

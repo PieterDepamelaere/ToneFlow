@@ -83,15 +83,13 @@ class Songs(Screen):
         :param new_name_song:
         :return:
         """
-        # Omit the provided explanation-text in case it was not omitted:
-        new_name_song = str(CU.with_consistent_linesep(new_name_song)).replace(f"{CU.tfs.dic['EXPLANATION_PLAYLIST_SONG_NAME'].value}{os.linesep}", "")
 
         # Check the new_name_song by means of a regular expression:
         # Only allow names entirely consisting of alphanumeric characters, dashes and underscores
         song_to_rename = song_rowview.song_entry_obj
 
         if re.match("^[\w\d_-]+$", str(new_name_song)):
-            filename_song = f"{str(new_name_song)}.{song_to_rename.file_path.suffix}"
+            filename_song = f"{str(new_name_song)}{song_to_rename.file_path.suffix}"
             if len(list(pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['RAW_MIDI_DIR_NAME'].value).glob(filename_song))) > 0:
                 toast(f"{new_name_song} already exists")
 
@@ -122,18 +120,15 @@ class Songs(Screen):
         :param args:
         :return:
         """
-        decision = args[0]
         song_to_delete = song_rowview.song_entry_obj
 
-        if (str(decision).lower() == "remove"):
-            self._list.remove(song_to_delete)
+        self._list.remove(song_to_delete)
 
-            file_path_to_delete = song_to_delete.file_path
-            if (file_path_to_delete.exists() and file_path_to_delete.is_file()):
-                pl.Path(file_path_to_delete).unlink()
-            toast(f"{str(song_to_delete.file_path.stem)} successfully removed")
-        else:
-            toast(f"Canceled removal of {str(song_to_delete.file_path.stem)}")
+        file_path_to_delete = song_to_delete.file_path
+        if (file_path_to_delete.exists() and file_path_to_delete.is_file()):
+            pl.Path(file_path_to_delete).unlink()
+        toast(f"{str(song_to_delete.file_path.stem)} successfully removed")
+
         await asynckivy.sleep(0)
 
     def clear_search_pattern(self):
@@ -292,7 +287,8 @@ class Songs(Screen):
                                  size_hint=(.7, .4),
                                  text_button_ok="Remove",
                                  text_button_cancel="Cancel",
-                                 ok_callback_set=lambda *args: (self.remove_song(song_rowview, args), self.refresh_list()))
+                                 ok_callback_set=lambda *args, **kwargs: (self.remove_song(song_rowview, args), self.refresh_list()),
+                                 cancel_callback_set=lambda *args, **kwargs: (toast(f"Canceled removal of {str(song_rowview.song_entry_obj.file_path.stem)}")))
 
     def sort_list(self):
         """
