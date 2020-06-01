@@ -165,6 +165,7 @@ class TFSettings(Screen):
         self._dic['PLAYLISTS_DIR_NAME'] = TFSetting("Name of Playlists Folder in Workspace", None, "Playlists", None, False, None)
         self._dic['PREP_MIDI_DIR_NAME'] = TFSetting("Name of Prep_MIDI Folder in Workspace", None, "Songs_Prep_MIDI", None, False, None)
         self._dic['RAW_MIDI_DIR_NAME'] = TFSetting("Name of Raw_MIDI Folder in Workspace", None, "Songs_Raw_MIDI", None, False, None)
+        self._dic['MIDI_FILE_EXTENSIONS'] = TFSetting("Supported MIDI File Extensions", None, [".mid", ".midi"], None, False, None)
         self._dic['SCREEN_HELP_CLASS'] = TFSetting("Help", None, Help, False, None)
         self._dic['SCREEN_PLAYLIST_CLASS'] = TFSetting("Lineup", None, PlayList, False, None)
         self._dic['SCREEN_PLAYLISTS_CLASS'] = TFSetting("Playlists", None, PlayLists, False, None)

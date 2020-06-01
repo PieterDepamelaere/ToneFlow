@@ -186,7 +186,7 @@ class Songs(Screen):
         """
         # Depending on the amount of time it takes to run through the refresh, the spinner will be more/longer visible:
         for song_folder in [pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['RAW_MIDI_DIR_NAME'].value)] + self._list_additional_song_locations:
-            for pattern in ["*.mid", "*.midi"]:
+            for pattern in ["*" + extension for extension in CU.tfs.dic['MIDI_FILE_EXTENSIONS'].value]:
                 for file_path in song_folder.rglob(pattern):
                     song = SongEntry(file_path=file_path, mute_play_along=True, songlevel_speedfactor=1.0)
                     self._list.append(song)
@@ -202,23 +202,25 @@ class Songs(Screen):
         :return:
         """
         mode = False
-        modal_view = ModalView(size_hint=(1, 1), auto_dismiss=False)
         file_manager = MDFileManager(
-            exit_manager=lambda *args: self.on_cancel_filemanager(modal_view, *args),
-            select_path=lambda *args: self.on_selected_path_filemanager(modal_view, *args),
+            # ext=["mid", "midi"],
+            search="all",
+            exit_manager=lambda *args, **kwargs: (toast(f"Canceled"), file_manager.close()),
+            select_path=lambda *args, **kwargs: (self.on_selected_path_filemanager(args, kwargs), file_manager.close()),
             previous=mode # Very special naming convention, False means listview-mode, True means Thumbnail mode
         )
-        modal_view.add_widget(file_manager)
-        file_manager.show(str(pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['RAW_MIDI_DIR_NAME'].value)))
-        modal_view.open()
+        file_manager.ext = CU.tfs.dic['MIDI_FILE_EXTENSIONS'].value
 
-    def on_selected_path_filemanager(self, modal_view, *args):
+        file_manager.show(str(pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['RAW_MIDI_DIR_NAME'].value)))
+
+    def on_selected_path_filemanager(self, *args, **kwargs):
         """It will be called when you click on the file name
         or the catalog selection button.
         :type path: str;
         :param path: path to the selected directory or file;
         """
-        path = CU.safe_cast(args[0], pl.Path, None)
+
+        path = CU.safe_cast(args[0][0], pl.Path, None)
         if path.is_file():
             # To make sure that whole parent directory is scanned for additional song-files:
             path = path.parents[0]
@@ -242,9 +244,8 @@ class Songs(Screen):
             toast(f"{path} added to search scope")
 
         self.refresh_list()
-        modal_view.dismiss()
 
-    def on_cancel_filemanager(self, modal_view, *args):
+    def on_cancel_filemanager(self, modal_view, *args, **kwargs):
         """Called when the user reaches the root of the directory tree."""
         modal_view.dismiss()
         toast(f"Canceled")

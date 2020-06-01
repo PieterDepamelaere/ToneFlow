@@ -186,17 +186,18 @@ class Help(Screen):
         Scan the workspace-Help folder for help.
         :return:
         """
-        # Depending on the amount of time it takes to run through the refresh, the spinner will be more/longer visible:
-        for help_folder in [pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['RAW_MIDI_DIR_NAME'].value)] + self._list_additional_help_locations:
-            for pattern in ["*.mid", "*.midi"]:
-                for file_path in help_folder.rglob(pattern):
-                    help = SongEntry(file_path=file_path, mute_play_along=True, helplevel_speedfactor=1.0)
-                    self._list.append(help)
-                    await asynckivy.sleep(0)
-
-        # TODO: Make overscroll easier than it is now, in fact scrollbar should be always visible
-        await self.async_filter_list()
-        self.ids.refresh_layout.refresh_done()
+        pass
+        # # Depending on the amount of time it takes to run through the refresh, the spinner will be more/longer visible:
+        # for help_folder in [pl.Path(CU.tfs.dic['tf_workspace_path'].value / CU.tfs.dic['RAW_MIDI_DIR_NAME'].value)] + self._list_additional_help_locations:
+        #     for pattern in ["*.mid", "*.midi"]:
+        #         for file_path in help_folder.rglob(pattern):
+        #             help = SongEntry(file_path=file_path, mute_play_along=True, helplevel_speedfactor=1.0)
+        #             self._list.append(help)
+        #             await asynckivy.sleep(0)
+        #
+        # # TODO: Make overscroll easier than it is now, in fact scrollbar should be always visible
+        # await self.async_filter_list()
+        # self.ids.refresh_layout.refresh_done()
 
     def show_filemanager_add_help_location(self):
         """
