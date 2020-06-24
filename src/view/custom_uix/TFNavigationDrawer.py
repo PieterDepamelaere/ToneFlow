@@ -104,8 +104,8 @@ from kivymd.uix.list import (
 )
 from kivymd.uix.toolbar import MDToolbar
 from kivymd.theming import ThemableBehavior
-from src.view.custom_uix.navigationdrawer import (
-    NavigationDrawer as VendorNavigationDrawer,
+from src.view.custom_uix.navigationdrawer.OriginalNavigationDrawer import (
+    OriginalNavigationDrawer as VendorNavigationDrawer,
 )
 from kivymd import images_path
 from kivymd.uix.behaviors import RectangularElevationBehavior
@@ -135,7 +135,7 @@ Builder.load_string(
 <TFNavigationLayout>
 
 
-<TFMDNavigationDrawer>
+<TFNavigationDrawer>
     _list: list
     _drawer_logo: drawer_logo
     _drawer_title: drawer_title
@@ -397,7 +397,7 @@ class TFNavigationDrawerDivider(OneLineListItem):
         self.height = dp(16)
 
 
-class TFMDNavigationDrawer(
+class TFNavigationDrawer(
     BoxLayout, ThemableBehavior, RectangularElevationBehavior
 ):
     _elevation = NumericProperty(0)

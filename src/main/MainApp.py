@@ -38,6 +38,10 @@ from kivymd.toast import toast
 from kivymd.color_definitions import palette
 from kivymd.theming_dynamic_text import get_contrast_text_color
 from kivymd.color_definitions import colors
+from kivymd.uix.menu import MDDropdownMenu
+from kivymd.theming import ThemableBehavior
+from kivymd.uix.behaviors import RectangularElevationBehavior
+from kivymd.uix.boxlayout import MDBoxLayout
 
 from src.main.TFExceptionHandler import TFExceptionHandler
 from src.model.CommonUtils import CommonUtils as CU
@@ -45,6 +49,12 @@ from src.model.TFSettings import TFSettings
 
 from kivy.base import ExceptionManager
 
+class CustomToolbar(
+    ThemableBehavior, RectangularElevationBehavior, MDBoxLayout,
+):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.md_bg_color = self.theme_cls.primary_color
 
 class MainApp(MDApp):
     """
@@ -118,16 +128,22 @@ class MainApp(MDApp):
 
     def convert_dict_to_context_menus(self, items):
         # Depending on the screen other context oriented options should appear under the three vertical dots
+
+        menu_items = [{"icon": "git", "text": i} for i in range(5)]
+        self._mddm = MDDropdownMenu(caller=self.main_widget.ids.toolbar.ids.right_actions, items=menu_items, width_mult=5)
+
         if (items is not None):
-            self.context_menus = [
-                {
-                    "viewclass": "MDMenuItem",
-                    "text": f"{key}",
-                    "text_color": get_contrast_text_color(self.theme_cls.primary_color, True),
-                    "callback": items[key]
-                }
-                for key in items
-            ]
+
+            pass
+            # self.context_menus = [
+            #     {
+            #         "viewclass": "MDMenuItem",
+            #         "text": f"{key}",
+            #         "text_color": get_contrast_text_color(self.theme_cls.primary_color, True),
+            #         "callback": items[key]
+            #     }
+            #     for key in items
+            # ]
         else:
             self.context_menus = None
 
