@@ -1,86 +1,165 @@
 #######################################################
 
 from kivy.lang import Builder
-from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import StringProperty
 
 from kivymd.app import MDApp
-from kivymd.uix.button import MDFlatButton
-from kivymd.uix.dialog import MDDialog
-from src.model.CommonUtils import CommonUtils as CU
-from kivymd.toast import toast
-from kivymd.uix.label import MDLabel
-from kivymd.uix.textfield import MDTextField
-from kivymd.uix.textfield import MDTextFieldRound
+from kivymd.uix.menu import MDDropdownMenu
+from kivymd.theming import ThemableBehavior
+from kivymd.uix.behaviors import RectangularElevationBehavior
+from kivymd.uix.boxlayout import MDBoxLayout
 
 KV = '''
-<NewDraftContent>
-    id: id_content
-    orientation: "vertical"
-    spacing: "12dp"
+<CustomToolbar>:
     size_hint_y: None
-    height: "120dp"
+    height: self.theme_cls.standard_increment
+    padding: "5dp"
+    spacing: "12dp"
 
-    MDTextField:
-        id: city_field
-        hint_text: "City" 
+    MDIconButton:
+        id: button_1
+        icon: "menu"
+        pos_hint: {"center_y": .5}
+        on_release: app.menu_1.open()
 
-    MDTextField:
-        id: street_field
-        hint_text: "Street"
+    MDLabel:
+        text: "MDDropdownMenu"
+        pos_hint: {"center_y": .5}
+        size_hint_x: None
+        width: self.texture_size[0]
+        text_size: None, None
+        font_style: 'H6'
+
+    Widget:
+
+    MDIconButton:
+        id: button_2
+        icon: "dots-vertical"
+        pos_hint: {"center_y": .5}
+        on_release: app.menu_2.open()
 
 
-FloatLayout:
+Screen:
 
-    MDFlatButton:
-        text: "ALERT DIALOG"
-        pos_hint: {'center_x': .5, 'center_y': .5}
-        on_release: app.show_confirmation_dialog()
+    CustomToolbar:
+        id: toolbar
+        elevation: 10
+        pos_hint: {"top": 1}
 '''
 
-class NewDraftContent(BoxLayout):
-    pass
 
-class Example(MDApp):
-    dialog = None
+class CustomToolbar(
+    ThemableBehavior, RectangularElevationBehavior, MDBoxLayout,
+):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.md_bg_color = self.theme_cls.primary_color
+
+
+class Test(MDApp):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.screen = Builder.load_string(KV)
+        self.menu_1 = self.create_menu(
+            "Button menu", self.screen.ids.toolbar.ids.button_1
+        )
+        self.menu_2 = self.create_menu(
+            "Button dots", self.screen.ids.toolbar.ids.button_2
+        )
+
+    def create_menu(self, text, instance):
+        menu_items = [{"icon": "git", "text": text} for i in range(5)]
+        return MDDropdownMenu(caller=instance, items=menu_items, width_mult=5)
 
     def build(self):
-        return Builder.load_string(KV)
-
-    def callback_like_never_before(self, content_obj, *args, **kwargs):
-        print(f"callback fires")
-        # print(content_obj[0].ids['city_field'].text)
-
-        # content_obj[0][0].text
-        print("printing args")
-        print(args[0])
+        return self.screen
 
 
-    def show_confirmation_dialog(self):
-
-        dialog_text=f"foo bar"
-        content_obj = BoxLayout(orientation='vertical', spacing="12dp", size_hint_y=None, height="120dp")
-
-        mdlbl1 = MDLabel(text=f"This is explanation label")
-
-        mdtf1 = MDTextField()
-
-        mdtf1.hint_text="override"
-        mdtf1.helper_text = "wqsdf"
-        mdtf1.helper_text_mode = "on_focus"
-
-        content_obj.add_widget(mdlbl1)
-        content_obj.add_widget(mdtf1)
-
-        # CU.show_input_dialog(title="Please Enter", content_obj=content_obj, size_hint=(.8, .4),
-          #                    text_button_ok="OK", text_button_cancel="CANCEL", ok_callback_set=lambda *args, **kwargs: (print(f'wow outside {args[0]}'), self.callback_like_never_before(args, kwargs)))
-
-        CU.show_ok_cancel_dialog(f"This is the title", "Do you agree with this", size_hint=(.8, .4), text_button_ok="Yes", text_button_cancel="No", ok_callback_set=lambda *args, **kwargs: self.callback_like_never_before(args, kwargs))
-
-        print(f"from outside after dialog call")
+Test().run()
 
 
-Example().run()
+#######################################################
+
+# from kivy.lang import Builder
+# from kivy.uix.boxlayout import BoxLayout
+# from kivy.properties import StringProperty
+#
+# from kivymd.app import MDApp
+# from kivymd.uix.button import MDFlatButton
+# from kivymd.uix.dialog import MDDialog
+# from src.model.CommonUtils import CommonUtils as CU
+# from kivymd.toast import toast
+# from kivymd.uix.label import MDLabel
+# from kivymd.uix.textfield import MDTextField
+# from kivymd.uix.textfield import MDTextFieldRound
+#
+# KV = '''
+# <NewDraftContent>
+#     id: id_content
+#     orientation: "vertical"
+#     spacing: "12dp"
+#     size_hint_y: None
+#     height: "120dp"
+#
+#     MDTextField:
+#         id: city_field
+#         hint_text: "City"
+#
+#     MDTextField:
+#         id: street_field
+#         hint_text: "Street"
+#
+#
+# FloatLayout:
+#
+#     MDFlatButton:
+#         text: "ALERT DIALOG"
+#         pos_hint: {'center_x': .5, 'center_y': .5}
+#         on_release: app.show_confirmation_dialog()
+# '''
+#
+# class NewDraftContent(BoxLayout):
+#     pass
+#
+# class Example(MDApp):
+#     dialog = None
+#
+#     def build(self):
+#         return Builder.load_string(KV)
+#
+#     def callback_like_never_before(self, content_obj, *args, **kwargs):
+#         print(f"callback fires")
+#         # print(content_obj[0].ids['city_field'].text)
+#
+#         # content_obj[0][0].text
+#         print("printing args")
+#         print(args[0])
+#
+#
+#     def show_confirmation_dialog(self):
+#
+#         dialog_text=f"foo bar"
+#         content_obj = BoxLayout(orientation='vertical', spacing="12dp", size_hint_y=None, height="120dp")
+#
+#         mdlbl1 = MDLabel(text=f"This is explanation label")
+#
+#         mdtf1 = MDTextField()
+#
+#         mdtf1.hint_text="override"
+#         mdtf1.helper_text = "wqsdf"
+#         mdtf1.helper_text_mode = "on_focus"
+#
+#         content_obj.add_widget(mdlbl1)
+#         content_obj.add_widget(mdtf1)
+#
+#         # CU.show_input_dialog(title="Please Enter", content_obj=content_obj, size_hint=(.8, .4),
+#           #                    text_button_ok="OK", text_button_cancel="CANCEL", ok_callback_set=lambda *args, **kwargs: (print(f'wow outside {args[0]}'), self.callback_like_never_before(args, kwargs)))
+#
+#         CU.show_ok_cancel_dialog(f"This is the title", "Do you agree with this", size_hint=(.8, .4), text_button_ok="Yes", text_button_cancel="No", ok_callback_set=lambda *args, **kwargs: self.callback_like_never_before(args, kwargs))
+#
+#         print(f"from outside after dialog call")
+#
+#
+# Example().run()
 
 ########################################"
 

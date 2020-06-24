@@ -82,7 +82,7 @@
         id: button_2
         icon: "dots-vertical"
         pos_hint: {"center_y": .5}
-        on_release: app.menu_2.open()
+        on_release: app._mddm.open()
 
 <ContentNavigationDrawer@TFNavigationDrawer>:
 
@@ -145,10 +145,10 @@ TFNavigationLayout:
         BoxLayout:
             orientation: 'vertical'
 
-            CustomToolbar:
-                id: toolbar2
-                elevation: 10
-                pos_hint: {"top": 1}
+#            CustomToolbar:
+#                id: toolbar2
+#                elevation: 10
+#                pos_hint: {"top": 1}
 
             TFToolbar:
                 id: toolbar

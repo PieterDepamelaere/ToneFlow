@@ -77,6 +77,7 @@ class MainApp(MDApp):
         self._exception_counter = 0
         self._mddm = MDDropdownMenu()
         self._context_menus = None
+
         # To prevent the window from closing, when 'X' is pressed on the windows itself:
         Window.bind(on_request_close=self.on_stop)
         Window.exit_on_escape = 1
@@ -100,7 +101,7 @@ class MainApp(MDApp):
         self.icon = str(pl.Path(CU.tfs.dic['IMG_DIR_PATH'].value) / "ToneFlow_Logo_TaskBarIcon.png")
 
         self._main_widget.ids.scr_mngr.add_widget(CU.tfs)
-        # self._mddm.caller= self._main_widget.ids.
+        self.convert_dict_to_context_menus([]) #TODO PDP: Remove this line:
 
         return self._main_widget
 
@@ -115,7 +116,7 @@ class MainApp(MDApp):
 
     def set_context_menus(self, context_menus):
         self._context_menus = context_menus
-        self._mddm.items = self._context_menus
+        # self._mddm.items = self._context_menus
 
     def get_main_widget(self):
         return self._main_widget
@@ -126,11 +127,15 @@ class MainApp(MDApp):
     main_widget = property(get_main_widget, set_main_widget)
     context_menus = property(get_context_menus, set_context_menus)
 
+
     def convert_dict_to_context_menus(self, items):
         # Depending on the screen other context oriented options should appear under the three vertical dots
 
-        menu_items = [{"icon": "git", "text": i} for i in range(5)]
-        self._mddm = MDDropdownMenu(caller=self.main_widget.ids.toolbar.ids.right_actions, items=menu_items, width_mult=5)
+        menu_items = [{"icon": "android", "text": "try"} for i in range(5)]
+
+        if (self.main_widget.ids.toolbar.ids.right_actions is not None):
+
+            self._mddm = MDDropdownMenu(caller=self.main_widget.ids.toolbar.ids.right_actions, items=menu_items, width_mult=3)
 
         if (items is not None):
 

@@ -420,7 +420,7 @@ ThemableBehavior, RectangularElevationBehavior, MDBoxLayout,
 
     icon = StringProperty("android")
     """
-    Floating button. Onle for :class:`~MDBottomAppBar` class.
+    Floating button. Only for :class:`~MDBottomAppBar` class.
 
     :attr:`icon` is an :class:`~kivy.properties.StringProperty`
     and defaults to `'android'`.
