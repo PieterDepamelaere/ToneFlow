@@ -132,14 +132,14 @@ class MainApp(MDApp):
     def convert_dict_to_context_menus(self, items):
         # Depending on the screen other context oriented options should appear under the three vertical dots
 
-        menu_items = [{"icon": "android", "text": f"try{i}"} for i in range(5)]
+        menu_items = [{"icon": "git", "text": f"try{i}"} for i in range(5)]
 
-        if (self.main_widget.ids.toolbar2.ids.button_2 is not None):
+        # if (self.main_widget.ids.toolbar.ids.right_actions is not None):
 
-            self.ddm = TFDropdownMenu(caller=self.main_widget.ids.toolbar2.ids.button_2, items=menu_items, width_mult=3)
+            # self.ddm = TFDropdownMenu(caller=self.main_widget.ids.toolbar2.ids.button_2, items=menu_items, width_mult=3)
 
-            # self.ddm = TFDropdownMenu(caller=self.main_widget.ids.toolbar.ids.right_actions, items=menu_items,
-            #                           width_mult=3)
+        self.ddm = TFDropdownMenu(caller=self.main_widget.ids.toolbar.ids.right_actions, use_icon_item=True, items=menu_items,
+                                  width_mult=3)
 
         if (items is not None):
 
@@ -286,9 +286,6 @@ if __name__ == "__main__":
 
 
 
-
     # =========================================================================
-    # IDEAS DURING FURTHER IMPLEMENTATION:
+    # IDEAS TO IMPLEMENT IN FUTURE:
     # TODO: Make mouse scrollwheel tempo/speed-control in concert mode.
-
-

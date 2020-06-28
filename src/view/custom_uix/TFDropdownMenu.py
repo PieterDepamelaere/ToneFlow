@@ -1,37 +1,25 @@
 """
 Components/Menu
 ===============
-
 .. seealso::
-
     `Material Design spec, Menus <https://material.io/components/menus>`_
-
 .. rubric:: Menus display a list of choices on temporary surfaces.
-
 .. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/menu-previous.png
     :align: center
-
 Usage
 -----
-
 .. code-block:: python
-
     from kivy.lang import Builder
-
     from kivymd.app import MDApp
     from kivymd.uix.menu import TFDropdownMenu
-
     KV = '''
     Screen:
-
         MDRaisedButton:
             id: button
             text: "PRESS ME"
             pos_hint: {"center_x": .5, "center_y": .5}
             on_release: app.menu.open()
     '''
-
-
     class Test(MDApp):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
@@ -40,71 +28,48 @@ Usage
             self.menu = TFDropdownMenu(
                 caller=self.screen.ids.button, items=menu_items, width_mult=4
             )
-
         def build(self):
             return self.screen
-
-
     Test().run()
-
 .. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/menu-usage.gif
     :align: center
-
 .. Warning:: Do not create the :class:`~TFDropdownMenu` object when you open
     the menu window. Because on a mobile device this one will be very slow!
-
 Wrong
 -----
-
 .. code-block:: python
-
     menu = TFDropdownMenu(caller=self.screen.ids.button, items=menu_items)
     menu.open()
-
 .. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/menu-wrong.gif
     :align: center
-
 Customization of menu item
 --------------------------
-
 .. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/menu-right.gif
     :align: center
-
 You must create a new class that inherits from the :class:`~RightContent` class:
-
 .. code-block:: python
-
     class RightContentCls(RightContent):
         pass
-
 Now in the KV rule you can create your own elements that will be displayed in
 the menu item on the right:
-
 .. code-block:: kv
-
     <RightContentCls>
         disabled: True
-
         MDIconButton:
             icon: root.icon
             user_font_size: "16sp"
             pos_hint: {"center_y": .5}
-
         MDLabel:
             text: root.text
             font_style: "Caption"
             size_hint_x: None
             width: self.texture_size[0]
             text_size: None, None
-
 .. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/menu-right-detail.png
     :align: center
-
 Now create menu items as usual, but add the key ``right_content_cls`` whose
 value is the class ``RightContentCls`` that you created:
-
 .. code-block:: python
-
     menu_items = [
         {
             "right_content_cls": RightContentCls(
@@ -118,48 +83,34 @@ value is the class ``RightContentCls`` that you created:
     self.menu = TFDropdownMenu(
         caller=self.screen.ids.button, items=menu_items, width_mult=4
     )
-
 Full example
 ------------
-
 .. code-block:: python
-
     from kivy.lang import Builder
-
     from kivymd.app import MDApp
     from kivymd.uix.menu import TFDropdownMenu, RightContent
-
     KV = '''
     <RightContentCls>
         disabled: True
-
         MDIconButton:
             icon: root.icon
             user_font_size: "16sp"
             pos_hint: {"center_y": .5}
-
         MDLabel:
             text: root.text
             font_style: "Caption"
             size_hint_x: None
             width: self.texture_size[0]
             text_size: None, None
-
-
     Screen:
-
         MDRaisedButton:
             id: button
             text: "PRESS ME"
             pos_hint: {"center_x": .5, "center_y": .5}
             on_release: app.menu.open()
     '''
-
-
     class RightContentCls(RightContent):
         pass
-
-
     class Test(MDApp):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
@@ -177,43 +128,32 @@ Full example
             self.menu = TFDropdownMenu(
                 caller=self.screen.ids.button, items=menu_items, width_mult=4
             )
-
         def build(self):
             return self.screen
-
-
     Test().run()
-
 Menu with MDToolbar
 -------------------
-
 .. Warning:: The :class:`~TFDropdownMenu` does not work with the standard
     :class:`~kivymd.uix.toolbar.MDToolbar`. You can use your own
     ``CustomToolbar`` and bind the menu window output to its elements.
-
 .. code-block:: python
-
     from kivy.lang import Builder
-
     from kivymd.app import MDApp
     from kivymd.uix.menu import TFDropdownMenu
     from kivymd.theming import ThemableBehavior
     from kivymd.uix.behaviors import RectangularElevationBehavior
     from kivymd.uix.boxlayout import MDBoxLayout
-
     KV = '''
     <CustomToolbar>:
         size_hint_y: None
         height: self.theme_cls.standard_increment
         padding: "5dp"
         spacing: "12dp"
-
         MDIconButton:
             id: button_1
             icon: "menu"
             pos_hint: {"center_y": .5}
             on_release: app.menu_1.open()
-
         MDLabel:
             text: "TFDropdownMenu"
             pos_hint: {"center_y": .5}
@@ -221,33 +161,24 @@ Menu with MDToolbar
             width: self.texture_size[0]
             text_size: None, None
             font_style: 'H6'
-
         Widget:
-
         MDIconButton:
             id: button_2
             icon: "dots-vertical"
             pos_hint: {"center_y": .5}
             on_release: app.menu_2.open()
-
-
     Screen:
-
         CustomToolbar:
             id: toolbar
             elevation: 10
             pos_hint: {"top": 1}
     '''
-
-
     class CustomToolbar(
         ThemableBehavior, RectangularElevationBehavior, MDBoxLayout,
     ):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
             self.md_bg_color = self.theme_cls.primary_color
-
-
     class Test(MDApp):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
@@ -258,41 +189,27 @@ Menu with MDToolbar
             self.menu_2 = self.create_menu(
                 "Button dots", self.screen.ids.toolbar.ids.button_2
             )
-
         def create_menu(self, text, instance):
             menu_items = [{"icon": "git", "text": text} for i in range(5)]
             return TFDropdownMenu(caller=instance, items=menu_items, width_mult=5)
-
         def build(self):
             return self.screen
-
-
     Test().run()
-
 .. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/menu-with-toolbar.gif
     :align: center
-
 Position menu
 =============
-
 Bottom position
 ---------------
-
 .. seealso::
-
     :attr:`~TFDropdownMenu.position`
-
 .. code-block:: python
-
     from kivy.clock import Clock
     from kivy.lang import Builder
-
     from kivymd.app import MDApp
     from kivymd.uix.menu import TFDropdownMenu
-
     KV = '''
     Screen
-
         MDTextField:
             id: field
             pos_hint: {'center_x': .5, 'center_y': .5}
@@ -301,8 +218,6 @@ Bottom position
             hint_text: "Password"
             on_focus: if self.focus: app.menu.open()
     '''
-
-
     class Test(MDApp):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
@@ -315,43 +230,29 @@ Bottom position
                 callback=self.set_item,
                 width_mult=4,
             )
-
         def set_item(self, instance):
             def set_item(interval):
                 self.screen.ids.field.text = instance.text
-
             Clock.schedule_once(set_item, 0.5)
-
         def build(self):
             return self.screen
-
-
     Test().run()
-
 .. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/menu-position.gif
     :align: center
-
 Center position
 ---------------
-
 .. code-block:: python
-
     from kivy.lang import Builder
-
     from kivymd.app import MDApp
     from kivymd.uix.menu import TFDropdownMenu
-
     KV = '''
     Screen
-
         MDDropDownItem:
             id: drop_item
             pos_hint: {'center_x': .5, 'center_y': .5}
             text: 'Item 0'
             on_release: app.menu.open()
     '''
-
-
     class Test(MDApp):
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
@@ -364,83 +265,60 @@ Center position
                 callback=self.set_item,
                 width_mult=4,
             )
-
         def set_item(self, instance):
             self.screen.ids.drop_item.set_item(instance.text)
-
         def build(self):
             return self.screen
-
-
     Test().run()
-
 .. image:: https://github.com/HeaTTheatR/KivyMD-data/raw/master/gallery/kivymddoc/menu-position-center.gif
     :align: center
 """
 
-__all__ = (
-    "TFDropdownMenu",
-    "TFMenuItem",
-    "RightContent",
-)
+__all__ = ("TFDropdownMenu", "RightContent")
 
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.lang import Builder
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.scrollview import ScrollView
 from kivy.metrics import dp
 from kivy.properties import (
-    NumericProperty,
+    BooleanProperty,
     ListProperty,
+    NumericProperty,
+    ObjectProperty,
     OptionProperty,
     StringProperty,
-    ObjectProperty,
-    BooleanProperty,
 )
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.scrollview import ScrollView
 
 import kivymd.material_resources as m_res
 from kivymd.theming import ThemableBehavior
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.list import (
-    OneLineAvatarIconListItem,
     IRightBodyTouch,
+    OneLineAvatarIconListItem,
     OneLineListItem,
 )
 
 Builder.load_string(
     """
 #:import STD_INC kivymd.material_resources.STANDARD_INCREMENT
-
-
 <RightContent>
     adaptive_width: True
-
-
-<TFMenuItem>
-    _txt_top_pad: "8dp"
-    _txt_bot_pad: "16dp"
-    on_release: root.parent.parent.parent.parent.dispatch("on_dismiss")
-
+<TFMenuItemIcon>
     IconLeftWidget:
+        id: icon_widget
         icon: root.icon
-        pos_hint: {"center_y": .5}
-
-
 <TFMenu>
     size_hint: None, None
     width: root.width_mult * STD_INC
     bar_width: 0
-
     MDGridLayout:
         id: box
         cols: 1
         adaptive_height: True
-
-
 <TFDropdownMenu>
-
     MDCard:
         id: card
         elevation: 10
@@ -449,7 +327,6 @@ Builder.load_string(
         pos: md_menu.pos
         md_bg_color: 0, 0, 0, 0
         opacity: md_menu.opacity
-
         canvas:
             Color:
                 rgba: root.background_color if root.background_color else root.theme_cls.bg_dark
@@ -457,7 +334,6 @@ Builder.load_string(
                 size: self.size
                 pos: self.pos
                 radius: [7,]
-
         TFMenu:
             id: md_menu
             width_mult: root.width_mult
@@ -474,11 +350,6 @@ class RightContent(IRightBodyTouch, MDBoxLayout):
 
 
 class TFMenuItemIcon(OneLineAvatarIconListItem):
-    text = StringProperty()
-    icon = StringProperty()
-
-
-class TFMenuItem(OneLineListItem):
     icon = StringProperty()
 
 
@@ -493,7 +364,6 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     items = ListProperty()
     """
     See :attr:`~kivy.uix.recycleview.RecycleView.data`.
-
     :attr:`items` is a :class:`~kivy.properties.ListProperty`
     and defaults to `[]`.
     """
@@ -502,10 +372,8 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     """
     This number multiplied by the standard increment (56dp on mobile,
     64dp on desktop, determines the width of the menu items.
-
     If the resulting number were to be too big for the application Window,
     the multiplier will be adjusted for the biggest possible one.
-
     :attr:`width_mult` is a :class:`~kivy.properties.NumericProperty`
     and defaults to `1`.
     """
@@ -513,7 +381,6 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     max_height = NumericProperty()
     """
     The menu will grow no bigger than this number. Set to 0 for no limit.
-
     :attr:`max_height` is a :class:`~kivy.properties.NumericProperty`
     and defaults to `0`.
     """
@@ -521,7 +388,6 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     border_margin = NumericProperty("4dp")
     """
     Margin between Window border and menu.
-
     :attr:`border_margin` is a :class:`~kivy.properties.NumericProperty`
     and defaults to `4dp`.
     """
@@ -530,7 +396,6 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     """
     Where the menu will grow vertically to when opening. Set to None to let
     the widget pick for you. Available options are: `'up'`, `'down'`.
-
     :attr:`ver_growth` is a :class:`~kivy.properties.OptionProperty`
     and defaults to `None`.
     """
@@ -539,7 +404,6 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     """
     Where the menu will grow horizontally to when opening. Set to None to let
     the widget pick for you. Available options are: `'left'`, `'right'`.
-
     :attr:`hor_growth` is a :class:`~kivy.properties.OptionProperty`
     and defaults to `None`.
     """
@@ -547,7 +411,6 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     background_color = ListProperty()
     """
     Color of the background of the menu.
-
     :attr:`background_color` is a :class:`~kivy.properties.ListProperty`
     and defaults to `[]`.
     """
@@ -555,7 +418,6 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     opening_transition = StringProperty("out_cubic")
     """
     Type of animation for opening a menu window.
-
     :attr:`opening_transition` is a :class:`~kivy.properties.StringProperty`
     and defaults to `'out_cubic'`.
     """
@@ -563,7 +425,6 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     opening_time = NumericProperty(0.2)
     """
     Menu window opening animation time.
-
     :attr:`opening_time` is a :class:`~kivy.properties.NumericProperty`
     and defaults to `0.2`.
     """
@@ -571,7 +432,6 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     caller = ObjectProperty()
     """
     The widget object that caller the menu window.
-
     :attr:`caller` is a :class:`~kivy.properties.ObjectProperty`
     and defaults to `None`.
     """
@@ -579,7 +439,6 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     callback = ObjectProperty()
     """
     The method that will be called when you click menu items.
-
     :attr:`callback` is a :class:`~kivy.properties.ObjectProperty`
     and defaults to `None`.
     """
@@ -588,7 +447,6 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     """
     Menu window position relative to parent element.
     Available options are: `'auto'`, `'center'`, `'bottom'`.
-
     :attr:`position` is a :class:`~kivy.properties.OptionProperty`
     and defaults to `'auto'`.
     """
@@ -617,17 +475,15 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
     def create_menu_items(self):
         """Creates menu items."""
 
-        if self.use_icon_item:
-            item_cls = TFMenuItemIcon
-        else:
-            item_cls = TFMenuItem
-
         for data in self.items:
-            item = item_cls(
-                text=data.get("text", ""),
-                icon=data.get("icon", ""),
-                divider=data.get("divider", "Full"),
+            item = TFMenuItemIcon(
+                text=data.get("text", ""), divider=data.get("divider", "Full")
             )
+            if not self.use_icon_item:
+                item.remove_widget(item.ids._left_container)
+                item._txt_left_pad = dp(16)
+            else:
+                item.icon = data.get("icon", "")
             if self.callback:
                 item.bind(on_release=self.callback)
             right_content_cls = data.get("right_content_cls", None)
@@ -663,7 +519,12 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
                     * m_res.STANDARD_INCREMENT
             )
 
-        self.target_height = sum([dp(56) for i in self.items])
+        # The height of each TFMenuItem or TFMenuItemIcon
+        menu_item_height = TFMenuItemIcon().height
+        # Set the target_height of the menu depending on the size of
+        # each TFMenuItem or TFMenuItemIcon
+        self.target_height = menu_item_height * len(self.items)
+
         # If we're over max_height...
         if 0 < self.max_height < self.target_height:
             self.target_height = self.max_height
@@ -748,7 +609,7 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
         """Animate the opening of a menu window."""
 
         def open(interval):
-            # This is the fix of dillon-pinto for the position of the MDDropdownMenu:
+            # This is the fix of dillon-pinto for the position of the TFDropdownMenu:
             # Source: https://github.com/HeaTTheatR/KivyMD/issues/305
             self.set_menu_properties(0)
 
