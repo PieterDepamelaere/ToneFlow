@@ -66,7 +66,7 @@
         id: button_1
         icon: "menu"
         pos_hint: {"center_y": .5}
-        on_release: app.menu_1.open()
+        on_release: app.root.toggle_nav_drawer()
 
     MDLabel:
         text: "MDDropdownMenu"
@@ -82,7 +82,7 @@
         id: button_2
         icon: "dots-vertical"
         pos_hint: {"center_y": .5}
-        on_release: app._mddm.open()
+        on_release: app.ddm.open()
 
 <ContentNavigationDrawer@TFNavigationDrawer>:
 
@@ -145,22 +145,22 @@ TFNavigationLayout:
         BoxLayout:
             orientation: 'vertical'
 
-#            CustomToolbar:
-#                id: toolbar2
-#                elevation: 10
-#                pos_hint: {"top": 1}
-
-            TFToolbar:
-                id: toolbar
-                title: app.title
-                md_bg_color: app.theme_cls.primary_color
-                background_palette: 'Primary'
-                background_hue: CU.tfs.dic['THEME_BACKGROUND_HUE'].value
+            CustomToolbar:
+                id: toolbar2
                 elevation: 10
-                left_action_items:
-                    [['menu', lambda *args, **kwargs: app.root.toggle_nav_drawer()]]
-                right_action_items:
-                    [['dots-vertical', lambda *args, **kwargs: app._mddm.open()]]
+                pos_hint: {"top": 1}
+
+#            TFToolbar:
+#                id: toolbar
+#                title: app.title
+#                md_bg_color: app.theme_cls.primary_color
+#                background_palette: 'Primary'
+#                background_hue: CU.tfs.dic['THEME_BACKGROUND_HUE'].value
+#                elevation: 10
+#                left_action_items:
+#                    [['menu', lambda *args, **kwargs: app.root.toggle_nav_drawer()]]
+#                right_action_items:
+#                    [['dots-vertical', lambda *args, **kwargs: app.ddm.open()]]
 
             ScreenManager:
                 id: scr_mngr

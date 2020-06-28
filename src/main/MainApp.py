@@ -46,6 +46,7 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from src.main.TFExceptionHandler import TFExceptionHandler
 from src.model.CommonUtils import CommonUtils as CU
 from src.model.TFSettings import TFSettings
+from src.view.custom_uix.TFDropdownMenu import TFDropdownMenu
 
 from kivy.base import ExceptionManager
 
@@ -75,7 +76,7 @@ class MainApp(MDApp):
 
         self._main_widget = None
         self._exception_counter = 0
-        self._mddm = MDDropdownMenu()
+        self.ddm = MDDropdownMenu()
         self._context_menus = None
 
         # To prevent the window from closing, when 'X' is pressed on the windows itself:
@@ -116,7 +117,7 @@ class MainApp(MDApp):
 
     def set_context_menus(self, context_menus):
         self._context_menus = context_menus
-        # self._mddm.items = self._context_menus
+        # self.ddm.items = self._context_menus
 
     def get_main_widget(self):
         return self._main_widget
@@ -131,11 +132,14 @@ class MainApp(MDApp):
     def convert_dict_to_context_menus(self, items):
         # Depending on the screen other context oriented options should appear under the three vertical dots
 
-        menu_items = [{"icon": "android", "text": "try"} for i in range(5)]
+        menu_items = [{"icon": "android", "text": f"try{i}"} for i in range(5)]
 
-        if (self.main_widget.ids.toolbar.ids.right_actions is not None):
+        if (self.main_widget.ids.toolbar2.ids.button_2 is not None):
 
-            self._mddm = MDDropdownMenu(caller=self.main_widget.ids.toolbar.ids.right_actions, items=menu_items, width_mult=3)
+            self.ddm = TFDropdownMenu(caller=self.main_widget.ids.toolbar2.ids.button_2, items=menu_items, width_mult=3)
+
+            # self.ddm = TFDropdownMenu(caller=self.main_widget.ids.toolbar.ids.right_actions, items=menu_items,
+            #                           width_mult=3)
 
         if (items is not None):
 
