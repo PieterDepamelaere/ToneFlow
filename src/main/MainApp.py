@@ -76,7 +76,7 @@ class MainApp(MDApp):
 
         self._main_widget = None
         self._exception_counter = 0
-        self.ddm = MDDropdownMenu()
+        self.ddm = None
         self._context_menus = None
 
         # To prevent the window from closing, when 'X' is pressed on the windows itself:

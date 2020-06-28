@@ -54,7 +54,7 @@ class TFExceptionHandler(ExceptionHandler):
                 self._error_dialog = CU.show_input_dialog(
                     title=f"{CU.tfs.dic['APP_NAME'].value} Encountered an Error & Needs to Shut Down",
                     content_obj=content_obj,
-                    # size_hint=(.8, .6),
+                    size_hint=(.8, .6),
                     text_button_ok="Quit",
                     text_button_cancel="Proceed @ Own Risk",
                     ok_callback_set=lambda *args, **kwargs: (self.set_raise_or_pass(ExceptionManager.RAISE)),
