@@ -136,7 +136,7 @@ class CommonUtils:
                 # MDFillRoundFlatButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
                 #                       on_release=lambda *args, **kwargs: (ok_callback_set(content_obj, *args, **kwargs), input_dialog.dismiss())),
                 MDRaisedButton(text=text_button_ok.upper(), md_bg_color=CommonUtils.app.theme_cls.primary_color,
-                               on_release=lambda *args, **kwargs: (ok_callback_set(content_obj, *args, **kwargs), input_dialog.dismiss())),
+                               on_release=lambda *args, **kwargs: (ok_callback_set(content_obj, args, kwargs), input_dialog.dismiss())),
 
                 # MDRoundFlatButton(text=text_button_cancel.upper(), text_color=CommonUtils.app.theme_cls.primary_color,
             #                       on_release=lambda *args, **kwargs: (cancel_callback_set(args, kwargs), input_dialog.dismiss()))

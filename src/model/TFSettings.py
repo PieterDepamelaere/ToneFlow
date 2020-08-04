@@ -62,11 +62,11 @@ class TFSettings(Screen):
         super(TFSettings, self).__init__(name=type(self).__name__, **kwargs)
 
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
-        self._context_menus = {"Clear Input": lambda x: {self.clear_search_pattern()},
-                               "Sort Settings": lambda x: {self.sort_editable_list()},
-                               "Refresh": lambda x: {self.refresh_editable_list(), toast(f"Refreshed")},
-                               "Restore Factory Settings": lambda x: toast("TODO: WIP"),
-                               "Help": lambda x: toast("TODO: WIP")}
+        self._context_menus = {"Clear Input": lambda *args, **kwargs: {self.clear_search_pattern()},
+                               "Sort Settings": lambda *args, **kwargs: {self.sort_editable_list()},
+                               "Refresh": lambda *args, **kwargs: {self.refresh_editable_list(), toast(f"Refreshed")},
+                               "Restore Factory Settings": lambda *args, **kwargs: toast("TODO: WIP"),
+                               "Help": lambda *args, **kwargs: toast("TODO: WIP")}
         # TODO: Implement the other context menus
 
     def get_dic(self):

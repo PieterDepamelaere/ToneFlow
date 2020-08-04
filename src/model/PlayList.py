@@ -93,10 +93,10 @@ class PlayList(ModalView):
         self.bind(on_dismiss=PlayList.on_dismiss_callback)
 
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
-        self._context_menus = {"Clear Input": lambda x: self.clear_search_pattern(),
-                               "Refresh": lambda x: self.refresh_list(),
-                               "Help": lambda x: toast("TODO: WIP"),
-                               "Save Playlist": lambda x: toast("TODO: WIP")}
+        self._context_menus = {"Clear Input": lambda *args, **kwargs: self.clear_search_pattern(),
+                               "Refresh": lambda *args, **kwargs: self.refresh_list(),
+                               "Help": lambda *args, **kwargs: toast("TODO: WIP"),
+                               "Save Playlist": lambda *args, **kwargs: toast("TODO: WIP")}
         # TODO: Implement the other context menus
 
         # Initializing custom properties:
@@ -419,7 +419,7 @@ class PlayList(ModalView):
         instance.playlist_name = '<Title not available>' if instance.file_path is None else instance.file_path.stem
 
         PlayList.app.set_theme_toolbar(PlayList.theme_primary_color, PlayList.theme_accent_color)
-        PlayList.app.convert_dict_to_context_menus(instance.context_menus)
+        PlayList.app.create_context_menus(instance.context_menus)
 
         # Override needed overscroll to refresh the screen to the bare minimum:
         # refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)

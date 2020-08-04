@@ -142,7 +142,7 @@ class ToneFlower(ModalView):
         instance.toneflower_name = '<Title not available>' if instance.file_path is None else instance.file_path.stem
 
         ToneFlower.app.set_theme_toolbar(ToneFlower.theme_primary_color, ToneFlower.theme_accent_color)
-        ToneFlower.app.convert_dict_to_context_menus(instance.context_menus)
+        ToneFlower.app.create_context_menus(instance.context_menus)
 
         # Override needed overscroll to refresh the screen to the bare minimum:
         # refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)

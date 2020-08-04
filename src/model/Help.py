@@ -38,12 +38,12 @@ class Help(Screen):
 
         Help.app = App.get_running_app()
         # These are the right action item menu's possible at the '3-vertical dots' menu. This can become a dict of callbacks
-        self._context_menus = {"Add Help Location": lambda x: {self.show_filemanager_add_help_location()},
-                               "Clear Input": lambda x: {self.clear_search_pattern()},
-                               "Sort Help": lambda x: {self.sort_list()},
-                               "Refresh": lambda x: {self.refresh_list(), toast(f"Refreshed")},
-                               "Remove Help(s)": lambda x: toast("TODO: WIP"),
-                               "Help": lambda x: toast("TODO: WIP")}
+        self._context_menus = {"Add Help Location": lambda *args, **kwargs: {self.show_filemanager_add_help_location()},
+                               "Clear Input": lambda *args, **kwargs: {self.clear_search_pattern()},
+                               "Sort Help": lambda *args, **kwargs: {self.sort_list()},
+                               "Refresh": lambda *args, **kwargs: {self.refresh_list(), toast(f"Refreshed")},
+                               "Remove Help(s)": lambda *args, **kwargs: toast("TODO: WIP"),
+                               "Help": lambda *args, **kwargs: toast("TODO: WIP")}
         # TODO: Implement the other context menus
 
         # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data

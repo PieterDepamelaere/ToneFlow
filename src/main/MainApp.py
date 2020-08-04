@@ -102,7 +102,9 @@ class MainApp(MDApp):
         self.icon = str(pl.Path(CU.tfs.dic['IMG_DIR_PATH'].value) / "ToneFlow_Logo_TaskBarIcon.png")
 
         self._main_widget.ids.scr_mngr.add_widget(CU.tfs)
-        self.convert_dict_to_context_menus([]) #TODO PDP: Remove this line:
+
+        # Initialize the context_menus as an empty list:
+        self.create_context_menus([])
 
         return self._main_widget
 
@@ -112,13 +114,6 @@ class MainApp(MDApp):
         screen_object = screen_class()
         return screen_object
 
-    def get_context_menus(self):
-        return self._context_menus
-
-    def set_context_menus(self, context_menus):
-        self._context_menus = context_menus
-        # self.ddm.items = self._context_menus
-
     def get_main_widget(self):
         return self._main_widget
 
@@ -126,35 +121,22 @@ class MainApp(MDApp):
         self._main_widget = main_widget
 
     main_widget = property(get_main_widget, set_main_widget)
-    context_menus = property(get_context_menus, set_context_menus)
 
-
-    def convert_dict_to_context_menus(self, items):
+    def create_context_menus(self, menu_items):
         # Depending on the screen other context oriented options should appear under the three vertical dots
 
-        menu_items = [{"icon": "git", "text": f"try{i}"} for i in range(5)]
+        # You can include an icon as well in the context menu's, clicks on it however do not trigger the intended callback:
+        dropdown_menu_items = [{"icon": "checkbox-blank-circle", "text": f"{key}"} for key in menu_items]
 
-        # if (self.main_widget.ids.toolbar.ids.right_actions is not None):
+        if (menu_items is not None):
 
-            # self.ddm = TFDropdownMenu(caller=self.main_widget.ids.toolbar2.ids.button_2, items=menu_items, width_mult=3)
-
-        self.ddm = TFDropdownMenu(caller=self.main_widget.ids.toolbar.ids.right_actions, use_icon_item=True, items=menu_items,
-                                  width_mult=3)
-
-        if (items is not None):
-
-            pass
-            # self.context_menus = [
-            #     {
-            #         "viewclass": "MDMenuItem",
-            #         "text": f"{key}",
-            #         "text_color": get_contrast_text_color(self.theme_cls.primary_color, True),
-            #         "callback": items[key]
-            #     }
-            #     for key in items
-            # ]
+            self.ddm = TFDropdownMenu(caller=self.main_widget.ids.toolbar.ids.right_actions, use_icon_item=False,
+                                      items=dropdown_menu_items,
+                                      width_mult=4, callback=lambda *args, **kwargs: (menu_items[args[0].text](args, kwargs), self.ddm.dismiss()))
         else:
-            self.context_menus = None
+            self.ddm = TFDropdownMenu(caller=self.main_widget.ids.toolbar.ids.right_actions, use_icon_item=False,
+                                      items=[],
+                                      width_mult=4, callback=lambda *args, **kwargs: self.ddm.dismiss())
 
     def on_pause(self):
         return True
@@ -248,7 +230,7 @@ class MainApp(MDApp):
             scr_mngr.add_widget(self.create_uninstantiated_screen(screen_class))
 
         # Update the context menu's and finally show toast when ready:
-        self.convert_dict_to_context_menus(scr_mngr.get_screen(class_name).context_menus)
+        self.create_context_menus(scr_mngr.get_screen(class_name).context_menus)
         scr_mngr.current = class_name
         toast(class_name)
 
