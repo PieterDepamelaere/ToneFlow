@@ -120,20 +120,33 @@ class MainApp(MDApp):
     def set_main_widget(self, main_widget):
         self._main_widget = main_widget
 
+    def get_context_menus(self):
+        return self._context_menus
+
+    def set_context_menus(self, context_menus):
+        self._context_menus = context_menus
+        self.create_context_menus(context_menus)
+
     main_widget = property(get_main_widget, set_main_widget)
+    context_menus = property(get_context_menus, set_context_menus)
 
     def create_context_menus(self, menu_items):
-        # Depending on the screen other context oriented options should appear under the three vertical dots
+        """
+        Goal of context menus: Depending on the screen other context oriented options should appear under the three vertical dots
+        :param menu_items: A dictionary with the name of the context_menu mapped to its callback
+        :return:
+        """
 
         # You can include an icon as well in the context menu's, clicks on it however do not trigger the intended callback:
         dropdown_menu_items = [{"icon": "checkbox-blank-circle", "text": f"{key}"} for key in menu_items]
 
         if (menu_items is not None):
-
+            self._context_menus = menu_items
             self.ddm = TFDropdownMenu(caller=self.main_widget.ids.toolbar.ids.right_actions, use_icon_item=False,
                                       items=dropdown_menu_items,
                                       width_mult=4, callback=lambda *args, **kwargs: (menu_items[args[0].text](args, kwargs), self.ddm.dismiss()))
         else:
+            self._context_menus = []
             self.ddm = TFDropdownMenu(caller=self.main_widget.ids.toolbar.ids.right_actions, use_icon_item=False,
                                       items=[],
                                       width_mult=4, callback=lambda *args, **kwargs: self.ddm.dismiss())
