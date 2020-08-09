@@ -353,6 +353,11 @@ class TFMenuItemIcon(OneLineAvatarIconListItem):
     icon = StringProperty()
 
 
+class TFMenuItem(OneLineListItem):
+    _height = NumericProperty("56dp")
+    text = StringProperty()
+
+
 class TFMenu(ScrollView):
     width_mult = NumericProperty(1)
     """
@@ -479,14 +484,18 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
             item = TFMenuItemIcon(
                 text=data.get("text", ""), divider=data.get("divider", "Full")
             )
+            
             if not self.use_icon_item:
-                item.remove_widget(item.ids._left_container)
-                item._txt_left_pad = dp(16)
+                # item.remove_widget(item.ids._left_container)
+                # item._txt_left_pad = dp(16)
+                item = TFMenuItem(text=data.get("text", ""), divider=data.get("divider", "Full"))
             else:
                 item.icon = data.get("icon", "")
+
             if self.callback:
                 item.bind(on_release=self.callback)
             right_content_cls = data.get("right_content_cls", None)
+
             # Set right content.
             if isinstance(right_content_cls, RightContent):
                 item.ids._right_container.width = right_content_cls.width + dp(

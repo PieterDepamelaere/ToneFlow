@@ -138,7 +138,7 @@ class MainApp(MDApp):
         """
 
         # You can include an icon as well in the context menu's, clicks on it however do not trigger the intended callback:
-        dropdown_menu_items = [{"icon": "checkbox-blank-circle", "text": f"{key}"} for key in menu_items]
+        dropdown_menu_items = [{"icon": "checkbox-blank-circle", "divider": None, "text": f"{key}"} for key in menu_items]
 
         if (menu_items is not None):
             self._context_menus = menu_items
