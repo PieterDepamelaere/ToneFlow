@@ -484,7 +484,7 @@ class TFDropdownMenu(ThemableBehavior, FloatLayout):
             item = TFMenuItemIcon(
                 text=data.get("text", ""), divider=data.get("divider", "Full")
             )
-            
+
             if not self.use_icon_item:
                 # item.remove_widget(item.ids._left_container)
                 # item._txt_left_pad = dp(16)

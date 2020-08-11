@@ -182,9 +182,9 @@ class TFSettings(Screen):
         self._dic['high_pitch_limit'] = TFSetting("High Pitch Limit", None, "E5", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)
         # TODO: Invent a color_scheme object, try a dictionary for this?
         self._dic['tone_color_scheme'] = TFSetting("Tone Color Scheme", None, dict(), f"The color scheme maps every tone to a color.", True, None)
-        self._dic['show_gridlines'] = TFSetting("Show Gridlines", None, True, f"Toggle Gridlines during playback.", True, None)
+        self._dic['toggle_white_note_strips'] = TFSetting("White Note Strips", None, True, f"Toggle white note background strips.", True, None)
 
-        # TODO: This setting is probably way to difficult to implement, and not even usefull:
+        # TODO: This setting is probably way to difficult to implement, and not even useful:
         self._dic['tone_flow_orientation'] = TFSetting("Flowing Direction", None, "Vertical", f"Flowing direction of the tones, either \'Vertical\' or \'Horizontal\'.", True, None)
         self._dic['overall_mute_play_along'] = TFSetting("Mute Play Along", None, True, f"Mute the song's audio while performing", True, None)
 

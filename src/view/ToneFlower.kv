@@ -24,7 +24,7 @@
 
     BoxLayout:
 
-        id: background
+        id: id_background
         orientation: 'vertical'
 
         canvas.before:
@@ -36,31 +36,31 @@
                 size: 	self.size
                 pos: 	self.pos
 
-            Color:
-                rgba: get_color_from_hex('#111111FF')
-            Rectangle:
-                size: 60, self.height
-                pos: self.pos[0], self.pos[1]
-
-            Rectangle:
-                size: 60, self.height
-                pos: self.pos[0]+90, self.pos[1]
-
-            Rectangle:
-                size: 120, self.height
-                pos: self.pos[0]+180, self.pos[1]
-
-            Rectangle:
-                size: 60, self.height
-                pos: self.pos[0]+330, self.pos[1]
-
-            Rectangle:
-                size: 60, self.height
-                pos: self.pos[0]+420, self.pos[1]
-
-            Rectangle:
-                size: 60, self.height
-                pos: self.pos[0]+510, self.pos[1]
+#            Color:
+#                rgba: get_color_from_hex('#111111FF')
+#            Rectangle:
+#                size: 60, self.height
+#                pos: self.pos[0], self.pos[1]
+#
+#            Rectangle:
+#                size: 60, self.height
+#                pos: self.pos[0]+90, self.pos[1]
+#
+#            Rectangle:
+#                size: 120, self.height
+#                pos: self.pos[0]+180, self.pos[1]
+#
+#            Rectangle:
+#                size: 60, self.height
+#                pos: self.pos[0]+330, self.pos[1]
+#
+#            Rectangle:
+#                size: 60, self.height
+#                pos: self.pos[0]+420, self.pos[1]
+#
+#            Rectangle:
+#                size: 60, self.height
+#                pos: self.pos[0]+510, self.pos[1]
 
         Splitter:
             sizable_from: 'bottom'
@@ -83,13 +83,12 @@
                             pos: self.pos
                             size: self.width, self.height
                         StencilUse:
-                        Color:
-                            rgba: 1, 1, 1, 1.0
-                        Rectangle:
-                            size: self.width, 10.0
-                            pos: 0,self.height * 0.20  #self.pos[0], self.pos[1] + self.height - 142
-                            #texture: self.cloud_texture
-
+#                        Color:
+#                            rgba: 1, 1, 1, 1.0
+#                        Rectangle:
+#                            size: self.width, 10.0
+#                            pos: 0,self.height * 0.20  #self.pos[0], self.pos[1] + self.height - 142
+#                            #texture: self.cloud_texture
                     canvas:
 
                         #C
@@ -202,11 +201,11 @@
 
 
                     canvas.after:
-                        Color:
-                            rgba: 0, 0, 0, 1.0
-                        Line:
-                            width: 1
-                            points: 0,self.height * 0.20 +5,self.width,self.height * 0.20 +5 #zip(self.data.x, self.data.y)
+#                        Color:
+#                            rgba: 0, 0, 0, 1.0
+#                        Line:
+#                            width: 1
+#                            points: 0,self.height * 0.20 +5,self.width,self.height * 0.20 +5 #zip(self.data.x, self.data.y)
 
                         StencilUnUse:
                         StencilPop:

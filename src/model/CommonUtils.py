@@ -153,14 +153,14 @@ class CommonUtils:
     @staticmethod
     def split_letters_from_digits(text):
 
-        letter_text = ''
-        digit_text = ''
+        letter_text = ""
+        digit_text = ""
 
         for character in text:
             if(character.isdigit()):
-                digit_text.join(character)
+                digit_text += character
             else:
-                letter_text.join(character)
+                letter_text += character
 
         return letter_text, digit_text
 

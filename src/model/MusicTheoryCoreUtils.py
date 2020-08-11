@@ -1,9 +1,9 @@
 import mido
 from mido import MidiFile
 from src.model.CommonUtils import CommonUtils as CU
-from src.model.MusicTheoryCoreUtils import MusicTheoryCoreUtils as MTCU
 
 all_mid = ['major-scale.mid']
+
 
 class MusicTheoryCoreUtils:
 
@@ -25,7 +25,7 @@ class MusicTheoryCoreUtils:
         :return: the corresponding note_number < 11
         """
         note_number = CU.safe_cast(note_number, int, 0)
-        return note_number % MTCU.AMOUNT_DISTINCT_NOTES
+        return note_number % MusicTheoryCoreUtils.AMOUNT_DISTINCT_NOTES
 
     @staticmethod
     def is_white_note(note_number):
@@ -34,8 +34,8 @@ class MusicTheoryCoreUtils:
         :param note_number: uncondensed note number, i.e. the note_number may still be > 11.
         :return: bool
         """
-        condensed_pitch = MTCU.condense_note_pitch(note_number)
-        return condensed_pitch in MTCU.WHITE_NOTES
+        condensed_pitch = MusicTheoryCoreUtils.condense_note_pitch(note_number)
+        return condensed_pitch in MusicTheoryCoreUtils.WHITE_NOTES
 
     @staticmethod
     def note_number_to_name(note_number):
@@ -44,10 +44,10 @@ class MusicTheoryCoreUtils:
         :param note_number: note_number
         :return: human-readable note_name
         """
-        octave = note_number / MTCU.AMOUNT_DISTINCT_NOTES
+        octave = note_number / MusicTheoryCoreUtils.AMOUNT_DISTINCT_NOTES
 
         # Add the octave number at the end, and also before the slash in case of black notes.
-        note_name = f"{MTCU.NOTE_SYSTEM[MTCU.condense_note_pitch(note_number)]}{octave}"
+        note_name = f"{MusicTheoryCoreUtils.NOTE_SYSTEM[MusicTheoryCoreUtils.condense_note_pitch(note_number)]}{octave}"
         note_name.replace("/", f"{octave}/")
 
         return note_name
@@ -74,15 +74,62 @@ class MusicTheoryCoreUtils:
         note_number = '-1'
 
         # Map the retrieved note_pitch_text to a condensed_note_number:
-        for key, value in MTCU.NOTE_SYSTEM.items():
+        for key, value in MusicTheoryCoreUtils.NOTE_SYSTEM.items():
             if (note_pitch_text in value):
                 note_number = key
                 break
 
         if note_number != -1:
-            note_number += MTCU.AMOUNT_DISTINCT_NOTES ** octave
+            note_number += MusicTheoryCoreUtils.AMOUNT_DISTINCT_NOTES * octave
 
         return note_number
+
+    @staticmethod
+    def note_interval_to_delta(from_note, to_note):
+        """
+        Calculates the amount of half tone steps that fit in the supplied interval.
+        An rising interval is an interval where the note-number of the to_note > from_note, and similarly for a dropping interval. 0 means no pitch difference.
+        :param from_note:
+        :param to_note:
+        :return: delta_pitch = the difference in pitch (expressed in halve steps)
+        """
+
+        return to_note - from_note
+
+    @staticmethod
+    def note_interval_to_key_range(from_note, to_note):
+        """
+        Calculates how many keys have to be drawn on ToneFlow's keyboard layout to visualize a particular note_interval
+        :param from_note:
+        :param to_note:
+        :return: delta_white_keys = the amount of white keys needed, delta_black_keys = the amount of black keys needed
+        """
+
+        delta_white_keys = 0
+        delta_black_keys = 0
+
+        delta_pitch_halve_steps = MusicTheoryCoreUtils.note_interval_to_delta(from_note, to_note)
+
+        # Correction in case of dropping interval:
+        if (delta_pitch_halve_steps < 0):
+
+            # Switch from_note and to_note:
+            temp_note = to_note
+            to_note = from_note
+            from_note = temp_note
+
+            # Invert the delta_pitch_halve_steps:
+            delta_pitch_halve_steps *= -1
+
+
+        for delta in range(0, delta_pitch_halve_steps + 1):
+
+            if MusicTheoryCoreUtils.is_white_note(from_note + delta):
+                delta_white_keys += 1
+            else:
+                delta_black_keys += 1
+
+        return delta_white_keys, delta_black_keys
 
     # Unlike music, tempo in MIDI is not given as beats per minute, but rather in microseconds per beat.
 
@@ -138,7 +185,7 @@ class MusicTheoryCoreUtils:
                 elif msg.is_meta:
                     #if filter_meta_type(msg):
                     if msg.type == "set_tempo":
-                        msgwithtempos = MTCU.remove_extra_tempo(msg, msgwithtempos, current_time)
+                        msgwithtempos = MusicTheoryCoreUtils.remove_extra_tempo(msg, msgwithtempos, current_time)
                     else:
                         all_messages.append([msg, current_time])
                 else:
@@ -149,8 +196,8 @@ class MusicTheoryCoreUtils:
     def preprocess_midi_file(midi_file):  # for each midi file do the following
         final_messages = None
         midi_file = MidiFile(midi_file)
-        if not MTCU.remove_type_2(midi_file):
-            all_messages, msgwithtempos = MTCU.do_shit(midi_file)
+        if not MusicTheoryCoreUtils.remove_type_2(midi_file):
+            all_messages, msgwithtempos = MusicTheoryCoreUtils.do_shit(midi_file)
             final_messages = all_messages + msgwithtempos
             final_messages = sorted(final_messages, key=lambda x: x[1])
         # print(final_messages)
@@ -159,4 +206,5 @@ class MusicTheoryCoreUtils:
     @staticmethod
     def preprocess_midi_files(midi_files):
         for midi_file in midi_files:
-            MTCU.preprocess_midi_file(midi_file)
+            MusicTheoryCoreUtils.preprocess_midi_file(midi_file)
+
