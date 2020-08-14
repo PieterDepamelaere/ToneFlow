@@ -84,8 +84,6 @@ class ToneFlower(ModalView):
 
         self.render_width_black_key = 10.0
 
-        self.create_white_note_strips()
-
 
         # When auto_dismiss==True, then you can escape the modal view with [ESC]
         self.auto_dismiss = True
@@ -93,10 +91,10 @@ class ToneFlower(ModalView):
 
         # Binding events that come with the ModalView ('on_pre_open', 'on_open', 'on_pre_dismiss', 'on_dismiss') to
         # their respective static methods:
-        # self.bind(on_pre_open=ToneFlower.on_pre_open_callback)
-        # self.bind(on_open=ToneFlower.on_open_callback)
-        # self.bind(on_pre_dismiss=ToneFlower.on_pre_dismiss_callback)
-        # self.bind(on_dismiss=ToneFlower.on_dismiss_callback)
+        self.bind(on_pre_open=ToneFlower.on_pre_open_callback)
+        self.bind(on_open=ToneFlower.on_open_callback)
+        self.bind(on_pre_dismiss=ToneFlower.on_pre_dismiss_callback)
+        self.bind(on_dismiss=ToneFlower.on_dismiss_callback)
 
         # Initializing custom properties:pipe
         self._block_close = False
@@ -149,35 +147,38 @@ class ToneFlower(ModalView):
 
             white_strip_position = self.pos
 
-            for note in range(low_pitch_limit, high_pitch_limit + 1):
+            with self.ids.id_background.canvas.before:
+                Color(get_color_from_hex("#111111FF"))
 
-                if MTCU.is_white_note(note):
-                    # A white note will be rendered with twice the width of a black note
+                note = low_pitch_limit
+                while note <= high_pitch_limit:
 
-                    with self.ids.id_background.canvas.before:
-                        Color(get_color_from_hex('#111111FF'))
+                    if MTCU.is_white_note(note):
+                        # A white note will be rendered with twice the width of a black note
+
 
                         # TODO: https://blog.kivy.org/2014/10/updating-canvas-instructions-declared-in-python/
 
                         if MTCU.is_white_note(note + 1):
                             # In case of adjacent E, F or B, C, one white_strip can be saved by drawing a wider one instead.
                             # This might be good for performance
-                            rect = Rectangle(pos=white_strip_position, size=(self.render_width_black_key * 4, self.height))
+                            self.rect = Rectangle(pos=white_strip_position, size=(self.render_width_black_key * 4, self.height))
 
                             # Increment the current note, because we draw two at once:
                             note += 1
 
                         else:
-                            rect = Rectangle(pos=white_strip_position, size=(self.render_width_black_key * 2, self.height))
+                            self.rect = Rectangle(pos=white_strip_position, size=(self.render_width_black_key * 2, self.height))
 
-                    white_strip_position[0] += rect.size[0]
+                        white_strip_position[0] += self.rect.size[0]
 
-                    # self.bind(pos=self.update_rect,
-                    #           size=self.update_rect)
+                        # self.bind(pos=self.update_rect, size=self.update_rect)
 
-                else:
-                    white_strip_position[0] += self.render_width_black_key
-                    # Callback(self.my_callback)
+                    else:
+                        white_strip_position[0] += self.render_width_black_key
+                        # Callback(self.my_callback)
+
+                    note += 1
 
                 # pipe.size_hint = (None, None)
                 # pipe.pos = (Window.width + i * distance_between_pipes, 96)
@@ -205,11 +206,8 @@ class ToneFlower(ModalView):
         :param instance:
         :return:
         """
-        # KivyProperties must made at class level/kv-rule not within __init__()-method. On pre open the title is updated:
-        instance.toneflower_name = '<Title not available>' if instance.file_path is None else instance.file_path.stem
-
-        ToneFlower.app.set_theme_toolbar(ToneFlower.theme_primary_color, ToneFlower.theme_accent_color)
-        ToneFlower.app.create_context_menus(instance.context_menus)
+        # Trigger the creation of the white note strips that try to enhance the readability of the flowing tones:
+        instance.create_white_note_strips()
 
         # Override needed overscroll to refresh the screen to the bare minimum:
         # refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)
@@ -223,7 +221,8 @@ class ToneFlower(ModalView):
         :return:
         """
         # self.refresh_list()
-        toast(f"{type(instance).__name__}")
+        toast(f"ToneFlower engine ready...{os.linesep}"
+              f"    Enjoy playing!")
 
     @staticmethod
     def on_pre_dismiss_callback(instance):
@@ -245,6 +244,6 @@ class ToneFlower(ModalView):
         if instance.block_close:
             toast(f"Blocked closing")
         else:
-            instance.restore_former_theme_context_menus()
+            pass
 
         return instance.block_close

@@ -73,14 +73,22 @@ class MusicTheoryCoreUtils:
 
         note_number = '-1'
 
+        is_black_note = any((char in set('#b')) for char in note_pitch_text)
+
+        # Save work in the next loop over the key-value pairs (parsing the note_pitch_text) by filtering the note_System:
+        subdict_whites_or_blacks = {key: value for (key, value) in MusicTheoryCoreUtils.NOTE_SYSTEM.items() if ((key in MusicTheoryCoreUtils.WHITE_NOTES) == (not is_black_note))}
+
         # Map the retrieved note_pitch_text to a condensed_note_number:
-        for key, value in MusicTheoryCoreUtils.NOTE_SYSTEM.items():
-            if (note_pitch_text in value):
+        for key, value in subdict_whites_or_blacks.items():
+
+            # As soon as the note if parsed exit the for loop:
+            if note_pitch_text in value:
                 note_number = key
                 break
 
         if note_number != -1:
-            note_number += MusicTheoryCoreUtils.AMOUNT_DISTINCT_NOTES * octave
+            # The reason why octave + 1 is multiplied with the amount of distinct notes rather than just octave is to match the MIDI-standard, apprently an octave -1 is foreseen:
+            note_number += MusicTheoryCoreUtils.AMOUNT_DISTINCT_NOTES * (octave + 1)
 
         return note_number
 
