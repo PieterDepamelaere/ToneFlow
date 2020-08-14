@@ -81,8 +81,8 @@ class ToneFlower(ModalView):
         self.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         self.background_color = (0, 0, 0, 0)
         self.white_note_strips = []
-
         self.render_width_black_key = 10.0
+        self.note_number_to_pos = {}
 
 
         # When auto_dismiss==True, then you can escape the modal view with [ESC]
@@ -135,6 +135,10 @@ class ToneFlower(ModalView):
     block_close = property(get_block_close, set_block_close)
 
     def create_white_note_strips(self):
+
+        # Reset the note_number_to_pos dictionary:
+        self.note_number_to_pos = {}
+
         # Only proceed if these white note strips are required by the TFSettings:
         if (CU.tfs.dic['toggle_white_note_strips'].value):
 
@@ -147,38 +151,45 @@ class ToneFlower(ModalView):
 
             white_strip_position = self.pos
 
+            # A call to the clear method would erase everything that has been drawn so far on the canvas:
+            # self.ids.id_background.canvas.before.clear()
+
+            # Add to the canvas the white_note_strips as rectangle in the background:
             with self.ids.id_background.canvas.before:
-                Color(get_color_from_hex("#111111FF"))
+
+                Color(rgba=get_color_from_hex("#111111FF"))
 
                 note = low_pitch_limit
                 while note <= high_pitch_limit:
 
                     if MTCU.is_white_note(note):
-                        # A white note will be rendered with twice the width of a black note
-
+                        # A white note will be rendered with twice the width of a black note, two adjacent white notes 4 times that size:
 
                         # TODO: https://blog.kivy.org/2014/10/updating-canvas-instructions-declared-in-python/
+
 
                         if MTCU.is_white_note(note + 1):
                             # In case of adjacent E, F or B, C, one white_strip can be saved by drawing a wider one instead.
                             # This might be good for performance
-                            self.rect = Rectangle(pos=white_strip_position, size=(self.render_width_black_key * 4, self.height))
+                            rect = Rectangle(pos=white_strip_position, size=(self.render_width_black_key * 4, self.height))
+                            self.white_note_strips.append(rect)
 
                             # Increment the current note, because we draw two at once:
                             note += 1
 
                         else:
-                            self.rect = Rectangle(pos=white_strip_position, size=(self.render_width_black_key * 2, self.height))
+                            rect = Rectangle(pos=white_strip_position, size=(self.render_width_black_key * 2, self.height))
+                            self.white_note_strips.append(rect)
 
-                        white_strip_position[0] += self.rect.size[0]
-
-                        # self.bind(pos=self.update_rect, size=self.update_rect)
+                        white_strip_position[0] += rect.size[0]
 
                     else:
                         white_strip_position[0] += self.render_width_black_key
                         # Callback(self.my_callback)
 
                     note += 1
+
+            self.bind(pos=self.update_rect, size=self.update_rect)
 
                 # pipe.size_hint = (None, None)
                 # pipe.pos = (Window.width + i * distance_between_pipes, 96)
@@ -188,8 +199,9 @@ class ToneFlower(ModalView):
                 # self.root.add_widget(pipe)
 
     def update_rect(self, *args):
-        self.rect.pos = self.pos
-        self.rect.size = self.size
+        for white_note_strip in self.white_note_strips:
+            # white_note_strip.pos = self.pos
+            white_note_strip.size = white_note_strip.size[0], self.height
 
     def load_from_json(self):
         # TODO

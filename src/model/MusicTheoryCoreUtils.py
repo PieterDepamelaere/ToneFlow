@@ -73,6 +73,7 @@ class MusicTheoryCoreUtils:
 
         note_number = '-1'
 
+        # Determine whether the note that has to be parsed is a black note or not.
         is_black_note = any((char in set('#b')) for char in note_pitch_text)
 
         # Save work in the next loop over the key-value pairs (parsing the note_pitch_text) by filtering the note_System:
