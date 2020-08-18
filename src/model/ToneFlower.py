@@ -12,9 +12,10 @@ from kivy.core.window import Window
 from kivy.graphics import Rectangle
 from kivy.graphics import Color
 from kivy.utils import get_color_from_hex
+from kivy.uix.widget import Widget
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.screenmanager import Screen
-from kivy.properties import ObservableList, ListProperty, StringProperty
+from kivy.properties import ObservableList, ListProperty, NumericProperty, StringProperty
 
 
 from kivymd.uix.useranimationcard import MDUserAnimationCard
@@ -81,7 +82,7 @@ class ToneFlower(ModalView):
         self.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         self.background_color = (0, 0, 0, 0)
         self.white_note_strips = []
-        self.render_width_black_key = 10.0
+        self.width_factor_black_key = 10.0
         self.note_number_to_pos = {}
 
 
@@ -147,56 +148,81 @@ class ToneFlower(ModalView):
 
             amount_white_keys, amount_black_keys = MTCU.note_interval_to_key_range(low_pitch_limit, high_pitch_limit)
 
-            self.render_width_black_key = Window.width / (amount_white_keys * 2 + amount_black_keys)
+            self.width_factor_black_key = 1 / (amount_white_keys * 2 + amount_black_keys)
 
-            white_strip_position = self.pos
+            pos_factor_white_strip = self.pos
 
             # A call to the clear method would erase everything that has been drawn so far on the canvas:
             # self.ids.id_background.canvas.before.clear()
 
-            # Add to the canvas the white_note_strips as rectangle in the background:
-            with self.ids.id_background.canvas.before:
+            # Add to the floatlayout the white_note_strips as rectangle in the background:
 
-                Color(rgba=get_color_from_hex("#111111FF"))
+            note = low_pitch_limit
+            while note <= high_pitch_limit:
 
-                note = low_pitch_limit
-                while note <= high_pitch_limit:
+                if MTCU.is_white_note(note):
+                    # A white note will be rendered with twice the width of a black note, two adjacent white notes 4 times that size:
 
-                    if MTCU.is_white_note(note):
-                        # A white note will be rendered with twice the width of a black note, two adjacent white notes 4 times that size:
+                    # TODO: https://blog.kivy.org/2014/10/updating-canvas-instructions-declared-in-python/
 
-                        # TODO: https://blog.kivy.org/2014/10/updating-canvas-instructions-declared-in-python/
+                    # TODO: https://stackoverflow.com/questions/57023147/how-to-set-a-custom-widget-size-position-to-its-parent-layout-in-kivy
+
+                    # TODO: https://www.geeksforgeeks.org/python-canvas-in-kivy/?ref=rp
 
 
-                        if MTCU.is_white_note(note + 1):
-                            # In case of adjacent E, F or B, C, one white_strip can be saved by drawing a wider one instead.
-                            # This might be good for performance
-                            rect = Rectangle(pos=white_strip_position, size=(self.render_width_black_key * 4, self.height))
-                            self.white_note_strips.append(rect)
+                    if MTCU.is_white_note(note + 1):
+                        # In case of adjacent E, F or B, C, one white_strip can be saved by drawing a wider one instead.
+                        # This might be good for performance
+                        # rect = Rectangle(pos=pos_factor_white_strip, size=(self.width_factor_black_key * 4, self.height))
+                        rect = WhiteNoteStrip()
 
-                            # Increment the current note, because we draw two at once:
-                            note += 1
+                        # rect.size = 40, self.height
+                        # rect.pos = 40, 0
 
-                        else:
-                            rect = Rectangle(pos=white_strip_position, size=(self.render_width_black_key * 2, self.height))
-                            self.white_note_strips.append(rect)
+                        # rect.size_hint = (4* self.width_factor_black_key, 1)
+                        # rect.pos_hint = (pos_factor_white_strip, 0)
+                        # rect.size = (64, Window)
 
-                        white_strip_position[0] += rect.size[0]
+                        # rect.proportional_horizontal_pos = pos_factor_white_strip[0]
+                        # rect.proportional_horizontal_size = (self.width_factor_black_key * 4)
+
+                        self.ids.id_background.add_widget(rect, len(self.ids.id_background.children))
+                        # self.ids.id_background.canvas.before.add(rect)
+
+
+                        self.white_note_strips.append(rect)
+
+                        # Increment the current note, because we draw two at once:
+                        note += 1
 
                     else:
-                        white_strip_position[0] += self.render_width_black_key
-                        # Callback(self.my_callback)
+                        rect = WhiteNoteStrip()
+                        # rect.size_hint = (2 * self.width_factor_black_key, 1)
+                        # rect.pos_hint = (pos_factor_white_strip, 0)
+                        # rect.proportional_horizontal_pos = pos_factor_white_strip[0]
+                        # rect.proportional_horizontal_size = (self.width_factor_black_key * 2)
+                        self.ids.id_background.add_widget(rect, len(self.ids.id_background.children))
 
-                    note += 1
+                        # self.ids.id_background.canvas.before.add(rect)
 
-            self.bind(pos=self.update_rect, size=self.update_rect)
+                        self.white_note_strips.append(rect)
 
-                # pipe.size_hint = (None, None)
-                # pipe.pos = (Window.width + i * distance_between_pipes, 96)
-                # pipe.size = (64, self.root.height - 96)
-                #
-                # self.pipes.append(pipe)
-                # self.root.add_widget(pipe)
+                    # pos_factor_white_strip[0] += rect.size[0]
+
+                else:
+                    pos_factor_white_strip[0] += self.width_factor_black_key
+                    # Callback(self.my_callback)
+
+                note += 1
+
+        # self.bind(pos=self.update_rect, size=self.update_rect)
+
+            # pipe.size_hint = (None, None)
+            # pipe.pos = (Window.width + i * distance_between_pipes, 96)
+            # pipe.size = (64, self.root.height - 96)
+            #
+            # self.pipes.append(pipe)
+            # self.root.add_widget(pipe)
 
     def update_rect(self, *args):
         for white_note_strip in self.white_note_strips:
@@ -259,3 +285,11 @@ class ToneFlower(ModalView):
             pass
 
         return instance.block_close
+
+
+class WhiteNoteStrip(Widget):
+    rel_pos = {"x": 0.6, "y": 0}
+    rel_size = (0.2, 1.0)
+    r_size = ListProperty([0, 0])
+    # proportional_horizontal_pos = NumericProperty(20)
+    # proportional_horizontal_size = NumericProperty(20)

@@ -86,7 +86,8 @@ class MainApp(MDApp):
         # TODO: Test how fullscreen must be used decently: fullscreen option has been deprecated, use Window.borderless or the borderless Config option instead
 
         #Window.fullscreen = 'fake' # False, True, 'auto', 'fake' are the possibilities: https://kivy.org/doc/stable/api-kivy.config.html#module-kivy.config he ‘fake’ option has been deprecated, use the borderless property instead.
-        Window.maximize()
+
+        # Window.maximize()
 
         # Linux way to kill fullscreen app when it doesn't want to close:
         # Ctrl+Alt+F1 > tty1 client (login, remember that numeric extension of keyboard does not work here) next try to

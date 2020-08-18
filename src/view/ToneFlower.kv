@@ -16,16 +16,23 @@
         keep_ratio: False
         source: str(CU.tfs.dic['IMG_DIR_PATH'].value / 'WhiteSquare.png') #'atlas://data/images/defaulttheme/splitter_grip' + root.horizontal
 
+<WhiteNoteStrip>:
+    pos_hint: self.rel_pos
+    size_hint: self.rel_size
+    canvas:
+        Color:
+            rgba: get_color_from_hex('#111111FF')
+        Rectangle:
+            size: self.size
+            pos: self.pos
 
 <ToneFlower>
 
     id: id_concertmode
     name: CU.tfs.dic['SCREEN_TONEFLOWER_CLASS'].value.__name__
 
-    BoxLayout:
-
+    FloatLayout:
         id: id_background
-        orientation: 'vertical'
 
         canvas.before:
 
@@ -36,270 +43,277 @@
                 size: 	self.size
                 pos: 	self.pos
 
-#            Color:
-#                rgba: get_color_from_hex('#111111FF')
-#            Rectangle:
-#                size: 60, self.height
-#                pos: self.pos[0], self.pos[1]
-#
-#            Rectangle:
-#                size: 60, self.height
-#                pos: self.pos[0]+90, self.pos[1]
-#
-#            Rectangle:
-#                size: 120, self.height
-#                pos: self.pos[0]+180, self.pos[1]
-#
-#            Rectangle:
-#                size: 60, self.height
-#                pos: self.pos[0]+330, self.pos[1]
-#
-#            Rectangle:
-#                size: 60, self.height
-#                pos: self.pos[0]+420, self.pos[1]
-#
-#            Rectangle:
-#                size: 60, self.height
-#                pos: self.pos[0]+510, self.pos[1]
+        BoxLayout:
 
-        Splitter:
-            sizable_from: 'bottom'
-            max_size: root.height
-            min_size: 0 #root.height*0.60
-            strip_size: 5
-            keep_within_parent: True
-            rescale_with_parent: True
-            #border: (4, 4, 4, 4)
-
-            BoxLayout:
-                orientation: 'vertical'
-
-                Label:
-                    text: 'Projected score'
-
-                    canvas.before:
-                        StencilPush:
-                        Rectangle:
-                            pos: self.pos
-                            size: self.width, self.height
-                        StencilUse:
-#                        Color:
-#                            rgba: 1, 1, 1, 1.0
-#                        Rectangle:
-#                            size: self.width, 10.0
-#                            pos: 0,self.height * 0.20  #self.pos[0], self.pos[1] + self.height - 142
-#                            #texture: self.cloud_texture
-                    canvas:
-
-                        #C
-                        Color:
-                            rgba: get_color_from_hex('#FC0020FF')
-                        RoundedRectangle:
-                            size: 60, 160
-                            pos: self.pos[0], self.pos[1] -50
-                            segments: 15
-                            radius: [15]
-
-                        #C#
-                        Color:
-                            rgba: get_color_from_hex('#FA6D1EFF')
-                        RoundedRectangle:
-                            size: 30, 20
-                            pos: self.pos[0]+60, self.pos[1] +50
-                            segments: 15
-                            radius: [15]
-
-                        #D
-                        Color:
-                            rgba: get_color_from_hex('#F7930AFF')
-                        RoundedRectangle:
-                            size: 60, 40
-                            pos: self.pos[0]+90, self.pos[1]
-                            segments: 15
-                            radius: [15]
-
-                        #D#
-                        Color:
-                            rgba: get_color_from_hex('#FFC000FF')
-                        RoundedRectangle:
-                            size: 30, 120
-                            pos: self.pos[0]+150, self.pos[1] +175
-                            segments: 15
-                            radius: [15]
-
-                        #E
-                        Color:
-                            rgba: get_color_from_hex('#FFFE03FF')
-                        RoundedRectangle:
-                            size: 60, 20
-                            pos: self.pos[0]+180, self.pos[1] -75
-                            segments: 15
-                            radius: [15]
-
-                        #F
-                        Color:
-                            rgba: get_color_from_hex('#93D250FF')
-                        RoundedRectangle:
-                            size: 60, 30
-                            pos: self.pos[0]+240, self.pos[1] +0
-                            segments: 15
-                            radius: [15]
-
-                        #F#
-                        Color:
-                            rgba: get_color_from_hex('#00AF50FF')
-                        RoundedRectangle:
-                            size: 30, 40
-                            pos: self.pos[0]+300, self.pos[1] +275
-                            segments: 15
-                            radius: [15]
-
-                        #G
-                        Color:
-                            rgba: get_color_from_hex('#10A192FF')
-                        RoundedRectangle:
-                            size: 60, 160
-                            pos: self.pos[0]+330, self.pos[1] -25
-                            segments: 15
-                            radius: [15]
-
-                        #G#
-                        Color:
-                            rgba: get_color_from_hex('#0329E4FF')
-                        RoundedRectangle:
-                            size: 30, 40
-                            pos: self.pos[0]+390, self.pos[1] +75
-                            segments: 15
-                            radius: [15]
-
-                        #A
-                        Color:
-                            rgba: get_color_from_hex('#7900F1FF')
-                        RoundedRectangle:
-                            size: 60, 120
-                            pos: self.pos[0]+420, self.pos[1] +125
-                            segments: 15
-                            radius: [15]
-
-                        #A#
-                        Color:
-                            rgba: get_color_from_hex('#AF5DFFFF')
-                        RoundedRectangle:
-                            size: 30, 160
-                            pos: self.pos[0]+480, self.pos[1] +50
-                            segments: 15
-                            radius: [15]
-
-                        #B
-                        Color:
-                            rgba: get_color_from_hex('#CB00CBFF')
-                        RoundedRectangle:
-                            size: 60, 20
-                            pos: self.pos[0]+510, self.pos[1]
-                            segments: 15
-                            radius: [15]
+#            id: id_background
+            orientation: 'vertical'
 
 
-                    canvas.after:
-#                        Color:
-#                            rgba: 0, 0, 0, 1.0
-#                        Line:
-#                            width: 1
-#                            points: 0,self.height * 0.20 +5,self.width,self.height * 0.20 +5 #zip(self.data.x, self.data.y)
 
-                        StencilUnUse:
-                        StencilPop:
-                #Label:
-                    #text: 'something2'
+    #            Color:
+    #                rgba: get_color_from_hex('#111111FF')
+    #            Rectangle:
+    #                size: 60, self.height
+    #                pos: self.pos[0], self.pos[1]
+    #
+    #            Rectangle:
+    #                size: 60, self.height
+    #                pos: self.pos[0]+90, self.pos[1]
+    #
+    #            Rectangle:
+    #                size: 120, self.height
+    #                pos: self.pos[0]+180, self.pos[1]
+    #
+    #            Rectangle:
+    #                size: 60, self.height
+    #                pos: self.pos[0]+330, self.pos[1]
+    #
+    #            Rectangle:
+    #                size: 60, self.height
+    #                pos: self.pos[0]+420, self.pos[1]
+    #
+    #            Rectangle:
+    #                size: 60, self.height
+    #                pos: self.pos[0]+510, self.pos[1]
 
-        Label:
-            text: 'Volume area'
+            Splitter:
+                sizable_from: 'bottom'
+                max_size: root.height
+                min_size: 0 #root.height*0.60
+                strip_size: 5
+                keep_within_parent: True
+                rescale_with_parent: True
+                #border: (4, 4, 4, 4)
 
-            canvas:
+                BoxLayout:
+                    orientation: 'vertical'
 
-                #C
-                Color:
-                    rgba: get_color_from_hex('#FC0020FF')
-                Rectangle:
-                    size: 60, 0.90 * self.height
-                    pos: self.pos[0], self.pos[1]
+                    Label:
+                        text: 'Projected score'
 
-                #C#
-                Color:
-                    rgba: get_color_from_hex('#FA6D1EFF')
-                Rectangle:
-                    size: 30, 0.05 * self.height
-                    pos: self.pos[0]+60, self.pos[1]
+                        canvas.before:
+                            StencilPush:
+                            Rectangle:
+                                pos: self.pos
+                                size: self.width, self.height
+                            StencilUse:
+    #                        Color:
+    #                            rgba: 1, 1, 1, 1.0
+    #                        Rectangle:
+    #                            size: self.width, 10.0
+    #                            pos: 0,self.height * 0.20  #self.pos[0], self.pos[1] + self.height - 142
+    #                            #texture: self.cloud_texture
+                        canvas:
 
-                #D
-                Color:
-                    rgba: get_color_from_hex('#F7930AFF')
-                Rectangle:
-                    size: 60, 0.15 * self.height
-                    pos: self.pos[0]+90, self.pos[1]
+                            #C
+                            Color:
+                                rgba: get_color_from_hex('#FC0020FF')
+                            RoundedRectangle:
+                                size: 60, 160
+                                pos: self.pos[0], self.pos[1] -50
+                                segments: 15
+                                radius: [15]
 
-                #D#
-                Color:
-                    rgba: get_color_from_hex('#FFC000FF')
-                Rectangle:
-                    size: 30, 0.23 * self.height
-                    pos: self.pos[0]+150, self.pos[1]
+                            #C#
+                            Color:
+                                rgba: get_color_from_hex('#FA6D1EFF')
+                            RoundedRectangle:
+                                size: 30, 20
+                                pos: self.pos[0]+60, self.pos[1] +50
+                                segments: 15
+                                radius: [15]
 
-                #E
-                Color:
-                    rgba: get_color_from_hex('#FFFE03FF')
-                Rectangle:
-                    size: 60, 0.80 * self.height
-                    pos: self.pos[0] +180, self.pos[1]
+                            #D
+                            Color:
+                                rgba: get_color_from_hex('#F7930AFF')
+                            RoundedRectangle:
+                                size: 60, 40
+                                pos: self.pos[0]+90, self.pos[1]
+                                segments: 15
+                                radius: [15]
 
-                #F
-                Color:
-                    rgba: get_color_from_hex('#93D250FF')
-                Rectangle:
-                    size: 60, 0.50 * self.height
-                    pos: self.pos[0] +240, self.pos[1]
+                            #D#
+                            Color:
+                                rgba: get_color_from_hex('#FFC000FF')
+                            RoundedRectangle:
+                                size: 30, 120
+                                pos: self.pos[0]+150, self.pos[1] +175
+                                segments: 15
+                                radius: [15]
 
-                #F#
-                Color:
-                    rgba: get_color_from_hex('#00AF50FF')
-                Rectangle:
-                    size: 30, 0.10 * self.height
-                    pos: self.pos[0]+300, self.pos[1]
+                            #E
+                            Color:
+                                rgba: get_color_from_hex('#FFFE03FF')
+                            RoundedRectangle:
+                                size: 60, 20
+                                pos: self.pos[0]+180, self.pos[1] -75
+                                segments: 15
+                                radius: [15]
 
-                #G
-                Color:
-                    rgba: get_color_from_hex('#10A192FF')
-                Rectangle:
-                    size: 60, 1.0 * self.height
-                    pos: self.pos[0]+330, self.pos[1]
+                            #F
+                            Color:
+                                rgba: get_color_from_hex('#93D250FF')
+                            RoundedRectangle:
+                                size: 60, 30
+                                pos: self.pos[0]+240, self.pos[1] +0
+                                segments: 15
+                                radius: [15]
 
-                #G#
-                Color:
-                    rgba: get_color_from_hex('#0329E4FF')
-                Rectangle:
-                    size: 30, 0.05 * self.height
-                    pos: self.pos[0] +390, self.pos[1]
+                            #F#
+                            Color:
+                                rgba: get_color_from_hex('#00AF50FF')
+                            RoundedRectangle:
+                                size: 30, 40
+                                pos: self.pos[0]+300, self.pos[1] +275
+                                segments: 15
+                                radius: [15]
 
-                #A
-                Color:
-                    rgba: get_color_from_hex('#7900F1FF')
-                Rectangle:
-                    size: 60, 1.0 * self.height
-                    pos: self.pos[0]+420, self.pos[1]
+                            #G
+                            Color:
+                                rgba: get_color_from_hex('#10A192FF')
+                            RoundedRectangle:
+                                size: 60, 160
+                                pos: self.pos[0]+330, self.pos[1] -25
+                                segments: 15
+                                radius: [15]
 
-                #A#
-                Color:
-                    rgba: get_color_from_hex('#AF5DFFFF')
-                Rectangle:
-                    size: 30, 0.25 * self.height
-                    pos: self.pos[0] +480, self.pos[1]
+                            #G#
+                            Color:
+                                rgba: get_color_from_hex('#0329E4FF')
+                            RoundedRectangle:
+                                size: 30, 40
+                                pos: self.pos[0]+390, self.pos[1] +75
+                                segments: 15
+                                radius: [15]
 
-                #B
-                Color:
-                    rgba: get_color_from_hex('#CB00CBFF')
-                Rectangle:
-                    size: 60, 0.75 * self.height
-                    pos: self.pos[0]+510, self.pos[1]
+                            #A
+                            Color:
+                                rgba: get_color_from_hex('#7900F1FF')
+                            RoundedRectangle:
+                                size: 60, 120
+                                pos: self.pos[0]+420, self.pos[1] +125
+                                segments: 15
+                                radius: [15]
 
-        #Button:
-            #text: 'Alarm'
+                            #A#
+                            Color:
+                                rgba: get_color_from_hex('#AF5DFFFF')
+                            RoundedRectangle:
+                                size: 30, 160
+                                pos: self.pos[0]+480, self.pos[1] +50
+                                segments: 15
+                                radius: [15]
+
+                            #B
+                            Color:
+                                rgba: get_color_from_hex('#CB00CBFF')
+                            RoundedRectangle:
+                                size: 60, 20
+                                pos: self.pos[0]+510, self.pos[1]
+                                segments: 15
+                                radius: [15]
+
+
+                        canvas.after:
+    #                        Color:
+    #                            rgba: 0, 0, 0, 1.0
+    #                        Line:
+    #                            width: 1
+    #                            points: 0,self.height * 0.20 +5,self.width,self.height * 0.20 +5 #zip(self.data.x, self.data.y)
+
+                            StencilUnUse:
+                            StencilPop:
+                    #Label:
+                        #text: 'something2'
+
+            Label:
+                text: 'Volume area'
+
+                canvas:
+
+                    #C
+                    Color:
+                        rgba: get_color_from_hex('#FC0020FF')
+                    Rectangle:
+                        size: 60, 0.90 * self.height
+                        pos: self.pos[0], self.pos[1]
+
+                    #C#
+                    Color:
+                        rgba: get_color_from_hex('#FA6D1EFF')
+                    Rectangle:
+                        size: 30, 0.05 * self.height
+                        pos: self.pos[0]+60, self.pos[1]
+
+                    #D
+                    Color:
+                        rgba: get_color_from_hex('#F7930AFF')
+                    Rectangle:
+                        size: 60, 0.15 * self.height
+                        pos: self.pos[0]+90, self.pos[1]
+
+                    #D#
+                    Color:
+                        rgba: get_color_from_hex('#FFC000FF')
+                    Rectangle:
+                        size: 30, 0.23 * self.height
+                        pos: self.pos[0]+150, self.pos[1]
+
+                    #E
+                    Color:
+                        rgba: get_color_from_hex('#FFFE03FF')
+                    Rectangle:
+                        size: 60, 0.80 * self.height
+                        pos: self.pos[0] +180, self.pos[1]
+
+                    #F
+                    Color:
+                        rgba: get_color_from_hex('#93D250FF')
+                    Rectangle:
+                        size: 60, 0.50 * self.height
+                        pos: self.pos[0] +240, self.pos[1]
+
+                    #F#
+                    Color:
+                        rgba: get_color_from_hex('#00AF50FF')
+                    Rectangle:
+                        size: 30, 0.10 * self.height
+                        pos: self.pos[0]+300, self.pos[1]
+
+                    #G
+                    Color:
+                        rgba: get_color_from_hex('#10A192FF')
+                    Rectangle:
+                        size: 60, 1.0 * self.height
+                        pos: self.pos[0]+330, self.pos[1]
+
+                    #G#
+                    Color:
+                        rgba: get_color_from_hex('#0329E4FF')
+                    Rectangle:
+                        size: 30, 0.05 * self.height
+                        pos: self.pos[0] +390, self.pos[1]
+
+                    #A
+                    Color:
+                        rgba: get_color_from_hex('#7900F1FF')
+                    Rectangle:
+                        size: 60, 1.0 * self.height
+                        pos: self.pos[0]+420, self.pos[1]
+
+                    #A#
+                    Color:
+                        rgba: get_color_from_hex('#AF5DFFFF')
+                    Rectangle:
+                        size: 30, 0.25 * self.height
+                        pos: self.pos[0] +480, self.pos[1]
+
+                    #B
+                    Color:
+                        rgba: get_color_from_hex('#CB00CBFF')
+                    Rectangle:
+                        size: 60, 0.75 * self.height
+                        pos: self.pos[0]+510, self.pos[1]
+
+            #Button:
+                #text: 'Alarm'

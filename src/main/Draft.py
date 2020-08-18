@@ -1,33 +1,303 @@
+from kivy.app import App
+from kivy.uix.widget import Widget
 from kivy.lang import Builder
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import ListProperty
 
-from kivymd.app import MDApp
-from kivymd.uix.menu import MDDropdownMenu
+kv_string = '''
+#:import get_color_from_hex kivy.utils.get_color_from_hex
 
-KV = '''
-Screen:
+<WhiteNoteStrip>:
+    pos_hint: {'x': 0.75, 'y': 0.25}
+    size_hint: 0.1, 0.8
+    canvas:
+        Color:
+            rgba: get_color_from_hex('#111111FF')
+        Rectangle:
+            size: self.size
+            pos: self.pos
 
-    MDRaisedButton:
-        id: button
-        text: "PRESS ME"
-        pos_hint: {"center_x": .5, "center_y": .5}
-        on_release: app.menu.open()
+<MyWidget>:
+    FloatLayout:
+        id: id_background
 '''
 
+Builder.load_string(kv_string)
 
-class Test(MDApp):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.screen = Builder.load_string(KV)
-        menu_items = [{"icon": "git", "text": f"Item {i}"} for i in range(5)]
-        self.menu = MDDropdownMenu(
-            caller=self.screen.ids.button, items=menu_items, width_mult=4
-        )
 
+class MyWidget(FloatLayout):
+
+    # def __init__(self):
+    #     super(MyWidget, self).__init__()
+
+    def create_strips(self):
+        # with self.ids.id_background.canvas.before:
+        #     WhiteNoteStrip()
+
+        w = WhiteNoteStrip()
+
+        self.ids.id_background.add_widget(w)
+
+    pass
+
+
+class WhiteNoteStrip(Widget):
+    r_size = ListProperty([0, 0])
+
+
+class TestApp(App):
     def build(self):
-        return self.screen
+        m = MyWidget()
+        m.create_strips()
+
+        return m
+
+if __name__ == '__main__':
+    TestApp().run()
+
+#
+# from kivy.app import App
+# from kivy.uix.floatlayout import FloatLayout
+# from kivy.uix.boxlayout import BoxLayout
+# from kivy.lang import Builder
+# from kivy.uix.widget import Widget
+#
+# kv_string = '''
+#
+# #:import get_color_from_hex kivy.utils.get_color_from_hex
+#
+# <WhiteNoteStrip@Widget>:
+#     pos_hint: {'x': 0.75, 'y': 0.25}
+#     size_hint: 0.1, 0.8
+#
+#     canvas:
+#         Color:
+#             rgba: get_color_from_hex('#111111FF')
+#         Rectangle:
+#             size: self.size
+#             pos: self.pos
+#
+# <MyWidget>:
+#     id: id_background
+#
+#
+#     # Widget:
+#     #     pos_hint: {'center_y': 0.5, 'center_x': 0.2}
+#     #     size_hint: 0.2, 0.2
+#     #     canvas:
+#     #         Color:
+#     #             rgb: 0.1, 0.6, 0.3
+#     #         Rectangle:
+#     #             size: self.size
+#     #             pos: self.pos
+#     # Widget:
+#     #     pos_hint: {'center_y': 0.5, 'center_x': 0.8}
+#     #     size_hint: 0.2, 0.2
+#     #     canvas:
+#     #         Color:
+#     #             rgb: 0.1, 0.6, 0.3
+#     #         Rectangle:
+#     #             size: self.size
+#     #             pos: self.pos
+#     # Widget:
+#     #     pos_hint: {'center_y': 0.2, 'center_x': 0.5}
+#     #     size_hint: 0.2, 0.2
+#     #     canvas:
+#     #         Color:
+#     #             rgb: 0.1, 0.6, 0.3
+#     #         Rectangle:
+#     #             size: self.size
+#     #             pos: self.pos
+#     # Widget:
+#     #     pos_hint: {'center_y': 0.8, 'center_x': 0.5}
+#     #     size_hint: 0.2, 0.2
+#     #     canvas:
+#     #         Color:
+#     #             rgb: 0.1, 0.6, 0.3
+#     #         Rectangle:
+#     #             size: self.size
+#     #             pos: self.pos
+# '''
+#
+# Builder.load_string(kv_string)
+#
+# class WhiteNoteStrip(Widget):
+#     pass
+#
+# class MyWidget(FloatLayout):
+#
+#     def __init__(self):
+#         super(MyWidget, self).__init__()
+#
+#     def create_strips(self):
+#         with self.ids.id_background.canvas.before:
+#             WhiteNoteStrip()
+#
+# class TestApp(App):
+#
+#     def build(self):
+#         m = MyWidget()
+#
+#         m.create_strips()
+#         return m
+#
+# if __name__ == '__main__':
+#
+#     t = TestApp()
+#
+#     t.run()
+
+##########################################################
+
+from kivy.app import App
+from kivy.uix.widget import Widget
+from kivy.lang import Builder
+from kivy.properties import ListProperty
+
+kv_string = '''
+<WhiteNoteStrip>:
+    pos_hint: {'center_y': 0.5, 'center_x': 0.5}
+    size_hint: 0.2, 0.2
+    canvas:
+        Color:
+            rgb: 0.1, 0.6, 0.3
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<MyWidget>:
+    FloatLayout:
+        id: id_background  
+        canvas.after:
+            Color:
+                rgb: 0.9, 0.6, 0.3
+
+'''
+
+Builder.load_string(kv_string)
 
 
-Test().run()
+class WhiteNoteStrip(Widget):
+    r_size = ListProperty([0, 0])
+
+
+class MyWidget(Widget):
+
+    def create_strips(self):
+        # with self.ids.id_background.canvas.before:
+        #     WhiteNoteStrip()
+        w = WhiteNoteStrip()
+        w.r_size = [20,40]
+        self.ids.id_background.add_widget(w)
+
+class TestApp(App):
+    def build(self):
+        m = MyWidget()
+        m.create_strips()
+        return m
+
+if __name__ == '__main__':
+    TestApp().run()
+
+
+#########################################################"
+
+# from kivy.lang import Builder
+#
+# from kivymd.app import MDApp
+# from kivymd.uix.menu import MDDropdownMenu
+#
+# import kivy
+# # kivy.require('1.0.5')
+#
+# from kivy.uix.floatlayout import FloatLayout
+# from kivy.app import App
+# from kivy.graphics import Rectangle
+# from kivy.properties import ObjectProperty, StringProperty, NumericProperty
+#
+# KV = '''
+# #:import get_color_from_hex kivy.utils.get_color_from_hex
+# <WhiteNoteStrip>:
+#     rectangle: id_rectangle
+#     FloatLayout:
+#         canvas:
+#             Color:
+#                 rgba: get_color_from_hex('#FF1111FF')
+#
+#             Rectangle:
+#                 id: id_rectangle
+#                 pos: root.proportional_horizontal_size, 0
+#                 size: root.proportional_horizontal_size, root.height
+#
+# <Controlller>:
+#     label_wid: my_custom_label
+#
+#     BoxLayout:
+#         orientation: 'vertical'
+#         padding: 20
+#
+#         Button:
+#             text: 'My controller info is: ' + root.info
+#             on_press: root.do_action()
+#
+#         Label:
+#             id: my_custom_label
+#             text: 'My label before button press'
+#
+#         Label:
+#             text: f'One higher than favorite number: {root.favorite_number + 1}'
+# '''
+
+
+# class Test(MDApp):
+#     def __init__(self, **kwargs):
+#         super().__init__(**kwargs)
+#         self.screen = Builder.load_string(KV)
+#         menu_items = [{"icon": "git", "text": f"Item {i}"} for i in range(5)]
+#         self.menu = MDDropdownMenu(
+#             caller=self.screen.ids.button, items=menu_items, width_mult=4
+#         )
+#
+#     def build(self):
+#         return self.screen
+
+
+# class Controlller(FloatLayout):
+#     '''Create a controller that receives a custom widget from the kv lang file.
+#
+#     Add an action to be called from the kv lang file.
+#     '''
+#     label_wid = ObjectProperty()
+#     info = StringProperty()
+#     favorite_number = NumericProperty(0)
+#
+#     def do_action(self):
+#         self.label_wid.text = 'My label after button press'
+#         self.info = 'New info text'
+#
+# class WhiteNoteStrip(FloatLayout):
+#     proportional_horizontal_pos = NumericProperty(20)
+#     proportional_horizontal_size = NumericProperty(20)
+#
+# class ControllerApp(App):
+#
+#     def __init__(self, **kwargs):
+#         super().__init__(**kwargs)
+#         self.screen = Builder.load_string(KV)
+#         # menu_items = [{"icon": "git", "text": f"Item {i}"} for i in range(5)]
+#         # self.menu = MDDropdownMenu(
+#         #     caller=self.screen.ids.button, items=menu_items, width_mult=4
+#         # )
+#
+#     def build(self):
+#         c = Controlller(info='Hello world', favorite_number=3)
+#         c.add_widget(WhiteNoteStrip(proportional_horizontal_pos=20, proportional_horizontal_size=40))
+#         return c
+#
+#
+# if __name__ == '__main__':
+#     ControllerApp().run()
 
 
 #######################################################

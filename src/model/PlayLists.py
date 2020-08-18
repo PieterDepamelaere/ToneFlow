@@ -24,6 +24,7 @@ curr_file = pl.Path(os.path.realpath(__file__))
 from src.model.PlayList import PlayListProvider
 from src.model.CommonUtils import CommonUtils as CU
 
+
 class PlayLists(Screen):
 
     app = None
