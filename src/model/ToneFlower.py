@@ -79,11 +79,10 @@ class ToneFlower(ModalView):
 
         # Initializing properties of ModalView:
         self.size_hint = (1, 1)
-        self.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
+        self.pos_hint = {'x': 0, 'y': 0}
         self.background_color = (0, 0, 0, 0)
-        self.white_note_strips = []
-        self.width_factor_black_key = 10.0
         self.note_number_to_pos = {}
+        self.note_number_to_size = {}
 
 
         # When auto_dismiss==True, then you can escape the modal view with [ESC]
@@ -148,86 +147,55 @@ class ToneFlower(ModalView):
 
             amount_white_keys, amount_black_keys = MTCU.note_interval_to_key_range(low_pitch_limit, high_pitch_limit)
 
-            self.width_factor_black_key = 1 / (amount_white_keys * 2 + amount_black_keys)
+            width_factor_black_key = 1.0 / (amount_white_keys * 2 + amount_black_keys)
+            width_factor_white_key = 2 * width_factor_black_key
 
-            pos_factor_white_strip = self.pos
-
-            # A call to the clear method would erase everything that has been drawn so far on the canvas:
-            # self.ids.id_background.canvas.before.clear()
-
-            # Add to the floatlayout the white_note_strips as rectangle in the background:
+            # Add the white_note_strips as rectangle in the background to the floatlayout:
 
             note = low_pitch_limit
+            rect = None
+            pos_factor_white_strip = 0.0
+            width = 0.0
+
             while note <= high_pitch_limit:
 
                 if MTCU.is_white_note(note):
-                    # A white note will be rendered with twice the width of a black note, two adjacent white notes 4 times that size:
+                    # A white note will be rendered with twice the white_strip_width of a black note, two adjacent white notes 4 times that size:
 
-                    # TODO: https://blog.kivy.org/2014/10/updating-canvas-instructions-declared-in-python/
-
-                    # TODO: https://stackoverflow.com/questions/57023147/how-to-set-a-custom-widget-size-position-to-its-parent-layout-in-kivy
-
-                    # TODO: https://www.geeksforgeeks.org/python-canvas-in-kivy/?ref=rp
-
+                    self.note_number_to_pos[note] = pos_factor_white_strip
+                    self.note_number_to_size[note] = width_factor_white_key
 
                     if MTCU.is_white_note(note + 1):
                         # In case of adjacent E, F or B, C, one white_strip can be saved by drawing a wider one instead.
                         # This might be good for performance
-                        # rect = Rectangle(pos=pos_factor_white_strip, size=(self.width_factor_black_key * 4, self.height))
-                        rect = WhiteNoteStrip()
 
-                        # rect.size = 40, self.height
-                        # rect.pos = 40, 0
-
-                        # rect.size_hint = (4* self.width_factor_black_key, 1)
-                        # rect.pos_hint = (pos_factor_white_strip, 0)
-                        # rect.size = (64, Window)
-
-                        # rect.proportional_horizontal_pos = pos_factor_white_strip[0]
-                        # rect.proportional_horizontal_size = (self.width_factor_black_key * 4)
-
-                        self.ids.id_background.add_widget(rect, len(self.ids.id_background.children))
-                        # self.ids.id_background.canvas.before.add(rect)
-
-
-                        self.white_note_strips.append(rect)
+                        width = width_factor_white_key * 2
 
                         # Increment the current note, because we draw two at once:
                         note += 1
 
+                        self.note_number_to_pos[note] = pos_factor_white_strip + width_factor_white_key
+                        self.note_number_to_size[note] = width_factor_white_key
+
                     else:
-                        rect = WhiteNoteStrip()
-                        # rect.size_hint = (2 * self.width_factor_black_key, 1)
-                        # rect.pos_hint = (pos_factor_white_strip, 0)
-                        # rect.proportional_horizontal_pos = pos_factor_white_strip[0]
-                        # rect.proportional_horizontal_size = (self.width_factor_black_key * 2)
-                        self.ids.id_background.add_widget(rect, len(self.ids.id_background.children))
+                        width = width_factor_white_key
 
-                        # self.ids.id_background.canvas.before.add(rect)
+                    rect = WhiteNoteStrip()
+                    rect.pos_hint = {'x': pos_factor_white_strip, 'y': 0.0}
+                    rect.size_hint = (width, 1.0)
 
-                        self.white_note_strips.append(rect)
+                    pos_factor_white_strip += width
 
-                    # pos_factor_white_strip[0] += rect.size[0]
+                    self.ids.id_background.add_widget(rect, len(self.ids.id_background.children))
 
                 else:
-                    pos_factor_white_strip[0] += self.width_factor_black_key
-                    # Callback(self.my_callback)
+                    self.note_number_to_pos[note] = pos_factor_white_strip
+                    self.note_number_to_size[note] = width_factor_black_key
+
+                    pos_factor_white_strip += width
 
                 note += 1
 
-        # self.bind(pos=self.update_rect, size=self.update_rect)
-
-            # pipe.size_hint = (None, None)
-            # pipe.pos = (Window.width + i * distance_between_pipes, 96)
-            # pipe.size = (64, self.root.height - 96)
-            #
-            # self.pipes.append(pipe)
-            # self.root.add_widget(pipe)
-
-    def update_rect(self, *args):
-        for white_note_strip in self.white_note_strips:
-            # white_note_strip.pos = self.pos
-            white_note_strip.size = white_note_strip.size[0], self.height
 
     def load_from_json(self):
         # TODO
@@ -288,8 +256,4 @@ class ToneFlower(ModalView):
 
 
 class WhiteNoteStrip(Widget):
-    rel_pos = {"x": 0.6, "y": 0}
-    rel_size = (0.2, 1.0)
-    r_size = ListProperty([0, 0])
-    # proportional_horizontal_pos = NumericProperty(20)
-    # proportional_horizontal_size = NumericProperty(20)
+    pass
