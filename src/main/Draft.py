@@ -8,7 +8,7 @@
 # kv_string = '''
 # #:import get_color_from_hex kivy.utils.get_color_from_hex
 #
-# <WhiteNoteStrip>:
+# <ColorStrip>:
 #     pos_hint: {'x': 0.75, 'y': 0.25}
 #     size_hint: 0.1, 0.8
 #     canvas:
@@ -33,16 +33,16 @@
 #
 #     def create_strips(self):
 #         # with self.ids.id_background.canvas.before:
-#         #     WhiteNoteStrip()
+#         #     ColorStrip()
 #
-#         w = WhiteNoteStrip()
+#         w = ColorStrip()
 #
 #         self.ids.id_background.add_widget(w)
 #
 #     pass
 #
 #
-# class WhiteNoteStrip(Widget):
+# class ColorStrip(Widget):
 #     r_size = ListProperty([0, 0])
 #
 #
@@ -67,7 +67,7 @@
 #
 # #:import get_color_from_hex kivy.utils.get_color_from_hex
 #
-# <WhiteNoteStrip@Widget>:
+# <ColorStrip@Widget>:
 #     pos_hint: {'x': 0.75, 'y': 0.25}
 #     size_hint: 0.1, 0.8
 #
@@ -122,7 +122,7 @@
 #
 # Builder.load_string(kv_string)
 #
-# class WhiteNoteStrip(Widget):
+# class ColorStrip(Widget):
 #     pass
 #
 # class MyWidget(FloatLayout):
@@ -132,7 +132,7 @@
 #
 #     def create_strips(self):
 #         with self.ids.id_background.canvas.before:
-#             WhiteNoteStrip()
+#             ColorStrip()
 #
 # class TestApp(App):
 #
@@ -156,7 +156,7 @@
 # from kivy.properties import ListProperty
 #
 # kv_string = '''
-# <WhiteNoteStrip>:
+# <ColorStrip>:
 #     pos_hint: {'center_y': 0.5, 'center_x': 0.5}
 #     size_hint: 0.2, 0.2
 #     canvas:
@@ -178,7 +178,7 @@
 # Builder.load_string(kv_string)
 #
 #
-# class WhiteNoteStrip(Widget):
+# class ColorStrip(Widget):
 #     r_size = ListProperty([0, 0])
 #
 #
@@ -186,8 +186,8 @@
 #
 #     def create_strips(self):
 #         # with self.ids.id_background.canvas.before:
-#         #     WhiteNoteStrip()
-#         w = WhiteNoteStrip()
+#         #     ColorStrip()
+#         w = ColorStrip()
 #         w.r_size = [20,40]
 #         self.ids.id_background.add_widget(w)
 #
@@ -218,7 +218,7 @@
 #
 # KV = '''
 # #:import get_color_from_hex kivy.utils.get_color_from_hex
-# <WhiteNoteStrip>:
+# <ColorStrip>:
 #     rectangle: id_rectangle
 #     FloatLayout:
 #         canvas:
@@ -276,7 +276,7 @@
 #         self.label_wid.text = 'My label after button press'
 #         self.info = 'New info text'
 #
-# class WhiteNoteStrip(FloatLayout):
+# class ColorStrip(FloatLayout):
 #     proportional_horizontal_pos = NumericProperty(20)
 #     proportional_horizontal_size = NumericProperty(20)
 #
@@ -292,7 +292,7 @@
 #
 #     def build(self):
 #         c = Controlller(info='Hello world', favorite_number=3)
-#         c.add_widget(WhiteNoteStrip(proportional_horizontal_pos=20, proportional_horizontal_size=40))
+#         c.add_widget(ColorStrip(proportional_horizontal_pos=20, proportional_horizontal_size=40))
 #         return c
 #
 #

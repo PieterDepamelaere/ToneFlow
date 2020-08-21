@@ -1,5 +1,6 @@
 import os
 import sys
+import random
 import re
 import aiofiles
 import pathlib as pl
@@ -8,6 +9,7 @@ from datetime import datetime
 from kivy.app import App
 from kivy.factory import Factory
 from kivy.lang import Builder
+from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.graphics import Rectangle
 from kivy.graphics import Color
@@ -85,6 +87,12 @@ class ToneFlower(ModalView):
         self.note_number_to_pos = {}
         self.note_number_to_size = {}
         self.note_number_to_color = {}
+        self.tone_flower_engine = None
+        self.white_note_strips = []
+        self.color_strips = {}
+
+        # TODO PDP: note_number mappen op queue<SoortToneObject> hier?
+        self.color_tones = {}
 
 
         # When auto_dismiss==True, then you can escape the modal view with [ESC]
@@ -143,7 +151,6 @@ class ToneFlower(ModalView):
         self.note_number_to_size = {}
         self.note_number_to_color = {}
 
-
         low_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['low_pitch_limit'].value)
         high_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['high_pitch_limit'].value)
 
@@ -155,11 +162,11 @@ class ToneFlower(ModalView):
         # Add the white_note_strips as rectangle in the background to the floatlayout:
 
         note = low_pitch_limit
-        rect = None
         pos_factor_white_strip = 0.0
-        width = 0.0
 
         while note <= high_pitch_limit:
+
+            width = 0.0
 
             if MTCU.is_white_note(note):
                 # A white note will be rendered with twice the white_strip_width of a black note, two adjacent white notes 4 times that size:
@@ -167,7 +174,6 @@ class ToneFlower(ModalView):
 
                 self.note_number_to_pos[note] = pos_factor_white_strip
                 self.note_number_to_size[note] = width_factor_white_key
-
 
                 if MTCU.is_white_note(note + 1):
                     # In case of adjacent E, F or B, C, one white_strip can be saved by drawing a wider one instead.
@@ -177,6 +183,15 @@ class ToneFlower(ModalView):
 
                     # Before this extra increment of note, retrieve the correct color:
                     self.note_number_to_color[note] = MTCU.NOTE_COLORS[MTCU.condense_note_pitch(note)]
+
+                    # Before this extra increment of note, add a color_strip
+                    color_strip = ColorStrip()
+                    color_strip.strip_color = self.note_number_to_color[note]
+                    color_strip.pos_hint = {'x': self.note_number_to_pos[note], 'y': 0.0}
+                    color_strip.size_hint = (self.note_number_to_size[note], 0.4 + 0.2 * random.uniform(0, 1))
+
+                    self.ids.id_bottom_foreground.add_widget(color_strip)
+                    self.color_strips[note] = color_strip
 
                     # Increment the current note, because we draw two at once:
                     note += 1
@@ -188,11 +203,13 @@ class ToneFlower(ModalView):
                     width = width_factor_white_key
 
                 if (CU.tfs.dic['toggle_white_note_strips'].value):
-                    rect = WhiteNoteStrip()
-                    rect.pos_hint = {'x': pos_factor_white_strip, 'y': 0.0}
-                    rect.size_hint = (width, 1.0)
+                    white_note_strip = ColorStrip()
+                    white_note_strip.strip_color = get_color_from_hex('#111111FF')
+                    white_note_strip.pos_hint = {'x': pos_factor_white_strip, 'y': 0.0}
+                    white_note_strip.size_hint = (width, 1.0)
 
-                    self.ids.id_background.add_widget(rect, len(self.ids.id_background.children))
+                    self.ids.id_background.add_widget(white_note_strip, len(self.ids.id_background.children))
+                    self.white_note_strips.append(white_note_strip)
 
             else:
                 # Add black note:
@@ -201,11 +218,19 @@ class ToneFlower(ModalView):
 
                 width = width_factor_black_key
 
-            pos_factor_white_strip += width
-
             # Before this increment of note, retrieve the correct color:
             self.note_number_to_color[note] = MTCU.NOTE_COLORS[MTCU.condense_note_pitch(note)]
 
+            # Before this increment of note, create a color_strip for this note:
+            color_strip = ColorStrip()
+            color_strip.strip_color = self.note_number_to_color[note]
+            color_strip.pos_hint = {'x': self.note_number_to_pos[note], 'y': 0.0}
+            color_strip.size_hint = (self.note_number_to_size[note], 0.4 + 0.2 * random.uniform(0, 1))
+
+            self.ids.id_bottom_foreground.add_widget(color_strip)
+            self.color_strips[note] = color_strip
+
+            pos_factor_white_strip += width
             note += 1
 
 
@@ -264,20 +289,29 @@ class ToneFlower(ModalView):
         # for msg in midi_file.play():
         #     print(f"Test PDP: {msg}")
 
-        tone = Tone()
+        tone = ColorTone()
         tone.tone_color = instance.note_number_to_color[60]
-        tone.pos_hint = {'x': instance.note_number_to_pos[60], 'y': 0.2}
+        tone.pos_hint = {'x': instance.note_number_to_pos[60]}
+        tone.pos[1] = 200
         tone.size_hint = (instance.note_number_to_size[60], None)
         tone.size[1] = 20
 
-        tone2 = Tone()
+        tone2 = ColorTone()
         tone2.tone_color = instance.note_number_to_color[67]
-        tone2.pos_hint = {'x': instance.note_number_to_pos[67], 'y': 0.4}
+        tone2.pos_hint = {'x': instance.note_number_to_pos[67], 'y': 0.5}
         tone2.size_hint = (instance.note_number_to_size[67], None)
         tone.size[1] = 35
 
-        instance.ids.id_foreground.add_widget(tone, len(instance.ids.id_background.children))
-        instance.ids.id_foreground.add_widget(tone2, len(instance.ids.id_background.children))
+        instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
+        instance.ids.id_top_foreground.add_widget(tone2, len(instance.ids.id_background.children))
+
+        # instance.tone_flower_engine = Clock.schedule_interval(instance.calculate_frame, 1 / 30.0)
+
+    def calculate_frame(self, time_passed):
+        self.flow_tones(time_passed)
+
+    def flow_tones(self, time_passed):
+        pass
 
     @staticmethod
     def on_pre_dismiss_callback(instance):
@@ -304,8 +338,8 @@ class ToneFlower(ModalView):
         return instance.block_close
 
 
-class WhiteNoteStrip(Widget):
+class ColorStrip(Widget):
     pass
 
-class Tone(Widget):
+class ColorTone(Widget):
     pass

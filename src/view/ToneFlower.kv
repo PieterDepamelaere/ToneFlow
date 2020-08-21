@@ -16,15 +16,16 @@
         keep_ratio: False
         source: str(CU.tfs.dic['IMG_DIR_PATH'].value / 'WhiteSquare.png') #'atlas://data/images/defaulttheme/splitter_grip' + root.horizontal
 
-<WhiteNoteStrip>:
+<ColorStrip>:
+    strip_color: (1, 1, 1, 1)
     canvas:
         Color:
-            rgba: get_color_from_hex('#111111FF')
+            rgba: self.strip_color
         Rectangle:
             size: self.size
             pos: self.pos
 
-<Tone>:
+<ColorTone>:
     tone_color: (1, 1, 1, 1)
     canvas:
         Color:
@@ -98,7 +99,7 @@
                     orientation: 'vertical'
 
                     FloatLayout:
-                        id: id_foreground
+                        id: id_top_foreground
 #                        text: 'Projected score'
 
                         canvas.before:
@@ -236,94 +237,96 @@
                     #Label:
                         #text: 'something2'
 
-            Label:
-                text: 'Volume area'
+            FloatLayout:
+                id: id_bottom_foreground
+#            Label:
+#                text: 'Volume area'
 
-                canvas:
-
-                    #C
-                    Color:
-                        rgba: get_color_from_hex('#FC0020FF')
-                    Rectangle:
-                        size: 60, 0.90 * self.height
-                        pos: self.pos[0], self.pos[1]
-
-                    #C#
-                    Color:
-                        rgba: get_color_from_hex('#FA6D1EFF')
-                    Rectangle:
-                        size: 30, 0.05 * self.height
-                        pos: self.pos[0]+60, self.pos[1]
-
-                    #D
-                    Color:
-                        rgba: get_color_from_hex('#F7930AFF')
-                    Rectangle:
-                        size: 60, 0.15 * self.height
-                        pos: self.pos[0]+90, self.pos[1]
-
-                    #D#
-                    Color:
-                        rgba: get_color_from_hex('#FFC000FF')
-                    Rectangle:
-                        size: 30, 0.23 * self.height
-                        pos: self.pos[0]+150, self.pos[1]
-
-                    #E
-                    Color:
-                        rgba: get_color_from_hex('#FFFE03FF')
-                    Rectangle:
-                        size: 60, 0.80 * self.height
-                        pos: self.pos[0] +180, self.pos[1]
-
-                    #F
-                    Color:
-                        rgba: get_color_from_hex('#93D250FF')
-                    Rectangle:
-                        size: 60, 0.50 * self.height
-                        pos: self.pos[0] +240, self.pos[1]
-
-                    #F#
-                    Color:
-                        rgba: get_color_from_hex('#00AF50FF')
-                    Rectangle:
-                        size: 30, 0.10 * self.height
-                        pos: self.pos[0]+300, self.pos[1]
-
-                    #G
-                    Color:
-                        rgba: get_color_from_hex('#10A192FF')
-                    Rectangle:
-                        size: 60, 1.0 * self.height
-                        pos: self.pos[0]+330, self.pos[1]
-
-                    #G#
-                    Color:
-                        rgba: get_color_from_hex('#0329E4FF')
-                    Rectangle:
-                        size: 30, 0.05 * self.height
-                        pos: self.pos[0] +390, self.pos[1]
-
-                    #A
-                    Color:
-                        rgba: get_color_from_hex('#7900F1FF')
-                    Rectangle:
-                        size: 60, 1.0 * self.height
-                        pos: self.pos[0]+420, self.pos[1]
-
-                    #A#
-                    Color:
-                        rgba: get_color_from_hex('#AF5DFFFF')
-                    Rectangle:
-                        size: 30, 0.25 * self.height
-                        pos: self.pos[0] +480, self.pos[1]
-
-                    #B
-                    Color:
-                        rgba: get_color_from_hex('#CB00CBFF')
-                    Rectangle:
-                        size: 60, 0.75 * self.height
-                        pos: self.pos[0]+510, self.pos[1]
+#                canvas:
+#
+#                    #C
+#                    Color:
+#                        rgba: get_color_from_hex('#FC0020FF')
+#                    Rectangle:
+#                        size: 60, 0.90 * self.height
+#                        pos: self.pos[0], self.pos[1]
+#
+#                    #C#
+#                    Color:
+#                        rgba: get_color_from_hex('#FA6D1EFF')
+#                    Rectangle:
+#                        size: 30, 0.05 * self.height
+#                        pos: self.pos[0]+60, self.pos[1]
+#
+#                    #D
+#                    Color:
+#                        rgba: get_color_from_hex('#F7930AFF')
+#                    Rectangle:
+#                        size: 60, 0.15 * self.height
+#                        pos: self.pos[0]+90, self.pos[1]
+#
+#                    #D#
+#                    Color:
+#                        rgba: get_color_from_hex('#FFC000FF')
+#                    Rectangle:
+#                        size: 30, 0.23 * self.height
+#                        pos: self.pos[0]+150, self.pos[1]
+#
+#                    #E
+#                    Color:
+#                        rgba: get_color_from_hex('#FFFE03FF')
+#                    Rectangle:
+#                        size: 60, 0.80 * self.height
+#                        pos: self.pos[0] +180, self.pos[1]
+#
+#                    #F
+#                    Color:
+#                        rgba: get_color_from_hex('#93D250FF')
+#                    Rectangle:
+#                        size: 60, 0.50 * self.height
+#                        pos: self.pos[0] +240, self.pos[1]
+#
+#                    #F#
+#                    Color:
+#                        rgba: get_color_from_hex('#00AF50FF')
+#                    Rectangle:
+#                        size: 30, 0.10 * self.height
+#                        pos: self.pos[0]+300, self.pos[1]
+#
+#                    #G
+#                    Color:
+#                        rgba: get_color_from_hex('#10A192FF')
+#                    Rectangle:
+#                        size: 60, 1.0 * self.height
+#                        pos: self.pos[0]+330, self.pos[1]
+#
+#                    #G#
+#                    Color:
+#                        rgba: get_color_from_hex('#0329E4FF')
+#                    Rectangle:
+#                        size: 30, 0.05 * self.height
+#                        pos: self.pos[0] +390, self.pos[1]
+#
+#                    #A
+#                    Color:
+#                        rgba: get_color_from_hex('#7900F1FF')
+#                    Rectangle:
+#                        size: 60, 1.0 * self.height
+#                        pos: self.pos[0]+420, self.pos[1]
+#
+#                    #A#
+#                    Color:
+#                        rgba: get_color_from_hex('#AF5DFFFF')
+#                    Rectangle:
+#                        size: 30, 0.25 * self.height
+#                        pos: self.pos[0] +480, self.pos[1]
+#
+#                    #B
+#                    Color:
+#                        rgba: get_color_from_hex('#CB00CBFF')
+#                    Rectangle:
+#                        size: 60, 0.75 * self.height
+#                        pos: self.pos[0]+510, self.pos[1]
 
             #Button:
                 #text: 'Alarm'
