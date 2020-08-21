@@ -271,7 +271,7 @@ class ToneFlower(ModalView):
         tone.size[1] = 20
 
         tone2 = Tone()
-        tone.tone_color = instance.note_number_to_color[67]
+        tone2.tone_color = instance.note_number_to_color[67]
         tone2.pos_hint = {'x': instance.note_number_to_pos[67], 'y': 0.4}
         tone2.size_hint = (instance.note_number_to_size[67], None)
         tone.size[1] = 35
@@ -308,4 +308,4 @@ class WhiteNoteStrip(Widget):
     pass
 
 class Tone(Widget):
-    tone_color = ListProperty([1, 1, 1, 1])
+    pass
