@@ -188,7 +188,7 @@ class ToneFlower(ModalView):
                     color_strip = ColorStrip()
                     color_strip.strip_color = self.note_number_to_color[note]
                     color_strip.pos_hint = {'x': self.note_number_to_pos[note], 'y': 0.0}
-                    color_strip.size_hint = (self.note_number_to_size[note], 0.4 + 0.2 * random.uniform(0, 1))
+                    color_strip.size_hint = (self.note_number_to_size[note], 0.25 + 0.5 * random.uniform(0, 1))
 
                     self.ids.id_bottom_foreground.add_widget(color_strip)
                     self.color_strips[note] = color_strip
@@ -225,7 +225,7 @@ class ToneFlower(ModalView):
             color_strip = ColorStrip()
             color_strip.strip_color = self.note_number_to_color[note]
             color_strip.pos_hint = {'x': self.note_number_to_pos[note], 'y': 0.0}
-            color_strip.size_hint = (self.note_number_to_size[note], 0.4 + 0.2 * random.uniform(0, 1))
+            color_strip.size_hint = (self.note_number_to_size[note], 0.25 + 0.5 * random.uniform(0, 1))
 
             self.ids.id_bottom_foreground.add_widget(color_strip)
             self.color_strips[note] = color_strip
@@ -291,8 +291,8 @@ class ToneFlower(ModalView):
 
         tone = ColorTone()
         tone.tone_color = instance.note_number_to_color[60]
-        tone.pos_hint = {'x': instance.note_number_to_pos[60]}
-        tone.pos[1] = 200
+        tone.pos_hint = {'x': instance.note_number_to_pos[60], 'y': 0.3}
+        # tone.pos[1] = 200
         tone.size_hint = (instance.note_number_to_size[60], None)
         tone.size[1] = 20
 
@@ -305,13 +305,19 @@ class ToneFlower(ModalView):
         instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
         instance.ids.id_top_foreground.add_widget(tone2, len(instance.ids.id_background.children))
 
-        # instance.tone_flower_engine = Clock.schedule_interval(instance.calculate_frame, 1 / 30.0)
+        instance.color_tones[60] = [tone]
+        instance.color_tones[67] = [tone2]
+
+
+        instance.tone_flower_engine = Clock.schedule_interval(instance.calculate_frame, 1 / 30.0)
 
     def calculate_frame(self, time_passed):
         self.flow_tones(time_passed)
 
     def flow_tones(self, time_passed):
-        pass
+        for key, value in self.color_tones.items():
+            for tone in value:
+                tone.pos_hint['y'] -= time_passed/10.0
 
     @staticmethod
     def on_pre_dismiss_callback(instance):
