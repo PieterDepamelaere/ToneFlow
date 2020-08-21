@@ -1,60 +1,60 @@
-from kivy.app import App
-from kivy.uix.widget import Widget
-from kivy.lang import Builder
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import ListProperty
-
-kv_string = '''
-#:import get_color_from_hex kivy.utils.get_color_from_hex
-
-<WhiteNoteStrip>:
-    pos_hint: {'x': 0.75, 'y': 0.25}
-    size_hint: 0.1, 0.8
-    canvas:
-        Color:
-            rgba: get_color_from_hex('#111111FF')
-        Rectangle:
-            size: self.size
-            pos: self.pos
-
-<MyWidget>:
-    FloatLayout:
-        id: id_background
-'''
-
-Builder.load_string(kv_string)
-
-
-class MyWidget(FloatLayout):
-
-    # def __init__(self):
-    #     super(MyWidget, self).__init__()
-
-    def create_strips(self):
-        # with self.ids.id_background.canvas.before:
-        #     WhiteNoteStrip()
-
-        w = WhiteNoteStrip()
-
-        self.ids.id_background.add_widget(w)
-
-    pass
-
-
-class WhiteNoteStrip(Widget):
-    r_size = ListProperty([0, 0])
-
-
-class TestApp(App):
-    def build(self):
-        m = MyWidget()
-        m.create_strips()
-
-        return m
-
-if __name__ == '__main__':
-    TestApp().run()
+# from kivy.app import App
+# from kivy.uix.widget import Widget
+# from kivy.lang import Builder
+# from kivy.uix.floatlayout import FloatLayout
+# from kivy.uix.boxlayout import BoxLayout
+# from kivy.properties import ListProperty
+#
+# kv_string = '''
+# #:import get_color_from_hex kivy.utils.get_color_from_hex
+#
+# <WhiteNoteStrip>:
+#     pos_hint: {'x': 0.75, 'y': 0.25}
+#     size_hint: 0.1, 0.8
+#     canvas:
+#         Color:
+#             rgba: get_color_from_hex('#111111FF')
+#         Rectangle:
+#             size: self.size
+#             pos: self.pos
+#
+# <MyWidget>:
+#     FloatLayout:
+#         id: id_background
+# '''
+#
+# Builder.load_string(kv_string)
+#
+#
+# class MyWidget(FloatLayout):
+#
+#     # def __init__(self):
+#     #     super(MyWidget, self).__init__()
+#
+#     def create_strips(self):
+#         # with self.ids.id_background.canvas.before:
+#         #     WhiteNoteStrip()
+#
+#         w = WhiteNoteStrip()
+#
+#         self.ids.id_background.add_widget(w)
+#
+#     pass
+#
+#
+# class WhiteNoteStrip(Widget):
+#     r_size = ListProperty([0, 0])
+#
+#
+# class TestApp(App):
+#     def build(self):
+#         m = MyWidget()
+#         m.create_strips()
+#
+#         return m
+#
+# if __name__ == '__main__':
+#     TestApp().run()
 
 #
 # from kivy.app import App
@@ -150,55 +150,55 @@ if __name__ == '__main__':
 
 ##########################################################
 
-from kivy.app import App
-from kivy.uix.widget import Widget
-from kivy.lang import Builder
-from kivy.properties import ListProperty
-
-kv_string = '''
-<WhiteNoteStrip>:
-    pos_hint: {'center_y': 0.5, 'center_x': 0.5}
-    size_hint: 0.2, 0.2
-    canvas:
-        Color:
-            rgb: 0.1, 0.6, 0.3
-        Rectangle:
-            size: self.size
-            pos: self.pos
-
-<MyWidget>:
-    FloatLayout:
-        id: id_background  
-        canvas.after:
-            Color:
-                rgb: 0.9, 0.6, 0.3
-
-'''
-
-Builder.load_string(kv_string)
-
-
-class WhiteNoteStrip(Widget):
-    r_size = ListProperty([0, 0])
-
-
-class MyWidget(Widget):
-
-    def create_strips(self):
-        # with self.ids.id_background.canvas.before:
-        #     WhiteNoteStrip()
-        w = WhiteNoteStrip()
-        w.r_size = [20,40]
-        self.ids.id_background.add_widget(w)
-
-class TestApp(App):
-    def build(self):
-        m = MyWidget()
-        m.create_strips()
-        return m
-
-if __name__ == '__main__':
-    TestApp().run()
+# from kivy.app import App
+# from kivy.uix.widget import Widget
+# from kivy.lang import Builder
+# from kivy.properties import ListProperty
+#
+# kv_string = '''
+# <WhiteNoteStrip>:
+#     pos_hint: {'center_y': 0.5, 'center_x': 0.5}
+#     size_hint: 0.2, 0.2
+#     canvas:
+#         Color:
+#             rgb: 0.1, 0.6, 0.3
+#         Rectangle:
+#             size: self.size
+#             pos: self.pos
+#
+# <MyWidget>:
+#     FloatLayout:
+#         id: id_background
+#         canvas.after:
+#             Color:
+#                 rgb: 0.9, 0.6, 0.3
+#
+# '''
+#
+# Builder.load_string(kv_string)
+#
+#
+# class WhiteNoteStrip(Widget):
+#     r_size = ListProperty([0, 0])
+#
+#
+# class MyWidget(Widget):
+#
+#     def create_strips(self):
+#         # with self.ids.id_background.canvas.before:
+#         #     WhiteNoteStrip()
+#         w = WhiteNoteStrip()
+#         w.r_size = [20,40]
+#         self.ids.id_background.add_widget(w)
+#
+# class TestApp(App):
+#     def build(self):
+#         m = MyWidget()
+#         m.create_strips()
+#         return m
+#
+# if __name__ == '__main__':
+#     TestApp().run()
 
 
 #########################################################"
@@ -517,35 +517,35 @@ if __name__ == '__main__':
 
 #############################################################
 
-# import sys
-# from mido import MidiFile
-#
-# if __name__ == '__main__':
-#     # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
-#     # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
-#     filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
-#
-#     # clip makes sure that no notes would be louder than 127
-#     midi_file = MidiFile(filename, clip=True)
-#     midi_file_type = midi_file.type
-#     ticks_per_beat = midi_file.ticks_per_beat()
-#     length = midi_file.length()
-#
-#     # type 0 (single track): all messages are saved in one track
-#     # type 1 (synchronous): all tracks start at the same time
-#     # type 2 (asynchronous): each track is independent of the others
-#
-#     print(f"The file type is {midi_file_type}")
-#
-#
-#     for i, track in enumerate(midi_file.tracks):
-#         sys.stdout.write('=== Track {}\n'.format(i))
-#         for message in track:
-#             sys.stdout.write('  {!r}\n'.format(message))
-#
-#
-#     for msg in midi_file.play():
-#         print(f"Test PDP: {msg}")
+import sys
+from mido import MidiFile
+
+if __name__ == '__main__':
+    # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
+    # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
+    filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
+
+    # clip makes sure that no notes would be louder than 127
+    midi_file = MidiFile(filename, clip=True)
+    midi_file_type = midi_file.type
+    ticks_per_beat = midi_file.ticks_per_beat()
+    length = midi_file.length()
+
+    # type 0 (single track): all messages are saved in one track
+    # type 1 (synchronous): all tracks start at the same time
+    # type 2 (asynchronous): each track is independent of the others
+
+    print(f"The file type is {midi_file_type}")
+
+
+    for i, track in enumerate(midi_file.tracks):
+        sys.stdout.write('=== Track {}\n'.format(i))
+        for message in track:
+            sys.stdout.write('  {!r}\n'.format(message))
+
+
+    for msg in midi_file.play():
+        print(f"Test PDP: {msg}")
 
 #############################################################
 

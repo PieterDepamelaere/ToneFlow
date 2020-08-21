@@ -10,7 +10,7 @@ from datetime import datetime
 
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.utils import get_hex_from_color
+from kivy.utils import get_hex_from_color, rgba
 from kivy.uix.screenmanager import Screen
 from kivy.properties import NumericProperty
 
@@ -27,6 +27,7 @@ from src.model.ToneFlower import ToneFlower
 curr_file = pl.Path(os.path.realpath(__file__))
 
 from src.model.CommonUtils import CommonUtils as CU
+from src.model.MusicTheoryCoreUtils import MusicTheoryCoreUtils as MTCU
 
 class TFSettings(Screen):
 
@@ -132,6 +133,33 @@ class TFSettings(Screen):
         # Finally return the value to set in the setter (Because there's a chance that it got modified along the way):
         return pl.Path(tf_workspace_path)
 
+    def update_color_sheme(self, new_color_scheme):
+        """
+        Callback that processes a new value for color_scheme
+        :param new_color_scheme:
+        :return:
+        """
+
+        try:
+            if new_color_scheme is not None:
+                for note_name, color_list in new_color_scheme.items():
+
+                    note_number = MTCU.note_name_to_number(note_name)
+                    condensed_note_number = MTCU.condense_note_pitch(note_number)
+
+                    if( 0 <= condensed_note_number < MTCU.AMOUNT_DISTINCT_NOTES):
+                        # Store the color in the MusicTheoryCoreUtils:
+                        MTCU.NOTE_COLORS[condensed_note_number] = rgba(color_list)
+
+                return new_color_scheme
+            else:
+                return None
+
+        except:
+            # Silent fail results in returning None, so the original value is not modified.
+            return None
+
+
     def export_tf_settings_to_config(self):
         with open(f"{self._dic['CONFIG_FILE_PATH'].value}", 'w') as config_file:
             # Only dump editable properties
@@ -181,7 +209,7 @@ class TFSettings(Screen):
         self._dic['low_pitch_limit'] = TFSetting("Low Pitch Limit", None, "C4", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)
         self._dic['high_pitch_limit'] = TFSetting("High Pitch Limit", None, "E5", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)
         # TODO: Invent a color_scheme object, try a dictionary for this?
-        self._dic['tone_color_scheme'] = TFSetting("Tone Color Scheme", None, dict(), f"The color scheme maps every tone to a color.", True, None)
+        self._dic['tone_color_scheme'] = TFSetting("Tone Color Scheme", None, {'C': [252, 0, 32, 255], 'C#/Db': [250, 109, 30, 255], 'D': [247, 147, 10, 255], 'D#/Eb': [255, 192, 0, 255], 'E': [255, 254, 3, 255], 'F': [147, 210, 80, 255], 'F#/Gb': [0, 175, 80, 255], 'G': [16, 161, 146, 255], 'G#/Ab': [3, 41, 228, 255], 'A': [121, 0, 241, 255], 'A#/Bb': [175, 93, 255, 255], 'B': [203, 0, 203, 255]}, f"The color scheme maps every tone to a 4-channel color [R, G, B, Alpha], each channel is a number [0 .. 255].", True, lambda value: self.update_color_sheme(value))
         self._dic['toggle_white_note_strips'] = TFSetting("White Note Strips", None, True, f"Toggle white note background strips.", True, None)
 
         # TODO: This setting is probably way to difficult to implement, and not even useful:

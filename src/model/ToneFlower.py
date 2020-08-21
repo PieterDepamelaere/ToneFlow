@@ -17,6 +17,7 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObservableList, ListProperty, NumericProperty, StringProperty
 
+from mido import MidiFile
 
 from kivymd.uix.useranimationcard import MDUserAnimationCard
 from kivy.uix.modalview import ModalView
@@ -83,6 +84,7 @@ class ToneFlower(ModalView):
         self.background_color = (0, 0, 0, 0)
         self.note_number_to_pos = {}
         self.note_number_to_size = {}
+        self.note_number_to_color = {}
 
 
         # When auto_dismiss==True, then you can escape the modal view with [ESC]
@@ -134,67 +136,77 @@ class ToneFlower(ModalView):
     playlist = property(get_playlist, set_playlist)
     block_close = property(get_block_close, set_block_close)
 
-    def create_white_note_strips(self):
+    def prepare_toneflower_engine(self):
 
         # Reset the note_number_to_pos dictionary:
         self.note_number_to_pos = {}
+        self.note_number_to_size = {}
+        self.note_number_to_color = {}
 
-        # Only proceed if these white note strips are required by the TFSettings:
-        if (CU.tfs.dic['toggle_white_note_strips'].value):
 
-            low_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['low_pitch_limit'].value)
-            high_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['high_pitch_limit'].value)
+        low_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['low_pitch_limit'].value)
+        high_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['high_pitch_limit'].value)
 
-            amount_white_keys, amount_black_keys = MTCU.note_interval_to_key_range(low_pitch_limit, high_pitch_limit)
+        amount_white_keys, amount_black_keys = MTCU.note_interval_to_key_range(low_pitch_limit, high_pitch_limit)
 
-            width_factor_black_key = 1.0 / (amount_white_keys * 2 + amount_black_keys)
-            width_factor_white_key = 2 * width_factor_black_key
+        width_factor_black_key = 1.0 / (amount_white_keys * 2 + amount_black_keys)
+        width_factor_white_key = 2 * width_factor_black_key
 
-            # Add the white_note_strips as rectangle in the background to the floatlayout:
+        # Add the white_note_strips as rectangle in the background to the floatlayout:
 
-            note = low_pitch_limit
-            rect = None
-            pos_factor_white_strip = 0.0
-            width = 0.0
+        note = low_pitch_limit
+        rect = None
+        pos_factor_white_strip = 0.0
+        width = 0.0
 
-            while note <= high_pitch_limit:
+        while note <= high_pitch_limit:
 
-                if MTCU.is_white_note(note):
-                    # A white note will be rendered with twice the white_strip_width of a black note, two adjacent white notes 4 times that size:
+            if MTCU.is_white_note(note):
+                # A white note will be rendered with twice the white_strip_width of a black note, two adjacent white notes 4 times that size:
+                # The reason for distinguishing between 1 white note and two adjacent ones is to save a rectangle
 
-                    self.note_number_to_pos[note] = pos_factor_white_strip
+                self.note_number_to_pos[note] = pos_factor_white_strip
+                self.note_number_to_size[note] = width_factor_white_key
+
+
+                if MTCU.is_white_note(note + 1):
+                    # In case of adjacent E, F or B, C, one white_strip can be saved by drawing a wider one instead.
+                    # This might be good for performance
+
+                    width = width_factor_white_key * 2
+
+                    # Before this extra increment of note, retrieve the correct color:
+                    self.note_number_to_color[note] = MTCU.NOTE_COLORS[MTCU.condense_note_pitch(note)]
+
+                    # Increment the current note, because we draw two at once:
+                    note += 1
+
+                    self.note_number_to_pos[note] = pos_factor_white_strip + width_factor_white_key
                     self.note_number_to_size[note] = width_factor_white_key
 
-                    if MTCU.is_white_note(note + 1):
-                        # In case of adjacent E, F or B, C, one white_strip can be saved by drawing a wider one instead.
-                        # This might be good for performance
+                else:
+                    width = width_factor_white_key
 
-                        width = width_factor_white_key * 2
-
-                        # Increment the current note, because we draw two at once:
-                        note += 1
-
-                        self.note_number_to_pos[note] = pos_factor_white_strip + width_factor_white_key
-                        self.note_number_to_size[note] = width_factor_white_key
-
-                    else:
-                        width = width_factor_white_key
-
+                if (CU.tfs.dic['toggle_white_note_strips'].value):
                     rect = WhiteNoteStrip()
                     rect.pos_hint = {'x': pos_factor_white_strip, 'y': 0.0}
                     rect.size_hint = (width, 1.0)
 
-                    pos_factor_white_strip += width
-
                     self.ids.id_background.add_widget(rect, len(self.ids.id_background.children))
 
-                else:
-                    self.note_number_to_pos[note] = pos_factor_white_strip
-                    self.note_number_to_size[note] = width_factor_black_key
+            else:
+                # Add black note:
+                self.note_number_to_pos[note] = pos_factor_white_strip
+                self.note_number_to_size[note] = width_factor_black_key
 
-                    pos_factor_white_strip += width
+                width = width_factor_black_key
 
-                note += 1
+            pos_factor_white_strip += width
+
+            # Before this increment of note, retrieve the correct color:
+            self.note_number_to_color[note] = MTCU.NOTE_COLORS[MTCU.condense_note_pitch(note)]
+
+            note += 1
 
 
     def load_from_json(self):
@@ -213,7 +225,7 @@ class ToneFlower(ModalView):
         :return:
         """
         # Trigger the creation of the white note strips that try to enhance the readability of the flowing tones:
-        instance.create_white_note_strips()
+        instance.prepare_toneflower_engine()
 
         # Override needed overscroll to refresh the screen to the bare minimum:
         # refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)
@@ -229,6 +241,43 @@ class ToneFlower(ModalView):
         # self.refresh_list()
         toast(f"ToneFlower engine ready...{os.linesep}"
               f"    Enjoy playing!")
+
+        filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
+
+        # # clip makes sure that no notes would be louder than 127
+        # midi_file = MidiFile(filename, clip=True)
+        # midi_file_type = midi_file.type
+        # ticks_per_beat = midi_file.ticks_per_beat()
+        # length = midi_file.length()
+        #
+        # # type 0 (single track): all messages are saved in one track
+        # # type 1 (synchronous): all tracks start at the same time
+        # # type 2 (asynchronous): each track is independent of the others
+
+        # print(f"The file type is {midi_file_type}")
+        #
+        # for i, track in enumerate(midi_file.tracks):
+        #     sys.stdout.write('=== Track {}\n'.format(i))
+        #     for message in track:
+        #         sys.stdout.write('  {!r}\n'.format(message))
+        #
+        # for msg in midi_file.play():
+        #     print(f"Test PDP: {msg}")
+
+        tone = Tone()
+        tone.tone_color = instance.note_number_to_color[60]
+        tone.pos_hint = {'x': instance.note_number_to_pos[60], 'y': 0.2}
+        tone.size_hint = (instance.note_number_to_size[60], None)
+        tone.size[1] = 20
+
+        tone2 = Tone()
+        tone.tone_color = instance.note_number_to_color[67]
+        tone2.pos_hint = {'x': instance.note_number_to_pos[67], 'y': 0.4}
+        tone2.size_hint = (instance.note_number_to_size[67], None)
+        tone.size[1] = 35
+
+        instance.ids.id_foreground.add_widget(tone, len(instance.ids.id_background.children))
+        instance.ids.id_foreground.add_widget(tone2, len(instance.ids.id_background.children))
 
     @staticmethod
     def on_pre_dismiss_callback(instance):
@@ -257,3 +306,6 @@ class ToneFlower(ModalView):
 
 class WhiteNoteStrip(Widget):
     pass
+
+class Tone(Widget):
+    tone_color = ListProperty([1, 1, 1, 1])

@@ -24,6 +24,16 @@
             size: self.size
             pos: self.pos
 
+<Tone>:
+    canvas:
+        Color:
+            rgba: tone_color
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            segments: 15
+            radius: [15]
+
 <ToneFlower>
 
     id: id_concertmode
@@ -86,8 +96,9 @@
                 BoxLayout:
                     orientation: 'vertical'
 
-                    Label:
-                        text: 'Projected score'
+                    FloatLayout:
+                        id: id_foreground
+#                        text: 'Projected score'
 
                         canvas.before:
                             StencilPush:
@@ -101,115 +112,115 @@
     #                            size: self.width, 10.0
     #                            pos: 0,self.height * 0.20  #self.pos[0], self.pos[1] + self.height - 142
     #                            #texture: self.cloud_texture
-                        canvas:
-
-                            #C
-                            Color:
-                                rgba: get_color_from_hex('#FC0020FF')
-                            RoundedRectangle:
-                                size: 60, 160
-                                pos: self.pos[0], self.pos[1] -50
-                                segments: 15
-                                radius: [15]
-
-                            #C#
-                            Color:
-                                rgba: get_color_from_hex('#FA6D1EFF')
-                            RoundedRectangle:
-                                size: 30, 20
-                                pos: self.pos[0]+60, self.pos[1] +50
-                                segments: 15
-                                radius: [15]
-
-                            #D
-                            Color:
-                                rgba: get_color_from_hex('#F7930AFF')
-                            RoundedRectangle:
-                                size: 60, 40
-                                pos: self.pos[0]+90, self.pos[1]
-                                segments: 15
-                                radius: [15]
-
-                            #D#
-                            Color:
-                                rgba: get_color_from_hex('#FFC000FF')
-                            RoundedRectangle:
-                                size: 30, 120
-                                pos: self.pos[0]+150, self.pos[1] +175
-                                segments: 15
-                                radius: [15]
-
-                            #E
-                            Color:
-                                rgba: get_color_from_hex('#FFFE03FF')
-                            RoundedRectangle:
-                                size: 60, 20
-                                pos: self.pos[0]+180, self.pos[1] -75
-                                segments: 15
-                                radius: [15]
-
-                            #F
-                            Color:
-                                rgba: get_color_from_hex('#93D250FF')
-                            RoundedRectangle:
-                                size: 60, 30
-                                pos: self.pos[0]+240, self.pos[1] +0
-                                segments: 15
-                                radius: [15]
-
-                            #F#
-                            Color:
-                                rgba: get_color_from_hex('#00AF50FF')
-                            RoundedRectangle:
-                                size: 30, 40
-                                pos: self.pos[0]+300, self.pos[1] +275
-                                segments: 15
-                                radius: [15]
-
-                            #G
-                            Color:
-                                rgba: get_color_from_hex('#10A192FF')
-                            RoundedRectangle:
-                                size: 60, 160
-                                pos: self.pos[0]+330, self.pos[1] -25
-                                segments: 15
-                                radius: [15]
-
-                            #G#
-                            Color:
-                                rgba: get_color_from_hex('#0329E4FF')
-                            RoundedRectangle:
-                                size: 30, 40
-                                pos: self.pos[0]+390, self.pos[1] +75
-                                segments: 15
-                                radius: [15]
-
-                            #A
-                            Color:
-                                rgba: get_color_from_hex('#7900F1FF')
-                            RoundedRectangle:
-                                size: 60, 120
-                                pos: self.pos[0]+420, self.pos[1] +125
-                                segments: 15
-                                radius: [15]
-
-                            #A#
-                            Color:
-                                rgba: get_color_from_hex('#AF5DFFFF')
-                            RoundedRectangle:
-                                size: 30, 160
-                                pos: self.pos[0]+480, self.pos[1] +50
-                                segments: 15
-                                radius: [15]
-
-                            #B
-                            Color:
-                                rgba: get_color_from_hex('#CB00CBFF')
-                            RoundedRectangle:
-                                size: 60, 20
-                                pos: self.pos[0]+510, self.pos[1]
-                                segments: 15
-                                radius: [15]
+#                        canvas:
+#
+#                            #C
+#                            Color:
+#                                rgba: get_color_from_hex('#FC0020FF')
+#                            RoundedRectangle:
+#                                size: 60, 160
+#                                pos: self.pos[0], self.pos[1] -50
+#                                segments: 15
+#                                radius: [15]
+#
+#                            #C#
+#                            Color:
+#                                rgba: get_color_from_hex('#FA6D1EFF')
+#                            RoundedRectangle:
+#                                size: 30, 20
+#                                pos: self.pos[0]+60, self.pos[1] +50
+#                                segments: 15
+#                                radius: [15]
+#
+#                            #D
+#                            Color:
+#                                rgba: get_color_from_hex('#F7930AFF')
+#                            RoundedRectangle:
+#                                size: 60, 40
+#                                pos: self.pos[0]+90, self.pos[1]
+#                                segments: 15
+#                                radius: [15]
+#
+#                            #D#
+#                            Color:
+#                                rgba: get_color_from_hex('#FFC000FF')
+#                            RoundedRectangle:
+#                                size: 30, 120
+#                                pos: self.pos[0]+150, self.pos[1] +175
+#                                segments: 15
+#                                radius: [15]
+#
+#                            #E
+#                            Color:
+#                                rgba: get_color_from_hex('#FFFE03FF')
+#                            RoundedRectangle:
+#                                size: 60, 20
+#                                pos: self.pos[0]+180, self.pos[1] -75
+#                                segments: 15
+#                                radius: [15]
+#
+#                            #F
+#                            Color:
+#                                rgba: get_color_from_hex('#93D250FF')
+#                            RoundedRectangle:
+#                                size: 60, 30
+#                                pos: self.pos[0]+240, self.pos[1] +0
+#                                segments: 15
+#                                radius: [15]
+#
+#                            #F#
+#                            Color:
+#                                rgba: get_color_from_hex('#00AF50FF')
+#                            RoundedRectangle:
+#                                size: 30, 40
+#                                pos: self.pos[0]+300, self.pos[1] +275
+#                                segments: 15
+#                                radius: [15]
+#
+#                            #G
+#                            Color:
+#                                rgba: get_color_from_hex('#10A192FF')
+#                            RoundedRectangle:
+#                                size: 60, 160
+#                                pos: self.pos[0]+330, self.pos[1] -25
+#                                segments: 15
+#                                radius: [15]
+#
+#                            #G#
+#                            Color:
+#                                rgba: get_color_from_hex('#0329E4FF')
+#                            RoundedRectangle:
+#                                size: 30, 40
+#                                pos: self.pos[0]+390, self.pos[1] +75
+#                                segments: 15
+#                                radius: [15]
+#
+#                            #A
+#                            Color:
+#                                rgba: get_color_from_hex('#7900F1FF')
+#                            RoundedRectangle:
+#                                size: 60, 120
+#                                pos: self.pos[0]+420, self.pos[1] +125
+#                                segments: 15
+#                                radius: [15]
+#
+#                            #A#
+#                            Color:
+#                                rgba: get_color_from_hex('#AF5DFFFF')
+#                            RoundedRectangle:
+#                                size: 30, 160
+#                                pos: self.pos[0]+480, self.pos[1] +50
+#                                segments: 15
+#                                radius: [15]
+#
+#                            #B
+#                            Color:
+#                                rgba: get_color_from_hex('#CB00CBFF')
+#                            RoundedRectangle:
+#                                size: 60, 20
+#                                pos: self.pos[0]+510, self.pos[1]
+#                                segments: 15
+#                                radius: [15]
 
 
                         canvas.after:

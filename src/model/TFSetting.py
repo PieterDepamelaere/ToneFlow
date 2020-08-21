@@ -1,6 +1,7 @@
 import os
 import sys
 import pathlib as pl
+from kivymd.toast import toast
 curr_file = pl.Path(os.path.realpath(__file__))
 
 sys.path.insert(0, str(curr_file.parents[0]))
@@ -54,7 +55,7 @@ class TFSetting:
             self._value = CU.safe_cast(processed_value, type(self._default_value), "")
         else:
             # The previous _value is left unchanged.
-            raise ValueError(f"Value \"{value}\" was not valid for setting \"{self.name}\"")
+            toast(f"Value for setting \"{self.name}\" is not valid{os.linesep}Original value was left unchanged.")
 
 
     def get_default_value(self):

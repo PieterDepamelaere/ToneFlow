@@ -16,6 +16,8 @@ class MusicTheoryCoreUtils:
     NOTE_SYSTEM = {0: 'C', 1: 'C#/Db', 2: 'D', 3: 'D#/Eb', 4: 'E', 5: 'F', 6: 'F#/Gb', 7: 'G', 8: 'G#/Ab', 9: 'A', 10: 'A#/Bb', 11: 'B'}
     AMOUNT_DISTINCT_NOTES = len(NOTE_SYSTEM)
     WHITE_NOTES = {0, 2, 4, 5, 7, 9, 11} # Made this a set for efficient lookups. (White/black notes refer to piano keys)
+    NOTE_COLORS = {0: [1, 1, 1, 1], 1: [1, 1, 1, 1], 2: [1, 1, 1, 1], 3: [1, 1, 1, 1], 4: [1, 1, 1, 1], 5: [1, 1, 1, 1], 
+                   6: [1, 1, 1, 1], 7: [1, 1, 1, 1], 8: [1, 1, 1, 1], 9: [1, 1, 1, 1], 10: [1, 1, 1, 1], 11: [1, 1, 1, 1]}
 
     @staticmethod
     def condense_note_pitch(note_number):
@@ -44,7 +46,8 @@ class MusicTheoryCoreUtils:
         :param note_number: note_number
         :return: human-readable note_name
         """
-        octave = note_number / MusicTheoryCoreUtils.AMOUNT_DISTINCT_NOTES
+        # The reason why 1 is subtracted is only to meet the MIDI-standard. Apparently, an octave -1 is foreseen:
+        octave = (note_number / MusicTheoryCoreUtils.AMOUNT_DISTINCT_NOTES) -1
 
         # Add the octave number at the end, and also before the slash in case of black notes.
         note_name = f"{MusicTheoryCoreUtils.NOTE_SYSTEM[MusicTheoryCoreUtils.condense_note_pitch(note_number)]}{octave}"
@@ -82,13 +85,13 @@ class MusicTheoryCoreUtils:
         # Map the retrieved note_pitch_text to a condensed_note_number:
         for key, value in subdict_whites_or_blacks.items():
 
-            # As soon as the note if parsed exit the for loop:
+            # As soon as the note is parsed exit the for loop:
             if note_pitch_text in value:
                 note_number = key
                 break
 
         if note_number != -1:
-            # The reason why octave + 1 is multiplied with the amount of distinct notes rather than just octave is to match the MIDI-standard, apprently an octave -1 is foreseen:
+            # The reason why octave + 1 is multiplied with the amount of distinct notes rather than just octave is to meet the MIDI-standard. Apparently, an octave -1 is foreseen:
             note_number += MusicTheoryCoreUtils.AMOUNT_DISTINCT_NOTES * (octave + 1)
 
         return note_number
