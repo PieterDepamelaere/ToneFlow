@@ -524,12 +524,13 @@ if __name__ == '__main__':
     # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
     # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
     filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
+    # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
 
     # clip makes sure that no notes would be louder than 127
     midi_file = MidiFile(filename, clip=True)
     midi_file_type = midi_file.type
-    ticks_per_beat = midi_file.ticks_per_beat()
-    length = midi_file.length()
+    ticks_per_beat = midi_file.ticks_per_beat
+    length = midi_file.length
 
     # type 0 (single track): all messages are saved in one track
     # type 1 (synchronous): all tracks start at the same time
@@ -541,7 +542,10 @@ if __name__ == '__main__':
     for i, track in enumerate(midi_file.tracks):
         sys.stdout.write('=== Track {}\n'.format(i))
         for message in track:
-            sys.stdout.write('  {!r}\n'.format(message))
+            if not message.is_meta:
+                # Then it's about notes:
+
+                sys.stdout.write('  {!r}\n'.format(message))
 
 
     for msg in midi_file.play():

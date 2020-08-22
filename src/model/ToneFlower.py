@@ -263,51 +263,73 @@ class ToneFlower(ModalView):
         :param instance:
         :return:
         """
-        # self.refresh_list()
+
+        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
+        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
+        filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
+        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
+
+        # clip makes sure that no notes would be louder than 127
+        midi_file = MidiFile(filename, clip=True)
+        midi_file_type = midi_file.type
+        ticks_per_beat = midi_file.ticks_per_beat
+        length = midi_file.length
+
+        # type 0 (single track): all messages are saved in one track
+        # type 1 (synchronous): all tracks start at the same time
+        # type 2 (asynchronous): each track is independent of the others
+
+        print(f"The file type is {midi_file_type}")
+
+        note_number_pos = {}
+        elapsed_ticks = 0
+
+        for i, track in enumerate(midi_file.tracks):
+            sys.stdout.write('=== Track {}\n'.format(i))
+            for message in track:
+                if not message.is_meta and message.type in ["note_on", "note_off"]:
+                    # Then it's about notes:
+
+                    if message.type == "note_on" and message.velocity > 0:
+                        # A genuine note_on event:
+                        # Store the beginning of the note in dict:
+                        elapsed_ticks += (message.time * 0.2)
+                        note_number_pos[message.note] = elapsed_ticks
+
+                    else:
+                        # A note_off event:
+                        elapsed_ticks += (message.time * 0.2)
+
+                        tone = ColorTone()
+                        tone.tone_color = instance.note_number_to_color[message.note]
+                        tone.pos_hint = {'x': instance.note_number_to_pos[message.note]}
+                        tone.pos[1] = note_number_pos[message.note]
+                        tone.size_hint = (instance.note_number_to_size[message.note], None)
+                        tone.size[1] = elapsed_ticks - note_number_pos[message.note]
+
+                        instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
+
+
+                    sys.stdout.write('  {!r}\n'.format(message))
+
         toast(f"ToneFlower engine ready...{os.linesep}"
               f"    Enjoy playing!")
 
-        filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
 
-        # # clip makes sure that no notes would be louder than 127
-        # midi_file = MidiFile(filename, clip=True)
-        # midi_file_type = midi_file.type
-        # ticks_per_beat = midi_file.ticks_per_beat()
-        # length = midi_file.length()
         #
-        # # type 0 (single track): all messages are saved in one track
-        # # type 1 (synchronous): all tracks start at the same time
-        # # type 2 (asynchronous): each track is independent of the others
-
-        # print(f"The file type is {midi_file_type}")
+        # tone2 = ColorTone()
+        # tone2.tone_color = instance.note_number_to_color[67]
+        # tone2.pos_hint = {'x': instance.note_number_to_pos[67]}
+        # tone2.pos[1] = 600
+        # tone2.size_hint = (instance.note_number_to_size[67], None)
+        # tone2.size[1] = 45
         #
-        # for i, track in enumerate(midi_file.tracks):
-        #     sys.stdout.write('=== Track {}\n'.format(i))
-        #     for message in track:
-        #         sys.stdout.write('  {!r}\n'.format(message))
         #
-        # for msg in midi_file.play():
-        #     print(f"Test PDP: {msg}")
-
-        tone = ColorTone()
-        tone.tone_color = instance.note_number_to_color[60]
-        tone.pos_hint = {'x': instance.note_number_to_pos[60], 'y': 0.3}
-        # tone.pos[1] = 200
-        tone.size_hint = (instance.note_number_to_size[60], None)
-        tone.size[1] = 20
-
-        tone2 = ColorTone()
-        tone2.tone_color = instance.note_number_to_color[67]
-        tone2.pos_hint = {'x': instance.note_number_to_pos[67], 'y': 0.5}
-        tone2.size_hint = (instance.note_number_to_size[67], None)
-        tone.size[1] = 35
-
-        instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
-        instance.ids.id_top_foreground.add_widget(tone2, len(instance.ids.id_background.children))
-
-        instance.color_tones[60] = [tone]
-        instance.color_tones[67] = [tone2]
-
+        # instance.ids.id_top_foreground.add_widget(tone2, len(instance.ids.id_background.children))
+        #
+        # instance.color_tones[60] = [tone]
+        # instance.color_tones[67] = [tone2]
+        #
 
         instance.tone_flower_engine = Clock.schedule_interval(instance.calculate_frame, 1 / 30.0)
 
@@ -315,9 +337,14 @@ class ToneFlower(ModalView):
         self.flow_tones(time_passed)
 
     def flow_tones(self, time_passed):
-        for key, value in self.color_tones.items():
-            for tone in value:
-                tone.pos_hint['y'] -= time_passed/10.0
+
+        for child in self.ids.id_top_foreground.children:
+            child.y -= time_passed * 50.0
+
+        # for key, value in self.color_tones.items():
+            # for tone in value:
+            #     tone.y -= time_passed *50.0
+                # tone.pos_hint['y'] -= time_passed/10.0
 
     @staticmethod
     def on_pre_dismiss_callback(instance):
