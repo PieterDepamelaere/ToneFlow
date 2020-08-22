@@ -266,8 +266,12 @@ class ToneFlower(ModalView):
 
         # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
         # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
-        filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
+        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
+        filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
+        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
+        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Game_of_Thrones_Easy_piano.mid'
+        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Ed_Sheeran_-_Perfect_-_Ed_Sheeran.mid'
+
 
         # clip makes sure that no notes would be louder than 127
         midi_file = MidiFile(filename, clip=True)
@@ -283,6 +287,7 @@ class ToneFlower(ModalView):
 
         note_number_pos = {}
         elapsed_ticks = 0
+        vert_pos_offset = 1600
 
         for i, track in enumerate(midi_file.tracks):
             sys.stdout.write('=== Track {}\n'.format(i))
@@ -293,27 +298,27 @@ class ToneFlower(ModalView):
                     if message.type == "note_on" and message.velocity > 0:
                         # A genuine note_on event:
                         # Store the beginning of the note in dict:
-                        elapsed_ticks += (message.time * 0.2)
+                        elapsed_ticks += (message.time * 0.1)
                         note_number_pos[message.note] = elapsed_ticks
 
                     else:
                         # A note_off event:
-                        elapsed_ticks += (message.time * 0.2)
+                        elapsed_ticks += (message.time * 0.1)
 
                         tone = ColorTone()
                         tone.tone_color = instance.note_number_to_color[message.note]
                         tone.pos_hint = {'x': instance.note_number_to_pos[message.note]}
-                        tone.pos[1] = note_number_pos[message.note]
+                        tone.pos[1] = note_number_pos[message.note] + vert_pos_offset
                         tone.size_hint = (instance.note_number_to_size[message.note], None)
                         tone.size[1] = elapsed_ticks - note_number_pos[message.note]
 
                         instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
 
 
-                    sys.stdout.write('  {!r}\n'.format(message))
+                    # sys.stdout.write('  {!r}\n'.format(message))
 
         toast(f"ToneFlower engine ready...{os.linesep}"
-              f"    Enjoy playing!")
+              f"         Enjoy playing!")
 
 
         #
@@ -330,10 +335,11 @@ class ToneFlower(ModalView):
         # instance.color_tones[60] = [tone]
         # instance.color_tones[67] = [tone2]
         #
-
-        instance.tone_flower_engine = Clock.schedule_interval(instance.calculate_frame, 1 / 30.0)
+        # TODO PDP: FPS!!! https://stackoverflow.com/questions/40952038/kivy-animation-works-slowly
+        instance.tone_flower_engine = Clock.schedule_interval(instance.calculate_frame, 1 / 60.0)
 
     def calculate_frame(self, time_passed):
+        # print(time_passed)
         self.flow_tones(time_passed)
 
     def flow_tones(self, time_passed):
@@ -366,7 +372,7 @@ class ToneFlower(ModalView):
         if instance.block_close:
             toast(f"Blocked closing")
         else:
-            pass
+            instance.tone_flower_engine.cancel()
 
         return instance.block_close
 
