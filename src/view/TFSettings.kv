@@ -54,7 +54,9 @@
             hint_text: '' if root.tfsetting_obj is None else f'{root.tfsetting_obj.name}'
             text: '' if root.tfsetting_obj is None else f'{root.tfsetting_obj.value}'
             color_mode: 'primary' #'primary', options=['primary', 'accent', 'custom']
-            on_text_validate: toast(f'Setting \"{root.tfsetting_obj.name}\" changed')
+            on_text_validate:
+                root.tfsetting_obj.set_value(self.text)
+                toast(f'Setting \"{root.tfsetting_obj.name}\" changed')
             helper_text: '' if root.tfsetting_obj is None else f'{root.tfsetting_obj.description.replace(os.linesep," ")}'
             helper_text_mode: 'on_focus'
 
