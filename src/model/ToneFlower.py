@@ -291,7 +291,7 @@ class ToneFlower(ModalView):
         vert_pos_offset = 800
 
         for i, track in enumerate(midi_file.tracks):
-            sys.stdout.write('=== Track {}\n'.format(i))
+            # sys.stdout.write('=== Track {}\n'.format(i))
             for message in track:
                 if not message.is_meta and message.type in ["note_on", "note_off"]:
                     # Then it's about notes:
@@ -345,8 +345,10 @@ class ToneFlower(ModalView):
 
     def flow_tones(self, time_passed):
 
-        for child in self.ids.id_top_foreground.children:
-            child.y -= time_passed * 50.0
+        self.ids.id_top_foreground.pos[1] -= time_passed * 50.0
+
+        # for child in self.ids.id_top_foreground.children:
+        #     child.y -= time_passed * 50.0
 
         # for key, value in self.color_tones.items():
             # for tone in value:

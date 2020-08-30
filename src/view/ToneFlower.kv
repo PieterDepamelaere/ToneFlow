@@ -98,16 +98,19 @@
                 BoxLayout:
                     orientation: 'vertical'
 
-                    FloatLayout:
+                    canvas.before:
+                        StencilPush:
+                        Rectangle:
+                            pos: self.pos
+                            size: self.width, self.height
+                        StencilUse:
+
+                    RelativeLayout:
                         id: id_top_foreground
+                        size_hint: 1.0, 100.0
 #                        text: 'Projected score'
 
-                        canvas.before:
-                            StencilPush:
-                            Rectangle:
-                                pos: self.pos
-                                size: self.width, self.height
-                            StencilUse:
+
     #                        Color:
     #                            rgba: 1, 1, 1, 1.0
     #                        Rectangle:
