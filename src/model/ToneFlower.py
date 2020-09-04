@@ -271,7 +271,8 @@ class ToneFlower(ModalView):
         # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
         # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Game_of_Thrones_Easy_piano.mid'
         # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Ed_Sheeran_-_Perfect_-_Ed_Sheeran.mid'
-        filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/LittleSubmarine_TheStarlings_Preprocessed.mid'
+        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/LittleSubmarine_TheStarlings_Preprocessed.mid'
+        filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go.mid'
 
 
         # clip makes sure that no notes would be louder than 127
@@ -345,8 +346,10 @@ class ToneFlower(ModalView):
 
     def flow_tones(self, time_passed):
 
+        delta = time_passed * 50.0
+
         for child in self.ids.id_top_foreground.children:
-            child.y -= time_passed * 50.0
+            child.y -= delta
 
         # for key, value in self.color_tones.items():
             # for tone in value:
