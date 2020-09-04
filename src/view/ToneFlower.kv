@@ -99,15 +99,15 @@
                     orientation: 'vertical'
 
                     canvas.before:
-                        StencilPush:
+                        StencilPush: #Push a new stencil layer. Any drawing that happens after this will be used as a mask.
                         Rectangle:
                             pos: self.pos
                             size: self.width, self.height
-                        StencilUse:
+                        StencilUse: #Now draw the next instructions and use the stencil for masking them.
 
                     RelativeLayout:
                         id: id_top_foreground
-                        size_hint: 1.0, 100.0
+                        size_hint: 1.0, 1.0
 #                        text: 'Projected score'
 
 
@@ -235,8 +235,8 @@
     #                            width: 1
     #                            points: 0,self.height * 0.20 +5,self.width,self.height * 0.20 +5 #zip(self.data.x, self.data.y)
 
-                            StencilUnUse:
-                            StencilPop:
+                            StencilUnUse: #Stop using the stencil i.e. remove the mask and draw normally.
+                            StencilPop: #Pop the current stencil layer.
                     #Label:
                         #text: 'something2'
 
