@@ -40,6 +40,7 @@
 
     id: id_concertmode
     name: CU.tfs.dic['SCREEN_TONEFLOWER_CLASS'].value.__name__
+    color_white_note_strips: (0, 0, 0, 1)
 
     FloatLayout:
         id: id_background
@@ -48,7 +49,7 @@
 
             # To ensure that the size of the modal screen is actually fullscreen
             Color:
-                rgba: 	(0, 0, 0, 1)
+                rgba: 	root.color_white_note_strips
             Rectangle:
                 size: 	self.size
                 pos: 	self.pos

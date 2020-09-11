@@ -84,11 +84,12 @@ class ToneFlower(ModalView):
         self.size_hint = (1, 1)
         self.pos_hint = {'x': 0, 'y': 0}
         self.background_color = (0, 0, 0, 0)
+        self.color_white_note_strips = get_color_from_hex('#161616FF') if (CU.tfs.dic['toggle_white_note_strips'].value) else get_color_from_hex('#000000FF')
         self.note_number_to_pos = {}
         self.note_number_to_size = {}
         self.note_number_to_color = {}
         self.tone_flower_engine = None
-        self.white_note_strips = []
+        self.black_note_strips = []
         self.color_strips = {}
 
         # TODO PDP: note_number mappen op queue<SoortToneObject> hier?
@@ -154,74 +155,46 @@ class ToneFlower(ModalView):
         low_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['low_pitch_limit'].value)
         high_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['high_pitch_limit'].value)
 
+        # Adjust low_pitch_limit and high_pitch_limit, in case the song does not need the entire range:
+        # TODO: implement
+
         amount_white_keys, amount_black_keys = MTCU.note_interval_to_key_range(low_pitch_limit, high_pitch_limit)
 
-        width_factor_black_key = 1.0 / (amount_white_keys * 2 + amount_black_keys)
-        width_factor_white_key = 2 * width_factor_black_key
+        rel_width_black_key = 1.0 / (amount_white_keys * 2 + amount_black_keys)
+        rel_width_white_key = 2 * rel_width_black_key
 
-        # Add the white_note_strips as rectangle in the background to the floatlayout:
+        # Add the black_note_strips as rectangle in the background to the floatlayout:
 
         note = low_pitch_limit
-        pos_factor_white_strip = 0.0
+        rel_hor_pos = 0.0
 
         while note <= high_pitch_limit:
 
-            width = 0.0
+            rel_width = 0.0
 
             if MTCU.is_white_note(note):
-                # A white note will be rendered with twice the white_strip_width of a black note, two adjacent white notes 4 times that size:
-                # The reason for distinguishing between 1 white note and two adjacent ones is to save a rectangle
-
-                self.note_number_to_pos[note] = pos_factor_white_strip
-                self.note_number_to_size[note] = width_factor_white_key
-
-                if MTCU.is_white_note(note + 1):
-                    # In case of adjacent E, F or B, C, one white_strip can be saved by drawing a wider one instead.
-                    # This might be good for performance
-
-                    width = width_factor_white_key * 2
-
-                    # Before this extra increment of note, retrieve the correct color:
-                    self.note_number_to_color[note] = MTCU.NOTE_COLORS[MTCU.condense_note_pitch(note)]
-
-                    # Before this extra increment of note, add a color_strip
-                    color_strip = ColorStrip()
-                    color_strip.strip_color = self.note_number_to_color[note]
-                    color_strip.pos_hint = {'x': self.note_number_to_pos[note], 'y': 0.0}
-                    color_strip.size_hint = (self.note_number_to_size[note], 0.25 + 0.5 * random.uniform(0, 1))
-
-                    self.ids.id_bottom_foreground.add_widget(color_strip)
-                    self.color_strips[note] = color_strip
-
-                    # Increment the current note, because we draw two at once:
-                    note += 1
-
-                    self.note_number_to_pos[note] = pos_factor_white_strip + width_factor_white_key
-                    self.note_number_to_size[note] = width_factor_white_key
-
-                else:
-                    width = width_factor_white_key
-
-                if (CU.tfs.dic['toggle_white_note_strips'].value):
-                    white_note_strip = ColorStrip()
-                    white_note_strip.strip_color = get_color_from_hex('#151515FF')
-                    white_note_strip.pos_hint = {'x': pos_factor_white_strip, 'y': 0.0}
-                    white_note_strip.size_hint = (width, 1.0)
-
-                    self.ids.id_background.add_widget(white_note_strip, len(self.ids.id_background.children))
-                    self.white_note_strips.append(white_note_strip)
+                # A white note will be rendered with twice the white_strip_width of a black note.
+                rel_width = rel_width_white_key
 
             else:
-                # Add black note:
-                self.note_number_to_pos[note] = pos_factor_white_strip
-                self.note_number_to_size[note] = width_factor_black_key
+                # Add black note strip:
+                rel_width = rel_width_black_key
 
-                width = width_factor_black_key
+                if (CU.tfs.dic['toggle_white_note_strips'].value):
+                    black_note_strip = ColorStrip()
+                    black_note_strip.strip_color = get_color_from_hex('#000000FF')
+                    black_note_strip.pos_hint = {'x': rel_hor_pos, 'y': 0.0}
+                    black_note_strip.size_hint = (rel_width, 1.0)
 
-            # Before this increment of note, retrieve the correct color:
+                    self.ids.id_background.add_widget(black_note_strip, len(self.ids.id_background.children))
+                    self.black_note_strips.append(black_note_strip)
+
+            # Before this increment of note, store correct rel_hor_pos, rel_width and color in resp. dicts:
+            self.note_number_to_pos[note] = rel_hor_pos
+            self.note_number_to_size[note] = rel_width
             self.note_number_to_color[note] = MTCU.NOTE_COLORS[MTCU.condense_note_pitch(note)]
 
-            # Before this increment of note, create a color_strip for this note:
+            # Before the increment of note, create a color_strip for this note to indicate volume, waiting time etc:
             color_strip = ColorStrip()
             color_strip.strip_color = self.note_number_to_color[note]
             color_strip.pos_hint = {'x': self.note_number_to_pos[note], 'y': 0.0}
@@ -230,7 +203,7 @@ class ToneFlower(ModalView):
             self.ids.id_bottom_foreground.add_widget(color_strip)
             self.color_strips[note] = color_strip
 
-            pos_factor_white_strip += width
+            rel_hor_pos += rel_width
             note += 1
 
 

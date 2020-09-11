@@ -147,7 +147,7 @@ class TFSettings(Screen):
                     note_number = MTCU.note_name_to_number(note_name)
                     condensed_note_number = MTCU.condense_note_pitch(note_number)
 
-                    if( 0 <= condensed_note_number < MTCU.AMOUNT_DISTINCT_NOTES):
+                    if(0 <= condensed_note_number < MTCU.AMOUNT_DISTINCT_NOTES):
                         # Store the color in the MusicTheoryCoreUtils:
                         MTCU.NOTE_COLORS[condensed_note_number] = rgba(color_list)
 
