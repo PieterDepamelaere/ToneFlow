@@ -84,7 +84,7 @@ class ToneFlower(ModalView):
         self.size_hint = (1, 1)
         self.pos_hint = {'x': 0, 'y': 0}
         self.background_color = (0, 0, 0, 0)
-        self.color_white_note_strips = get_color_from_hex('#161616FF') if (CU.tfs.dic['toggle_white_note_strips'].value) else get_color_from_hex('#000000FF')
+        self.color_white_note_strips = get_color_from_hex('#111111FF') if (CU.tfs.dic['toggle_white_note_strips'].value) else get_color_from_hex('#000000FF')
         self.note_number_to_pos = {}
         self.note_number_to_size = {}
         self.note_number_to_color = {}
@@ -206,6 +206,24 @@ class ToneFlower(ModalView):
             rel_hor_pos += rel_width
             note += 1
 
+    def start_stop_toneflower_engine(self):
+        """
+        Can start, pause and resume the toneflower_engine
+        :return:
+        """
+
+        if self.tone_flower_engine is not None:
+            self.tone_flower_engine.cancel()
+            self.tone_flower_engine = None
+            toast(f"ToneFlower engine paused")
+        else:
+            self.tone_flower_engine = Clock.schedule_interval(self.calculate_frame, 1 / 60.0)
+            toast(f"ToneFlower engine started")
+
+
+        # TODO PDP: FPS!!! https://stackoverflow.com/questions/40952038/kivy-animation-works-slowly
+
+
 
     def load_from_json(self):
         # TODO
@@ -249,7 +267,6 @@ class ToneFlower(ModalView):
         filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
         # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go.mid'
 
-
         # clip makes sure that no notes would be louder than 127
         midi_file = MidiFile(filename, clip=True)
         midi_file_type = midi_file.type
@@ -264,7 +281,7 @@ class ToneFlower(ModalView):
 
         note_number_pos = {}
         elapsed_ticks = 0
-        vert_pos_offset = 800
+        vert_pos_offset = 0
 
         for i, track in enumerate(midi_file.tracks):
             # sys.stdout.write('=== Track {}\n'.format(i))
@@ -312,8 +329,6 @@ class ToneFlower(ModalView):
         # instance.color_tones[60] = [tone]
         # instance.color_tones[67] = [tone2]
         #
-        # TODO PDP: FPS!!! https://stackoverflow.com/questions/40952038/kivy-animation-works-slowly
-        instance.tone_flower_engine = Clock.schedule_interval(instance.calculate_frame, 1 / 60.0)
 
     def calculate_frame(self, time_passed):
         # print(time_passed)
@@ -340,8 +355,7 @@ class ToneFlower(ModalView):
         :param instance: the instance of the ModalView itself, a non-static implementation would have passed 'self'
         :return:
         """
-        # TODO: Warn display popup not to leave with unsaved progress:
-        pass
+        instance.tone_flower_engine.cancel()
 
     @staticmethod
     def on_dismiss_callback(instance):

@@ -54,6 +54,18 @@
                 size: 	self.size
                 pos: 	self.pos
 
+        Button:
+            pos_hint: {'center_x': .5, 'center_y': .5}
+            text: ""
+            background_color: get_color_from_hex('#00000000')
+#            background_normal: "transparent.png"
+#            background_down: "transparent.png"
+            id: start_button
+            on_release:
+#                self.disabled = True
+                self.opacity = 0
+                root.start_stop_toneflower_engine()
+
         BoxLayout:
 
 #            id: id_background
