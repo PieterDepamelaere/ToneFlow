@@ -84,13 +84,14 @@ class ToneFlower(ModalView):
         self.size_hint = (1, 1)
         self.pos_hint = {'x': 0, 'y': 0}
         self.background_color = (0, 0, 0, 0)
-        self.color_white_note_strips = get_color_from_hex('#111111FF') if (CU.tfs.dic['toggle_white_note_strips'].value) else get_color_from_hex('#000000FF')
+        self.color_white_note_strips = get_color_from_hex('#161616FF') if (CU.tfs.dic['toggle_white_note_strips'].value) else get_color_from_hex('#000000FF')
         self.note_number_to_pos = {}
         self.note_number_to_size = {}
         self.note_number_to_color = {}
         self.tone_flower_engine = None
         self.black_note_strips = []
         self.color_strips = {}
+        self.note_scale_factor = 2
 
         # TODO PDP: note_number mappen op queue<SoortToneObject> hier?
         self.color_tones = {}
@@ -333,9 +334,9 @@ class ToneFlower(ModalView):
                         tone = ColorTone()
                         tone.tone_color = instance.note_number_to_color[message.note]
                         tone.pos_hint = {'x': instance.note_number_to_pos[message.note]}
-                        tone.pos[1] = note_number_pos[message.note] *2 + vert_pos_offset
+                        tone.pos[1] = note_number_pos[message.note] * instance.note_scale_factor + vert_pos_offset
                         tone.size_hint = (instance.note_number_to_size[message.note], None)
-                        tone.size[1] = (elapsed_ticks - note_number_pos[message.note]) *2
+                        tone.size[1] = (elapsed_ticks - note_number_pos[message.note]) * instance.note_scale_factor
 
                         instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
 
@@ -367,7 +368,7 @@ class ToneFlower(ModalView):
 
     def flow_tones(self, time_passed):
 
-        self.ids.id_top_foreground.pos[1] -= time_passed * 50.0 * 2
+        self.ids.id_top_foreground.pos[1] -= time_passed * 50.0 * self.note_scale_factor
 
         # self.ids.id_top_foreground.size_hint['y'] -= 0.0001
 
