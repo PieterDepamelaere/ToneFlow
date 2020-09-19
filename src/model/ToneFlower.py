@@ -95,6 +95,22 @@ class ToneFlower(ModalView):
         # TODO PDP: note_number mappen op queue<SoortToneObject> hier?
         self.color_tones = {}
 
+        # TODO: Playalong platform independently https://stackoverflow.com/questions/8299303/generating-sine-wave-sound-in-python/27978895#27978895
+        # TODO: note to freq: https://pages.mtu.edu/~suits/notefreqs.html
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
+
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Game_of_Thrones_Easy_piano.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Ed_Sheeran_-_Perfect_-_Ed_Sheeran.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/LittleSubmarine_TheStarlings1Octave_Preprocessed.mid'
+
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go1Octavev1.mid'
+        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go1Octavev2.mid'
+
 
         # When auto_dismiss==True, then you can escape the modal view with [ESC]
         self.auto_dismiss = True
@@ -154,6 +170,30 @@ class ToneFlower(ModalView):
 
         low_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['low_pitch_limit'].value)
         high_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['high_pitch_limit'].value)
+
+        if (self.filename is not None):
+            # Narrow the low_pitch_limit and high_pitch_limit if the song allows it:
+            # clip makes sure that no notes would be louder than 127
+            midi_file = MidiFile(self.filename, clip=True)
+
+            low_pitch_limit_song = -1
+            high_pitch_limit_song = -1
+
+            for i, track in enumerate(midi_file.tracks):
+                # sys.stdout.write('=== Track {}\n'.format(i))
+                for message in track:
+                    if message.type in ["note_on", "note_off"]:
+                        # Then it's about notes:
+                        if (message.note > high_pitch_limit_song) or (high_pitch_limit_song == -1):
+                            high_pitch_limit_song = message.note
+                        if ((message.note < low_pitch_limit_song) or (low_pitch_limit_song == -1)):
+                            low_pitch_limit_song = message.note
+
+            low_pitch_limit = low_pitch_limit_song if low_pitch_limit_song > low_pitch_limit else low_pitch_limit
+            high_pitch_limit = high_pitch_limit_song if high_pitch_limit_song < high_pitch_limit else high_pitch_limit
+
+
+
 
         # Adjust low_pitch_limit and high_pitch_limit, in case the song does not need the entire range:
         # TODO: implement
@@ -255,20 +295,8 @@ class ToneFlower(ModalView):
         :return:
         """
 
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
-
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Game_of_Thrones_Easy_piano.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Ed_Sheeran_-_Perfect_-_Ed_Sheeran.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/LittleSubmarine_TheStarlings_Preprocessed.mid'
-
-        filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go.mid'
-
         # clip makes sure that no notes would be louder than 127
-        midi_file = MidiFile(filename, clip=True)
+        midi_file = MidiFile(instance.filename, clip=True)
         midi_file_type = midi_file.type
         ticks_per_beat = midi_file.ticks_per_beat
         length = midi_file.length
@@ -281,12 +309,15 @@ class ToneFlower(ModalView):
 
         note_number_pos = {}
         elapsed_ticks = 0
-        vert_pos_offset = 0
+        vert_pos_offset = 300
 
         for i, track in enumerate(midi_file.tracks):
             # sys.stdout.write('=== Track {}\n'.format(i))
             for message in track:
-                if not message.is_meta and message.type in ["note_on", "note_off"]:
+                if message.is_meta:
+                    pass
+
+                elif message.type in ["note_on", "note_off"]:
                     # Then it's about notes:
 
                     if message.type == "note_on" and message.velocity > 0:
@@ -302,9 +333,9 @@ class ToneFlower(ModalView):
                         tone = ColorTone()
                         tone.tone_color = instance.note_number_to_color[message.note]
                         tone.pos_hint = {'x': instance.note_number_to_pos[message.note]}
-                        tone.pos[1] = note_number_pos[message.note] + vert_pos_offset
+                        tone.pos[1] = note_number_pos[message.note] *2 + vert_pos_offset
                         tone.size_hint = (instance.note_number_to_size[message.note], None)
-                        tone.size[1] = elapsed_ticks - note_number_pos[message.note]
+                        tone.size[1] = (elapsed_ticks - note_number_pos[message.note]) *2
 
                         instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
 
@@ -336,7 +367,7 @@ class ToneFlower(ModalView):
 
     def flow_tones(self, time_passed):
 
-        self.ids.id_top_foreground.pos[1] -= time_passed * 50.0
+        self.ids.id_top_foreground.pos[1] -= time_passed * 50.0 * 2
 
         # self.ids.id_top_foreground.size_hint['y'] -= 0.0001
 
@@ -355,7 +386,9 @@ class ToneFlower(ModalView):
         :param instance: the instance of the ModalView itself, a non-static implementation would have passed 'self'
         :return:
         """
-        instance.tone_flower_engine.cancel()
+        if instance.tone_flower_engine is not None:
+            instance.tone_flower_engine.cancel()
+            instance.tone_flower_engine = None
 
     @staticmethod
     def on_dismiss_callback(instance):
@@ -366,8 +399,6 @@ class ToneFlower(ModalView):
         """
         if instance.block_close:
             toast(f"Blocked closing")
-        else:
-            instance.tone_flower_engine.cancel()
 
         return instance.block_close
 
