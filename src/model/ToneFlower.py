@@ -19,7 +19,7 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObservableList, ListProperty, NumericProperty, StringProperty
 
-from mido import MidiFile
+from mido import (MidiFile, bpm2tempo, tempo2bpm, tick2second, second2tick,)
 
 from kivymd.uix.useranimationcard import MDUserAnimationCard
 from kivy.uix.modalview import ModalView
@@ -91,7 +91,22 @@ class ToneFlower(ModalView):
         self.tone_flower_engine = None
         self.black_note_strips = []
         self.color_strips = {}
-        self.note_scale_factor = 2
+        self.note_scale_factor = 0.5
+
+        self.song_position = 1
+
+        # # The start time of the object.
+        # time_number
+        # # The beats-per-measure (upper number) of the time signature.
+        self.time_signature_numerator = 0
+        # # The type of beat (lower number) of the time signature.
+        # time_signature_denominator
+        # # The number of "MIDI clocks" between metronome clicks. There are 24 MIDI clocks in one quarter note.
+        # clocks_integer
+        # # The number of notated 32nds in 24 MIDI clocks. The default value is 8.
+        # 32nds_integer
+
+        self.ppq = 0
 
         # TODO PDP: note_number mappen op queue<SoortToneObject> hier?
         self.color_tones = {}
@@ -105,12 +120,14 @@ class ToneFlower(ModalView):
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Game_of_Thrones_Easy_piano.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Ed_Sheeran_-_Perfect_-_Ed_Sheeran.mid'
-        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/LittleSubmarine_TheStarlings1Octave_Preprocessed.mid'
+
 
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go1Octavev1.mid'
-        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go1Octavev2.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go1Octavev2.mid'
+
+        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/LittleSubmarine_TheStarlings1Octave_Preprocessed.mid'
 
 
         # When auto_dismiss==True, then you can escape the modal view with [ESC]
@@ -299,76 +316,147 @@ class ToneFlower(ModalView):
         # clip makes sure that no notes would be louder than 127
         midi_file = MidiFile(instance.filename, clip=True)
         midi_file_type = midi_file.type
+        length = midi_file.length #In sec
         ticks_per_beat = midi_file.ticks_per_beat
-        length = midi_file.length
+
+        sec_per_beat = 0
+
+        sec_per_tick = 0
 
         # type 0 (single track): all messages are saved in one track
         # type 1 (synchronous): all tracks start at the same time
         # type 2 (asynchronous): each track is independent of the others
 
-        print(f"The file type is {midi_file_type}")
+        print(f"The file type is {midi_file_type} and ticks_per_beat {ticks_per_beat} (=480), length {length} sec")
 
-        note_number_pos = {}
-        elapsed_ticks = 0
-        vert_pos_offset = 300
+        note_number_to_start = {}
+        elapsed_time = 0
+        start_time_offset = 0
+        start_time_offset_known = False
 
         for i, track in enumerate(midi_file.tracks):
             # sys.stdout.write('=== Track {}\n'.format(i))
             for message in track:
+                # if (elapsed_time < 500): #This clipping is only intended for testing purposes:
                 if message.is_meta:
-                    pass
+
+                    if message.type == "time_signature":
+                        # < meta
+                        # message
+                        # time_signature
+                        # numerator = 1
+                        # denominator = 4
+                        # clocks_per_click = 24
+                        # notated_32nd_notes_per_beat = 8
+                        # time = 0 >
+
+                        pass
+
+                    elif message.type == "set_tempo":
+                        sec_per_beat = message.tempo * 1e-6
+                        sec_per_tick = sec_per_beat / ticks_per_beat
+
+                        if not start_time_offset_known:
+                            start_time_offset =  4 * sec_per_beat # 4 beats
+                            start_time_offset = True
+
+
 
                 elif message.type in ["note_on", "note_off"]:
                     # Then it's about notes:
 
                     if message.type == "note_on" and message.velocity > 0:
                         # A genuine note_on event:
-                        # Store the beginning of the note in dict:
-                        elapsed_ticks += (message.time * 0.1)
-                        note_number_pos[message.note] = elapsed_ticks
+
+                        elapsed_time += message.time * sec_per_tick
+
+                        if message.note in note_number_to_start:
+
+
+                            if note_number_to_start[message.note] == -1:
+                                # In this case a note_off event (prior to the currently processed note_one-event) has reset the note:
+                                # Store the beginning of the note in dict:
+
+                                note_number_to_start[message.note] = elapsed_time
+
+                        else:
+                            note_number_to_start[message.note] = elapsed_time
+
 
                     else:
                         # A note_off event:
-                        elapsed_ticks += (message.time * 0.1)
+                        elapsed_time += message.time * sec_per_tick
 
                         tone = ColorTone()
                         tone.tone_color = instance.note_number_to_color[message.note]
-                        tone.pos_hint = {'x': instance.note_number_to_pos[message.note]}
-                        tone.pos[1] = note_number_pos[message.note] * instance.note_scale_factor + vert_pos_offset
-                        tone.size_hint = (instance.note_number_to_size[message.note], None)
-                        tone.size[1] = (elapsed_ticks - note_number_pos[message.note]) * instance.note_scale_factor
+                        # tone.pos_hint = {'x': instance.note_number_to_pos[message.note],
+                        #                  'y': (note_number_to_start[message.note] + start_time_offset)}
+                        tone.pos_hint_x = instance.note_number_to_pos[message.note]
+                        tone.pos_hint_y = (note_number_to_start[message.note] + start_time_offset)
+
+                        # tone.pos[1] = note_number_to_start[message.note] * instance.note_scale_factor + start_time_offset
+
+                        tone.size_hint = (instance.note_number_to_size[message.note], elapsed_time - note_number_to_start[message.note])
+                        # tone.size[1] = (elapsed_time - note_number_to_start[message.note]) * instance.note_scale_factor
+
+                        # Reset the start for this note_number:
+                        note_number_to_start[message.note] = -1
 
                         instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
 
 
                     # sys.stdout.write('  {!r}\n'.format(message))
 
+        # instance.ids.id_top_foreground.pos_hint["y"] = 0.5
+
+        print(f"the intial size is {instance.ids.id_top_foreground.size}")
+        instance.ids.id_top_foreground.size[1] = instance.note_scale_factor * 100
+
         toast(f"ToneFlower engine ready...{os.linesep}"
               f"         Enjoy playing!")
 
 
-        #
-        # tone2 = ColorTone()
-        # tone2.tone_color = instance.note_number_to_color[67]
-        # tone2.pos_hint = {'x': instance.note_number_to_pos[67]}
-        # tone2.pos[1] = 600
-        # tone2.size_hint = (instance.note_number_to_size[67], None)
-        # tone2.size[1] = 45
-        #
-        #
-        # instance.ids.id_top_foreground.add_widget(tone2, len(instance.ids.id_background.children))
-        #
-        # instance.color_tones[60] = [tone]
-        # instance.color_tones[67] = [tone2]
-        #
-
     def calculate_frame(self, time_passed):
         # print(time_passed)
+
+
         self.flow_tones(time_passed)
+
+
 
     def flow_tones(self, time_passed):
 
-        self.ids.id_top_foreground.pos[1] -= time_passed * 50.0 * self.note_scale_factor
+        # Resize
+
+        # size is the pixel height of the part from the splitter to the top
+
+        # print(self.ids.id_top_foreground.size_hint[1])
+        self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
+        # self.ids.id_top_foreground.size_hint[1] += 0.00001
+
+
+        # print(f"delta {time_passed * 0.5 * self.note_scale_factor}")
+        # print(f"song_position {self.song_position}")
+
+        for child in self.ids.id_top_foreground.children:
+            # child.pos_hint["y"] -= time_passed
+            child.pos_hint_y -= time_passed
+
+
+        # The statement to update the relative layout as a whole does not work together with the note_scale_factor
+        # self.ids.id_top_foreground.pos_hint["y"] -= 1
+
+
+
+
+
+
+        # self.ids.id_top_foreground.pos_hint['x'] += 0.01
+
+        # print(f"size {self.ids.id_top_foreground.size[1]}")
+        # print(f"pos {self.ids.id_top_foreground.pos[1]}")
+
+
 
         # self.ids.id_top_foreground.size_hint['y'] -= 0.0001
 
@@ -408,4 +496,6 @@ class ColorStrip(Widget):
     pass
 
 class ColorTone(Widget):
-    pass
+    pos_hint_x = NumericProperty(0)
+    pos_hint_y = NumericProperty(0)
+    # pass

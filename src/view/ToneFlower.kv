@@ -27,6 +27,7 @@
 
 <ColorTone>:
     tone_color: (1, 1, 1, 1)
+    pos_hint: {"x":root.pos_hint_x, "y":root.pos_hint_y}
     canvas:
         Color:
             rgba: self.tone_color
@@ -120,7 +121,7 @@
 
                     RelativeLayout:
                         id: id_top_foreground
-                        size_hint: 1.0, 1.0
+                        size_hint: 1.0, None
 #                        text: 'Projected score'
 
 
