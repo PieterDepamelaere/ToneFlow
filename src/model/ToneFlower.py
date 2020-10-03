@@ -313,6 +313,9 @@ class ToneFlower(ModalView):
         :return:
         """
 
+        # Remove previous ColorTones if any:
+        instance.ids.id_top_foreground.clear_widgets()
+
         # clip makes sure that no notes would be louder than 127
         midi_file = MidiFile(instance.filename, clip=True)
         midi_file_type = midi_file.type
@@ -337,7 +340,7 @@ class ToneFlower(ModalView):
         for i, track in enumerate(midi_file.tracks):
             # sys.stdout.write('=== Track {}\n'.format(i))
             for message in track:
-                # if (elapsed_time < 500): #This clipping is only intended for testing purposes:
+                # if (elapsed_time < 15): #This clipping is only intended for testing purposes:
                 if message.is_meta:
 
                     if message.type == "time_signature":
@@ -357,7 +360,8 @@ class ToneFlower(ModalView):
                         sec_per_tick = sec_per_beat / ticks_per_beat
 
                         if not start_time_offset_known:
-                            start_time_offset =  4 * sec_per_beat # 4 beats
+                            start_time_offset = 8 * sec_per_beat # 8 beats
+                            elapsed_time += start_time_offset
                             start_time_offset = True
 
 
@@ -392,7 +396,7 @@ class ToneFlower(ModalView):
                         # tone.pos_hint = {'x': instance.note_number_to_pos[message.note],
                         #                  'y': (note_number_to_start[message.note] + start_time_offset)}
                         tone.pos_hint_x = instance.note_number_to_pos[message.note]
-                        tone.pos_hint_y = (note_number_to_start[message.note] + start_time_offset)
+                        tone.pos_hint_y = (note_number_to_start[message.note])
 
                         # tone.pos[1] = note_number_to_start[message.note] * instance.note_scale_factor + start_time_offset
 
@@ -430,17 +434,21 @@ class ToneFlower(ModalView):
 
         # size is the pixel height of the part from the splitter to the top
 
-        # print(self.ids.id_top_foreground.size_hint[1])
-        self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
-        # self.ids.id_top_foreground.size_hint[1] += 0.00001
+        # print(self.ids.id_top_foreground.size[1])
+        # Statement  below can resize, but better scheduled on less frequently polled thread.
+        # self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
+
 
 
         # print(f"delta {time_passed * 0.5 * self.note_scale_factor}")
         # print(f"song_position {self.song_position}")
 
+        delta = time_passed * CU.tfs.dic['overall_speedfactor'].value
+
+        # Is this parallellizible?
         for child in self.ids.id_top_foreground.children:
-            # child.pos_hint["y"] -= time_passed
-            child.pos_hint_y -= time_passed
+            # child.pos_hint["y"] -= delta
+            child.pos_hint_y -= delta
 
 
         # The statement to update the relative layout as a whole does not work together with the note_scale_factor
