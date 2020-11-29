@@ -91,7 +91,7 @@ class ToneFlower(ModalView):
         self.tone_flower_engine = None
         self.black_note_strips = []
         self.color_strips = {}
-        self.note_scale_factor = 0.5
+        self.note_scale_factor = 1
 
         self.song_position = 1
 
@@ -127,7 +127,13 @@ class ToneFlower(ModalView):
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go1Octavev1.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go1Octavev2.mid'
 
-        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/LittleSubmarine_TheStarlings1Octave_Preprocessed.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/LittleSubmarine_TheStarlings1Octave_Preprocessed.mid'
+
+
+
+        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/preprocessed-eerste-wals.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/preprocessed-melodie-met-kwartnoten.mid'
+
 
 
         # When auto_dismiss==True, then you can escape the modal view with [ESC]
