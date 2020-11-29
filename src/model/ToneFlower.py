@@ -19,7 +19,7 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObservableList, ListProperty, NumericProperty, StringProperty
 
-from mido import MidiFile
+from mido import (MidiFile, bpm2tempo, tempo2bpm, tick2second, second2tick,)
 
 from kivymd.uix.useranimationcard import MDUserAnimationCard
 from kivy.uix.modalview import ModalView
@@ -84,15 +84,56 @@ class ToneFlower(ModalView):
         self.size_hint = (1, 1)
         self.pos_hint = {'x': 0, 'y': 0}
         self.background_color = (0, 0, 0, 0)
+        self.color_white_note_strips = get_color_from_hex('#161616FF') if (CU.tfs.dic['toggle_white_note_strips'].value) else get_color_from_hex('#000000FF')
         self.note_number_to_pos = {}
         self.note_number_to_size = {}
         self.note_number_to_color = {}
         self.tone_flower_engine = None
-        self.white_note_strips = []
+        self.black_note_strips = []
         self.color_strips = {}
+        self.note_scale_factor = 1
+
+        self.song_position = 1
+
+        # # The start time of the object.
+        # time_number
+        # # The beats-per-measure (upper number) of the time signature.
+        self.time_signature_numerator = 0
+        # # The type of beat (lower number) of the time signature.
+        # time_signature_denominator
+        # # The number of "MIDI clocks" between metronome clicks. There are 24 MIDI clocks in one quarter note.
+        # clocks_integer
+        # # The number of notated 32nds in 24 MIDI clocks. The default value is 8.
+        # 32nds_integer
+
+        self.ppq = 0
 
         # TODO PDP: note_number mappen op queue<SoortToneObject> hier?
         self.color_tones = {}
+
+        # TODO: Playalong platform independently https://stackoverflow.com/questions/8299303/generating-sine-wave-sound-in-python/27978895#27978895
+        # TODO: note to freq: https://pages.mtu.edu/~suits/notefreqs.html
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
+
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Game_of_Thrones_Easy_piano.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Ed_Sheeran_-_Perfect_-_Ed_Sheeran.mid'
+
+
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go1Octavev1.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go1Octavev2.mid'
+
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/LittleSubmarine_TheStarlings1Octave_Preprocessed.mid'
+
+
+
+        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/preprocessed-eerste-wals.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/preprocessed-melodie-met-kwartnoten.mid'
+
 
 
         # When auto_dismiss==True, then you can escape the modal view with [ESC]
@@ -154,74 +195,70 @@ class ToneFlower(ModalView):
         low_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['low_pitch_limit'].value)
         high_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['high_pitch_limit'].value)
 
+        if (self.filename is not None):
+            # Narrow the low_pitch_limit and high_pitch_limit if the song allows it:
+            # clip makes sure that no notes would be louder than 127
+            midi_file = MidiFile(self.filename, clip=True)
+
+            low_pitch_limit_song = -1
+            high_pitch_limit_song = -1
+
+            for i, track in enumerate(midi_file.tracks):
+                # sys.stdout.write('=== Track {}\n'.format(i))
+                for message in track:
+                    if message.type in ["note_on", "note_off"]:
+                        # Then it's about notes:
+                        if (message.note > high_pitch_limit_song) or (high_pitch_limit_song == -1):
+                            high_pitch_limit_song = message.note
+                        if ((message.note < low_pitch_limit_song) or (low_pitch_limit_song == -1)):
+                            low_pitch_limit_song = message.note
+
+            low_pitch_limit = low_pitch_limit_song if low_pitch_limit_song > low_pitch_limit else low_pitch_limit
+            high_pitch_limit = high_pitch_limit_song if high_pitch_limit_song < high_pitch_limit else high_pitch_limit
+
+
+
+
+        # Adjust low_pitch_limit and high_pitch_limit, in case the song does not need the entire range:
+        # TODO: implement
+
         amount_white_keys, amount_black_keys = MTCU.note_interval_to_key_range(low_pitch_limit, high_pitch_limit)
 
-        width_factor_black_key = 1.0 / (amount_white_keys * 2 + amount_black_keys)
-        width_factor_white_key = 2 * width_factor_black_key
+        rel_width_black_key = 1.0 / (amount_white_keys * 2 + amount_black_keys)
+        rel_width_white_key = 2 * rel_width_black_key
 
-        # Add the white_note_strips as rectangle in the background to the floatlayout:
+        # Add the black_note_strips as rectangle in the background to the floatlayout:
 
         note = low_pitch_limit
-        pos_factor_white_strip = 0.0
+        rel_hor_pos = 0.0
 
         while note <= high_pitch_limit:
 
-            width = 0.0
+            rel_width = 0.0
 
             if MTCU.is_white_note(note):
-                # A white note will be rendered with twice the white_strip_width of a black note, two adjacent white notes 4 times that size:
-                # The reason for distinguishing between 1 white note and two adjacent ones is to save a rectangle
-
-                self.note_number_to_pos[note] = pos_factor_white_strip
-                self.note_number_to_size[note] = width_factor_white_key
-
-                if MTCU.is_white_note(note + 1):
-                    # In case of adjacent E, F or B, C, one white_strip can be saved by drawing a wider one instead.
-                    # This might be good for performance
-
-                    width = width_factor_white_key * 2
-
-                    # Before this extra increment of note, retrieve the correct color:
-                    self.note_number_to_color[note] = MTCU.NOTE_COLORS[MTCU.condense_note_pitch(note)]
-
-                    # Before this extra increment of note, add a color_strip
-                    color_strip = ColorStrip()
-                    color_strip.strip_color = self.note_number_to_color[note]
-                    color_strip.pos_hint = {'x': self.note_number_to_pos[note], 'y': 0.0}
-                    color_strip.size_hint = (self.note_number_to_size[note], 0.25 + 0.5 * random.uniform(0, 1))
-
-                    self.ids.id_bottom_foreground.add_widget(color_strip)
-                    self.color_strips[note] = color_strip
-
-                    # Increment the current note, because we draw two at once:
-                    note += 1
-
-                    self.note_number_to_pos[note] = pos_factor_white_strip + width_factor_white_key
-                    self.note_number_to_size[note] = width_factor_white_key
-
-                else:
-                    width = width_factor_white_key
-
-                if (CU.tfs.dic['toggle_white_note_strips'].value):
-                    white_note_strip = ColorStrip()
-                    white_note_strip.strip_color = get_color_from_hex('#111111FF')
-                    white_note_strip.pos_hint = {'x': pos_factor_white_strip, 'y': 0.0}
-                    white_note_strip.size_hint = (width, 1.0)
-
-                    self.ids.id_background.add_widget(white_note_strip, len(self.ids.id_background.children))
-                    self.white_note_strips.append(white_note_strip)
+                # A white note will be rendered with twice the white_strip_width of a black note.
+                rel_width = rel_width_white_key
 
             else:
-                # Add black note:
-                self.note_number_to_pos[note] = pos_factor_white_strip
-                self.note_number_to_size[note] = width_factor_black_key
+                # Add black note strip:
+                rel_width = rel_width_black_key
 
-                width = width_factor_black_key
+                if (CU.tfs.dic['toggle_white_note_strips'].value):
+                    black_note_strip = ColorStrip()
+                    black_note_strip.strip_color = get_color_from_hex('#000000FF')
+                    black_note_strip.pos_hint = {'x': rel_hor_pos, 'y': 0.0}
+                    black_note_strip.size_hint = (rel_width, 1.0)
 
-            # Before this increment of note, retrieve the correct color:
+                    self.ids.id_background.add_widget(black_note_strip, len(self.ids.id_background.children))
+                    self.black_note_strips.append(black_note_strip)
+
+            # Before this increment of note, store correct rel_hor_pos, rel_width and color in resp. dicts:
+            self.note_number_to_pos[note] = rel_hor_pos
+            self.note_number_to_size[note] = rel_width
             self.note_number_to_color[note] = MTCU.NOTE_COLORS[MTCU.condense_note_pitch(note)]
 
-            # Before this increment of note, create a color_strip for this note:
+            # Before the increment of note, create a color_strip for this note to indicate volume, waiting time etc:
             color_strip = ColorStrip()
             color_strip.strip_color = self.note_number_to_color[note]
             color_strip.pos_hint = {'x': self.note_number_to_pos[note], 'y': 0.0}
@@ -230,8 +267,26 @@ class ToneFlower(ModalView):
             self.ids.id_bottom_foreground.add_widget(color_strip)
             self.color_strips[note] = color_strip
 
-            pos_factor_white_strip += width
+            rel_hor_pos += rel_width
             note += 1
+
+    def start_stop_toneflower_engine(self):
+        """
+        Can start, pause and resume the toneflower_engine
+        :return:
+        """
+
+        if self.tone_flower_engine is not None:
+            self.tone_flower_engine.cancel()
+            self.tone_flower_engine = None
+            toast(f"ToneFlower engine paused")
+        else:
+            self.tone_flower_engine = Clock.schedule_interval(self.calculate_frame, 1 / 60.0)
+            toast(f"ToneFlower engine started")
+
+
+        # TODO PDP: FPS!!! https://stackoverflow.com/questions/40952038/kivy-animation-works-slowly
+
 
 
     def load_from_json(self):
@@ -264,92 +319,163 @@ class ToneFlower(ModalView):
         :return:
         """
 
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Game_of_Thrones_Easy_piano.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Ed_Sheeran_-_Perfect_-_Ed_Sheeran.mid'
-        # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/LittleSubmarine_TheStarlings_Preprocessed.mid'
-        filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go.mid'
-
+        # Remove previous ColorTones if any:
+        instance.ids.id_top_foreground.clear_widgets()
 
         # clip makes sure that no notes would be louder than 127
-        midi_file = MidiFile(filename, clip=True)
+        midi_file = MidiFile(instance.filename, clip=True)
         midi_file_type = midi_file.type
+        length = midi_file.length #In sec
         ticks_per_beat = midi_file.ticks_per_beat
-        length = midi_file.length
+
+        sec_per_beat = 0
+
+        sec_per_tick = 0
 
         # type 0 (single track): all messages are saved in one track
         # type 1 (synchronous): all tracks start at the same time
         # type 2 (asynchronous): each track is independent of the others
 
-        print(f"The file type is {midi_file_type}")
+        print(f"The file type is {midi_file_type} and ticks_per_beat {ticks_per_beat} (=480), length {length} sec")
 
-        note_number_pos = {}
-        elapsed_ticks = 0
-        vert_pos_offset = 800
+        note_number_to_start = {}
+        elapsed_time = 0
+        start_time_offset = 0
+        start_time_offset_known = False
 
         for i, track in enumerate(midi_file.tracks):
-            sys.stdout.write('=== Track {}\n'.format(i))
+            # sys.stdout.write('=== Track {}\n'.format(i))
             for message in track:
-                if not message.is_meta and message.type in ["note_on", "note_off"]:
+                # if (elapsed_time < 15): #This clipping is only intended for testing purposes:
+                if message.is_meta:
+
+                    if message.type == "time_signature":
+                        # < meta
+                        # message
+                        # time_signature
+                        # numerator = 1
+                        # denominator = 4
+                        # clocks_per_click = 24
+                        # notated_32nd_notes_per_beat = 8
+                        # time = 0 >
+
+                        pass
+
+                    elif message.type == "set_tempo":
+                        sec_per_beat = message.tempo * 1e-6
+                        sec_per_tick = sec_per_beat / ticks_per_beat
+
+                        if not start_time_offset_known:
+                            start_time_offset = 8 * sec_per_beat # 8 beats
+                            elapsed_time += start_time_offset
+                            start_time_offset = True
+
+
+
+                elif message.type in ["note_on", "note_off"]:
                     # Then it's about notes:
 
                     if message.type == "note_on" and message.velocity > 0:
                         # A genuine note_on event:
-                        # Store the beginning of the note in dict:
-                        elapsed_ticks += (message.time * 0.1)
-                        note_number_pos[message.note] = elapsed_ticks
+
+                        elapsed_time += message.time * sec_per_tick
+
+                        if message.note in note_number_to_start:
+
+
+                            if note_number_to_start[message.note] == -1:
+                                # In this case a note_off event (prior to the currently processed note_one-event) has reset the note:
+                                # Store the beginning of the note in dict:
+
+                                note_number_to_start[message.note] = elapsed_time
+
+                        else:
+                            note_number_to_start[message.note] = elapsed_time
+
 
                     else:
                         # A note_off event:
-                        elapsed_ticks += (message.time * 0.1)
+                        elapsed_time += message.time * sec_per_tick
 
                         tone = ColorTone()
                         tone.tone_color = instance.note_number_to_color[message.note]
-                        tone.pos_hint = {'x': instance.note_number_to_pos[message.note]}
-                        tone.pos[1] = note_number_pos[message.note] + vert_pos_offset
-                        tone.size_hint = (instance.note_number_to_size[message.note], None)
-                        tone.size[1] = elapsed_ticks - note_number_pos[message.note]
+                        # tone.pos_hint = {'x': instance.note_number_to_pos[message.note],
+                        #                  'y': (note_number_to_start[message.note] + start_time_offset)}
+                        tone.pos_hint_x = instance.note_number_to_pos[message.note]
+                        tone.pos_hint_y = (note_number_to_start[message.note])
+
+                        # tone.pos[1] = note_number_to_start[message.note] * instance.note_scale_factor + start_time_offset
+
+                        tone.size_hint = (instance.note_number_to_size[message.note], elapsed_time - note_number_to_start[message.note])
+                        # tone.size[1] = (elapsed_time - note_number_to_start[message.note]) * instance.note_scale_factor
+
+                        # Reset the start for this note_number:
+                        note_number_to_start[message.note] = -1
 
                         instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
 
 
                     # sys.stdout.write('  {!r}\n'.format(message))
 
+        # instance.ids.id_top_foreground.pos_hint["y"] = 0.5
+
+        print(f"the intial size is {instance.ids.id_top_foreground.size}")
+        instance.ids.id_top_foreground.size[1] = instance.note_scale_factor * 100
+
         toast(f"ToneFlower engine ready...{os.linesep}"
               f"         Enjoy playing!")
 
 
-        #
-        # tone2 = ColorTone()
-        # tone2.tone_color = instance.note_number_to_color[67]
-        # tone2.pos_hint = {'x': instance.note_number_to_pos[67]}
-        # tone2.pos[1] = 600
-        # tone2.size_hint = (instance.note_number_to_size[67], None)
-        # tone2.size[1] = 45
-        #
-        #
-        # instance.ids.id_top_foreground.add_widget(tone2, len(instance.ids.id_background.children))
-        #
-        # instance.color_tones[60] = [tone]
-        # instance.color_tones[67] = [tone2]
-        #
-        # TODO PDP: FPS!!! https://stackoverflow.com/questions/40952038/kivy-animation-works-slowly
-        instance.tone_flower_engine = Clock.schedule_interval(instance.calculate_frame, 1 / 60.0)
-
     def calculate_frame(self, time_passed):
         # print(time_passed)
+
+
         self.flow_tones(time_passed)
+
+
 
     def flow_tones(self, time_passed):
 
-        delta = time_passed * 50.0
+        # Resize
 
+        # size is the pixel height of the part from the splitter to the top
+
+        # print(self.ids.id_top_foreground.size[1])
+        # Statement  below can resize, but better scheduled on less frequently polled thread.
+        # self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
+
+
+
+        # print(f"delta {time_passed * 0.5 * self.note_scale_factor}")
+        # print(f"song_position {self.song_position}")
+
+        delta = time_passed * CU.tfs.dic['overall_speedfactor'].value
+
+        # Is this parallellizible?
         for child in self.ids.id_top_foreground.children:
-            child.y -= delta
+            # child.pos_hint["y"] -= delta
+            child.pos_hint_y -= delta
+
+
+        # The statement to update the relative layout as a whole does not work together with the note_scale_factor
+        # self.ids.id_top_foreground.pos_hint["y"] -= 1
+
+
+
+
+
+
+        # self.ids.id_top_foreground.pos_hint['x'] += 0.01
+
+        # print(f"size {self.ids.id_top_foreground.size[1]}")
+        # print(f"pos {self.ids.id_top_foreground.pos[1]}")
+
+
+
+        # self.ids.id_top_foreground.size_hint['y'] -= 0.0001
+
+        # for child in self.ids.id_top_foreground.children:
+        #     child.y -= time_passed * 50.0
 
         # for key, value in self.color_tones.items():
             # for tone in value:
@@ -363,8 +489,9 @@ class ToneFlower(ModalView):
         :param instance: the instance of the ModalView itself, a non-static implementation would have passed 'self'
         :return:
         """
-        # TODO: Warn display popup not to leave with unsaved progress:
-        pass
+        if instance.tone_flower_engine is not None:
+            instance.tone_flower_engine.cancel()
+            instance.tone_flower_engine = None
 
     @staticmethod
     def on_dismiss_callback(instance):
@@ -375,8 +502,6 @@ class ToneFlower(ModalView):
         """
         if instance.block_close:
             toast(f"Blocked closing")
-        else:
-            instance.tone_flower_engine.cancel()
 
         return instance.block_close
 
@@ -385,4 +510,6 @@ class ColorStrip(Widget):
     pass
 
 class ColorTone(Widget):
-    pass
+    pos_hint_x = NumericProperty(0)
+    pos_hint_y = NumericProperty(0)
+    # pass
