@@ -9,7 +9,7 @@ Kivy-Garden==0.1.4
 kivymd==0.104.1
 mido==1.2.9
 numpy==1.18.3
-Pillow==7.1.2
+Pillow==8.1.1
 Pygments==2.6.1
 PyInstaller==3.6
 pyperclip==1.8.0
