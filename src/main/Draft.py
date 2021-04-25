@@ -1,3 +1,314 @@
+import threading
+import time
+
+from kivy.app import App
+from kivy.lang import Builder
+from kivy.factory import Factory
+from kivy.animation import Animation
+from kivy.clock import Clock, mainthread
+from kivy.uix.gridlayout import GridLayout
+from kivy.properties import NumericProperty
+from kivy.uix.widget import Widget
+
+from functools import partial
+
+Builder.load_string("""
+<AnimWidget@Widget>:
+    canvas:
+        Color:
+            rgba: 0.7, 0.3, 0.9, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    size_hint: None, None
+    size: 400, 30
+
+<ColorTone>:
+    tone_color: (1, 1, 1, 1)
+    pos_hint: {"x":root.pos_hint_x, "y":root.pos_hint_y}
+    canvas:
+        Color:
+            rgba: self.tone_color
+        RoundedRectangle:
+            size: self.size
+            pos: self.pos
+            segments: 15
+            radius: [15]
+
+<RootWidget>:
+    cols: 1
+    
+    
+    but_1: but_1
+    lab_1: lab_1
+    lab_2: lab_2
+    # lab_3: lab_3
+    # lab_4: lab_4
+    ct_1: ct_1
+    ct_2: ct_2
+    ct_3: ct_3
+    ct_4: ct_4
+    ct_5: ct_5
+
+    RelativeLayout:
+        id: id_top_foreground
+        size_hint: 1.0, None
+        
+
+        canvas:
+            Color:
+                rgba: 0.9, 0.9, 0.9, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+    
+        # anim_box: anim_box
+        
+        
+
+        Button:
+            id: but_1
+            font_size: 20
+            text: 'Start second thread'
+            on_press: root.start_second_thread(lab_2.text)
+        # 
+        Label:
+            id: lab_1
+            font_size: 30
+            color: 0.6, 0.6, 0.6, 1
+            text_size: self.width, None
+            # halign: 'center'
+    
+        # AnchorLayout:
+        #     id: anim_box
+    
+        Label:
+            id: lab_2
+            font_size: 100
+            color: 0.8, 0, 0, 1
+            text: '3'
+    
+        # Label:
+        #     id: lab_3
+        #     font_size: 100
+        #     color: 0.8, 0, 0, 1
+        #     text: 'koe'
+        # 
+        # Label:
+        #     id: lab_4
+        #     font_size: 100
+        #     color: 0.8, 0, 0, 1
+        #     text: 'belle'
+        
+    
+        ColorTone:
+            id: ct_1
+            pos_hint_x: 0.15 
+            tone_color: (0.5, 0.4, 0.8, 1)
+            pos_hint: {"x":0.2, "y":0.5}
+            size_hint: 0.05, 0.3
+        
+        ColorTone:
+            id: ct_2
+            pos_hint_x: 0.35
+            tone_color: (0.9, 0.4, 0.4, 1)
+            pos_hint: {"x":0.35, "y":0.7}
+            size_hint: 0.05, 0.6
+            
+        ColorTone:
+            id: ct_3
+            pos_hint_x: 0.75
+            tone_color: (0.0, 0.6, 0.3, 1)
+            pos_hint: {"x":0.75, "y":0.3}
+            size_hint: 0.1, 0.2
+            
+        ColorTone:
+            id: ct_4
+            pos_hint_x: 0.9
+            pos_hint_y: 0.75
+            tone_color: (0.0, 0.2, 0.8, 1)
+            # pos_hint: {"x":0.75, "y":0.75}
+            size_hint: 0.1, 0.4
+
+        ColorTone:
+            id: ct_5
+            pos_hint_x: 0.2
+            pos_hint_y: 0.3
+            tone_color: (0.7, 0.1, 0.3, 1)
+            # pos_hint: {"x":0.2, "y":0.75}
+            size_hint: 0.05, 0.8
+    
+""")
+
+class ColorTone(Widget):
+    pos_hint_x = NumericProperty(0)
+    pos_hint_y = NumericProperty(0)
+    # pass
+
+class RootWidget(GridLayout):
+
+    stop = threading.Event()
+
+    def start_second_thread(self, l_text):
+        threading.Thread(target=self.second_thread, args=(l_text,)).start()
+
+    def second_thread(self, label_text):
+        # Remove a widget, update a widget property, create a new widget,
+        # add it and animate it in the main thread by scheduling a function
+        # call with Clock.
+        # Clock.schedule_once(self.start_test, 0)
+
+        # Do some thread blocking operations.
+        # time.sleep(5)
+        l_text = str(int(label_text) * 3000)
+
+        # Update a widget property in the main thread by decorating the
+        # called function with @mainthread.
+        self.update_label_text(l_text)
+
+        # Do some more blocking operations.
+        time.sleep(0.5)
+
+        # Remove some widgets and update some properties in the main thread
+        # by decorating the called function with @mainthread.
+        self.stop_test()
+
+        # # Start a new thread with an infinite loop and stop the current one.
+        # threading.Thread(target=Clock.schedule_interval(partial(self.shift_x, self.lab_2), 0)).start()
+        # print(f'test')
+        # threading.Thread(target=Clock.schedule_interval(partial(self.shift_y, self.lab_2), 0)).start()
+        #
+        # threading.Thread(target=Clock.schedule_interval(partial(self.inverse_shift_x, self.lab_3), 0)).start()
+        # threading.Thread(target=Clock.schedule_interval(partial(self.shift_y, self.lab_4), 0)).start()
+
+        # threading.Thread(target=Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_1), 0)).start()
+        # threading.Thread(target=Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_2), 0)).start()
+        # threading.Thread(target=Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_3), 0)).start()
+        # threading.Thread(target=Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_4), 0)).start()
+        # threading.Thread(target=Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_5), 0)).start()
+
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_1), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_2), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_3), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_4), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_5), 0)
+
+        # Clock.schedule_interval(self.combine, 0)
+
+        # Clock.schedule_interval(partial(self.shift_x, self.lab_2), 0)
+        # Clock.schedule_interval(partial(self.shift_y, self.lab_2), 0)
+        # Clock.schedule_interval(partial(self.inverse_shift_x, self.lab_3), 0)
+        # Clock.schedule_interval(partial(self.shift_y, self.lab_4), 0)
+
+        # threading.Thread(target=self.infinite_loop1).start()
+        # threading.Thread(target=self.infinite_loop2).start()
+        # threading.Thread(target=self.infinite_loop3).start()
+        print(f'second infinite thread started')
+
+    def combine(self, *args):
+        self.inverse_shift_y(self.ct_1)
+        self.inverse_shift_y(self.ct_2)
+        self.inverse_shift_y(self.ct_3)
+        self.inverse_shift_y(self.ct_4)
+        self.inverse_shift_y(self.ct_5)
+
+
+
+    def start_test(self, *args):
+        # Remove the button.
+        self.remove_widget(self.but_1)
+
+        # Update a widget property.
+        self.lab_1.text = ('The UI remains responsive while the '
+                           'second thread is running.')
+
+        # Create and add a new widget.
+        # anim_bar = Factory.AnimWidget()
+        # self.anim_box.add_widget(anim_bar)
+
+        # Animate the added widget.
+        # anim = Animation(opacity=0.3, width=100, duration=0.6)
+        # anim += Animation(opacity=1, width=400, duration=0.8)
+        # anim.repeat = True
+        # anim.start(anim_bar)
+
+    @mainthread
+    def update_label_text(self, new_text):
+        self.lab_2.text = new_text
+
+    @mainthread
+    def stop_test(self):
+        self.lab_1.text = ('Second thread exited, a new thread has started. '
+                           'Close the app to exit the new thread and stop '
+                           'the main process.')
+
+        self.lab_2.text = str(int(self.lab_2.text) + 1)
+
+        # self.remove_widget(self.anim_box)
+
+    def shift_x(self, widget, *args):
+        widget.pos_hint_x -= 0.01
+
+        # widget.x -= 1
+
+    def inverse_shift_x(self, widget, *args):
+        widget.x += 1
+
+    def inverse_shift_y(self, widget, *args):
+        widget.pos_hint_y -= 0.01
+
+    def shift_y(self, widget, *args):
+        widget.y += 1
+
+    def infinite_loop1(self):
+
+        while True:
+            if self.stop.is_set():
+                # Stop running this thread so the main Python process can exit.
+                return
+
+            self.shift_x()
+
+
+            # if(iteration % 100 == 0):
+            #     self.update_label_text(f'the new iteration is {iteration}')
+            # print('Infinite loop, iteration {}.'.format(iteration))
+            # time.sleep(1)
+
+    def infinite_loop2(self):
+        while True:
+            if self.stop.is_set():
+                return
+
+            self.shift_y()
+
+    def infinite_loop3(self):
+        iteration = 0
+
+        while True:
+            if self.stop.is_set():
+                return
+
+            iteration += 1
+
+            self.lab_2.text = f"{iteration}"
+
+class ThreadedApp(App):
+
+    def on_stop(self):
+        # The Kivy event loop is about to stop, set a stop signal;
+        # otherwise the app window will close, but the Python process will
+        # keep running until all secondary threads exit.
+        self.root.stop.set()
+
+    def build(self):
+        return RootWidget()
+
+if __name__ == '__main__':
+    ThreadedApp().run()
+
+##############################################################
+
 # from kivy.app import App
 # from kivy.uix.widget import Widget
 # from kivy.lang import Builder
@@ -516,40 +827,40 @@
 #     main()
 
 #############################################################
-
-import sys
-from mido import MidiFile
-
-if __name__ == '__main__':
-    # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
-    # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
-    filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
-    # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
-
-    # clip makes sure that no notes would be louder than 127
-    midi_file = MidiFile(filename, clip=True)
-    midi_file_type = midi_file.type
-    ticks_per_beat = midi_file.ticks_per_beat
-    length = midi_file.length
-
-    # type 0 (single track): all messages are saved in one track
-    # type 1 (synchronous): all tracks start at the same time
-    # type 2 (asynchronous): each track is independent of the others
-
-    print(f"The file type is {midi_file_type}")
-
-
-    for i, track in enumerate(midi_file.tracks):
-        sys.stdout.write('=== Track {}\n'.format(i))
-        for message in track:
-            if not message.is_meta:
-                # Then it's about notes:
-
-                sys.stdout.write('  {!r}\n'.format(message))
-
-
-    for msg in midi_file.play():
-        print(f"Test PDP: {msg}")
+#
+# import sys
+# from mido import MidiFile
+#
+# if __name__ == '__main__':
+#     # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/all_by_myself.mid'
+#     # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
+#     filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics.mid'
+#     # filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
+#
+#     # clip makes sure that no notes would be louder than 127
+#     midi_file = MidiFile(filename, clip=True)
+#     midi_file_type = midi_file.type
+#     ticks_per_beat = midi_file.ticks_per_beat
+#     length = midi_file.length
+#
+#     # type 0 (single track): all messages are saved in one track
+#     # type 1 (synchronous): all tracks start at the same time
+#     # type 2 (asynchronous): each track is independent of the others
+#
+#     print(f"The file type is {midi_file_type}")
+#
+#
+#     for i, track in enumerate(midi_file.tracks):
+#         sys.stdout.write('=== Track {}\n'.format(i))
+#         for message in track:
+#             if not message.is_meta:
+#                 # Then it's about notes:
+#
+#                 sys.stdout.write('  {!r}\n'.format(message))
+#
+#
+#     for msg in midi_file.play():
+#         print(f"Test PDP: {msg}")
 
 #############################################################
 

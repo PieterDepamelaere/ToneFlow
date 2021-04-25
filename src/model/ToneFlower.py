@@ -2,14 +2,17 @@ import os
 import sys
 import random
 import re
+import threading
+
 import aiofiles
 import pathlib as pl
 from datetime import datetime
+import multiprocessing as mp
 
 from kivy.app import App
 from kivy.factory import Factory
 from kivy.lang import Builder
-from kivy.clock import Clock
+from kivy.clock import Clock, mainthread
 from kivy.core.window import Window
 from kivy.graphics import Rectangle
 from kivy.graphics import Color
@@ -71,6 +74,7 @@ from src.model.MusicTheoryCoreUtils import MusicTheoryCoreUtils as MTCU
 class ToneFlower(ModalView):
     app = None
     is_kv_loaded = False
+    CPU_COUNT = mp.cpu_count()
 
     def __init__(self, playlist, **kwargs):
         if (not ToneFlower.is_kv_loaded):
@@ -110,6 +114,9 @@ class ToneFlower(ModalView):
 
         # TODO PDP: note_number mappen op queue<SoortToneObject> hier?
         self.color_tones = {}
+
+        self.pool = None
+        self.infinte_loop_stop = threading.Event()
 
         # TODO: Playalong platform independently https://stackoverflow.com/questions/8299303/generating-sine-wave-sound-in-python/27978895#27978895
         # TODO: note to freq: https://pages.mtu.edu/~suits/notefreqs.html
@@ -192,6 +199,7 @@ class ToneFlower(ModalView):
         self.note_number_to_size = {}
         self.note_number_to_color = {}
 
+        # Adjust low_pitch_limit and high_pitch_limit, in case the song does not need the entire range:
         low_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['low_pitch_limit'].value)
         high_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['high_pitch_limit'].value)
 
@@ -216,19 +224,12 @@ class ToneFlower(ModalView):
             low_pitch_limit = low_pitch_limit_song if low_pitch_limit_song > low_pitch_limit else low_pitch_limit
             high_pitch_limit = high_pitch_limit_song if high_pitch_limit_song < high_pitch_limit else high_pitch_limit
 
-
-
-
-        # Adjust low_pitch_limit and high_pitch_limit, in case the song does not need the entire range:
-        # TODO: implement
-
         amount_white_keys, amount_black_keys = MTCU.note_interval_to_key_range(low_pitch_limit, high_pitch_limit)
 
         rel_width_black_key = 1.0 / (amount_white_keys * 2 + amount_black_keys)
         rel_width_white_key = 2 * rel_width_black_key
 
         # Add the black_note_strips as rectangle in the background to the floatlayout:
-
         note = low_pitch_limit
         rel_hor_pos = 0.0
 
@@ -277,17 +278,36 @@ class ToneFlower(ModalView):
         """
 
         if self.tone_flower_engine is not None:
-            self.tone_flower_engine.cancel()
-            self.tone_flower_engine = None
+            # self.tone_flower_engine.cancel()
+            # self.tone_flower_engine = None
+            self.infinte_loop_stop.set()
             toast(f"ToneFlower engine paused")
         else:
-            self.tone_flower_engine = Clock.schedule_interval(self.calculate_frame, 1 / 60.0)
-            toast(f"ToneFlower engine started")
 
+
+            # self.tone_flower_engine = Clock.schedule_interval(self.calculate_frame, 1/60.0)
+            self.pool = mp.Pool(processes=self.CPU_COUNT)
+
+            self.infinte_loop_stop.clear()
+
+            self.tone_flower_engine = threading.Thread(target=self.infinite_loop())
+            self.tone_flower_engine.daemon = True
+
+            self.tone_flower_engine.start()
+
+
+
+            toast(f"ToneFlower engine started")
 
         # TODO PDP: FPS!!! https://stackoverflow.com/questions/40952038/kivy-animation-works-slowly
 
+    def infinite_loop(self):
+        while True:
+            if self.infinte_loop_stop.is_set():
+                # Stop running this thread so the main Python process can exit.
+                return
 
+            self.calculate_frame(0.016667)
 
     def load_from_json(self):
         # TODO
@@ -375,10 +395,10 @@ class ToneFlower(ModalView):
                 elif message.type in ["note_on", "note_off"]:
                     # Then it's about notes:
 
+                    elapsed_time += message.time * sec_per_tick
+
                     if message.type == "note_on" and message.velocity > 0:
                         # A genuine note_on event:
-
-                        elapsed_time += message.time * sec_per_tick
 
                         if message.note in note_number_to_start:
 
@@ -395,7 +415,6 @@ class ToneFlower(ModalView):
 
                     else:
                         # A note_off event:
-                        elapsed_time += message.time * sec_per_tick
 
                         tone = ColorTone()
                         tone.tone_color = instance.note_number_to_color[message.note]
@@ -428,12 +447,21 @@ class ToneFlower(ModalView):
 
     def calculate_frame(self, time_passed):
         # print(time_passed)
-
-
         self.flow_tones(time_passed)
 
+        # results = self.pool.starmap_async(self.change_height_color_strip, [color_strip for color_strip in self.color_strips.values()]).get()
+
+    def change_height_color_strip(self, color_strip):
+        color_strip.size_hint_y = random.gauss(0.5, 0.1666)
+        print(color_strip.size_hint_y)
+
+    @mainthread
+    def shift_color_tone(self, arg):
+        child, delta = arg
+        child.pos_hint_y -= delta
 
 
+    @mainthread
     def flow_tones(self, time_passed):
 
         # Resize
@@ -451,19 +479,30 @@ class ToneFlower(ModalView):
 
         delta = time_passed * CU.tfs.dic['overall_speedfactor'].value
 
-        # Is this parallellizible?
-        for child in self.ids.id_top_foreground.children:
-            # child.pos_hint["y"] -= delta
-            child.pos_hint_y -= delta
+        # for child in self.ids.id_top_foreground.children:
+        child = self.ids.id_top_foreground.children[0]
+        child.pos_hint_y -= delta
+        print(f'done')
 
+        # self.pool = mp.Pool(mp.cpu_count())
+        # list_of_results = self.pool.map(self.shift_color_tone , ((child, delta) for child in self.ids.id_top_foreground.children))
+        # self.pool.close()
+        # self.pool.join()
 
         # The statement to update the relative layout as a whole does not work together with the note_scale_factor
         # self.ids.id_top_foreground.pos_hint["y"] -= 1
 
 
+        #############################
+        # Original working code with kivy clock:
 
+        # delta = time_passed * CU.tfs.dic['overall_speedfactor'].value
+        #
+        # # Is this parallellizible?
+        # for child in self.ids.id_top_foreground.children:
+        #     child.pos_hint_y -= delta
 
-
+        ###############################"
 
         # self.ids.id_top_foreground.pos_hint['x'] += 0.01
 
