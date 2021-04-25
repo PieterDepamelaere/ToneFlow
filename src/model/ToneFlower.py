@@ -117,7 +117,7 @@ class ToneFlower(ModalView):
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
 
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
-        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
+        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Game_of_Thrones_Easy_piano.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Ed_Sheeran_-_Perfect_-_Ed_Sheeran.mid'
 
@@ -131,7 +131,7 @@ class ToneFlower(ModalView):
 
 
 
-        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/preprocessed-eerste-wals.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/preprocessed-eerste-wals.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/preprocessed-melodie-met-kwartnoten.mid'
 
 
@@ -281,7 +281,7 @@ class ToneFlower(ModalView):
             self.tone_flower_engine = None
             toast(f"ToneFlower engine paused")
         else:
-            self.tone_flower_engine = Clock.schedule_interval(self.calculate_frame, 1 / 60.0)
+            self.tone_flower_engine = Clock.schedule_interval(self.calculate_frame, 0)
             toast(f"ToneFlower engine started")
 
 
