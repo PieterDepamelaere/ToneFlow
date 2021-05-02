@@ -49,6 +49,21 @@ Builder.load_string("""
     ct_3: ct_3
     ct_4: ct_4
     ct_5: ct_5
+    ct_6: ct_6
+    ct_7: ct_7
+    ct_8: ct_8
+    ct_9: ct_9
+    ct_10: ct_10
+    ct_11: ct_11
+    ct_12: ct_12
+    ct_13: ct_13
+    ct_14: ct_14
+    ct_15: ct_15
+    ct_16: ct_16
+    ct_17: ct_17
+    ct_18: ct_18
+    ct_19: ct_19
+    
 
     RelativeLayout:
         id: id_top_foreground
@@ -137,6 +152,116 @@ Builder.load_string("""
             tone_color: (0.7, 0.1, 0.3, 1)
             # pos_hint: {"x":0.2, "y":0.75}
             size_hint: 0.05, 0.8
+            
+        ColorTone:
+            id: ct_6
+            pos_hint_x: 0.35
+            pos_hint_y: 0.01
+            tone_color: (0.9, 0.4, 0.4, 1)
+            size_hint: 0.05, 0.5
+            
+        ColorTone:
+            id: ct_7
+            pos_hint_x: 0.75
+            pos_hint_y: 1.0
+            tone_color: (1.0, 0.0, 0.0, 1)
+            # pos_hint: {"x":0.75, "y":0.8}
+            size_hint: 0.1, 0.2
+            
+        ColorTone:
+            id: ct_8
+            pos_hint_x: 0.9
+            pos_hint_y: 0.4
+            tone_color: (0.0, 0.2, 0.8, 1)
+            # pos_hint: {"x":0.75, "y":0.75}
+            size_hint: 0.1, 0.4
+
+        ColorTone:
+            id: ct_9
+            pos_hint_x: 0.2
+            pos_hint_y: 1.6
+            tone_color: (0.7, 0.1, 0.3, 1)
+            # pos_hint: {"x":0.2, "y":0.75}
+            size_hint: 0.05, 0.8
+        
+        ColorTone:    
+            id: ct_10
+            pos_hint_x: 0.15
+            pos_hint_y: 0.6 
+            tone_color: (0.5, 0.4, 0.8, 1)
+            # pos_hint: {"x":0.2, "y":0.7}
+            size_hint: 0.05, 0.3
+            
+        ColorTone:
+            id: ct_11
+            pos_hint_x: 0.15
+            pos_hint_y: 1.6  
+            tone_color: (0.5, 0.4, 0.8, 1)
+            # pos_hint: {"x":0.2, "y":0.5}
+            size_hint: 0.05, 0.3
+        
+        ColorTone:
+            id: ct_12
+            pos_hint_x: 0.35
+            pos_hint_y: 2.3 
+            tone_color: (0.9, 0.4, 0.4, 1)
+            # pos_hint: {"x":0.35, "y":0.7}
+            size_hint: 0.05, 0.6
+            
+        ColorTone:
+            id: ct_13
+            pos_hint_x: 0.75
+            pos_hint_y: 1.9
+            tone_color: (0.0, 0.6, 0.3, 1)
+            # pos_hint: {"x":0.75, "y":0.3}
+            size_hint: 0.1, 0.2
+            
+        ColorTone:
+            id: ct_14
+            pos_hint_x: 0.9
+            pos_hint_y: 1.75
+            tone_color: (0.0, 0.2, 0.8, 1)
+            # pos_hint: {"x":0.75, "y":0.75}
+            size_hint: 0.1, 0.4
+
+        ColorTone:
+            id: ct_15
+            pos_hint_x: 0.2
+            pos_hint_y: 0.8
+            tone_color: (0.7, 0.1, 0.3, 1)
+            # pos_hint: {"x":0.2, "y":0.75}
+            size_hint: 0.05, 0.8
+            
+        ColorTone:
+            id: ct_16
+            pos_hint_x: 0.35
+            pos_hint_y: 2
+            tone_color: (0.9, 0.4, 0.4, 1)
+            size_hint: 0.05, 0.5
+            
+        ColorTone:
+            id: ct_17
+            pos_hint_x: 0.75
+            pos_hint_y: 1.6
+            tone_color: (1.0, 0.0, 0.0, 1)
+            # pos_hint: {"x":0.75, "y":0.8}
+            size_hint: 0.1, 0.2
+            
+        ColorTone:
+            id: ct_18
+            pos_hint_x: 0.9
+            pos_hint_y: 1.2
+            tone_color: (0.0, 0.2, 0.8, 1)
+            # pos_hint: {"x":0.75, "y":0.75}
+            size_hint: 0.1, 0.4
+
+        ColorTone:
+            id: ct_19
+            pos_hint_x: 0.2
+            pos_hint_y: 2.6
+            tone_color: (0.7, 0.1, 0.3, 1)
+            # pos_hint: {"x":0.2, "y":0.75}
+            size_hint: 0.05, 0.8
     
 """)
 
@@ -192,6 +317,20 @@ class RootWidget(GridLayout):
         Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_3), 0)
         Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_4), 0)
         Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_5), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_6), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_7), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_8), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_9), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_10), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_11), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_12), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_13), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_14), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_15), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_16), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_17), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_18), 0)
+        Clock.schedule_interval(partial(self.inverse_shift_y, self.ct_19), 0)
 
         # Clock.schedule_interval(self.combine, 0)
 

@@ -74,7 +74,7 @@ from src.model.MusicTheoryCoreUtils import MusicTheoryCoreUtils as MTCU
 class ToneFlower(ModalView):
     app = None
     is_kv_loaded = False
-    CPU_COUNT = mp.cpu_count()
+    # CPU_COUNT = mp.cpu_count()
 
     def __init__(self, playlist, **kwargs):
         if (not ToneFlower.is_kv_loaded):
@@ -89,9 +89,10 @@ class ToneFlower(ModalView):
         self.pos_hint = {'x': 0, 'y': 0}
         self.background_color = (0, 0, 0, 0)
         self.color_white_note_strips = get_color_from_hex('#161616FF') if (CU.tfs.dic['toggle_white_note_strips'].value) else get_color_from_hex('#000000FF')
-        self.note_number_to_pos = {}
-        self.note_number_to_size = {}
+        self.note_number_to_pos_hint_x = {}
+        self.note_number_to_width = {}
         self.note_number_to_color = {}
+        self.note_number_to_count = {}
         self.tone_flower_engine = None
         self.black_note_strips = []
         self.color_strips = {}
@@ -112,11 +113,10 @@ class ToneFlower(ModalView):
 
         self.ppq = 0
 
-        # TODO PDP: note_number mappen op queue<SoortToneObject> hier?
-        self.color_tones = {}
+        self.color_tones_song = []
 
         self.pool = None
-        self.infinte_loop_stop = threading.Event()
+        self.toneflower_engine_2 = threading.Event()
 
         # TODO: Playalong platform independently https://stackoverflow.com/questions/8299303/generating-sine-wave-sound-in-python/27978895#27978895
         # TODO: note to freq: https://pages.mtu.edu/~suits/notefreqs.html
@@ -124,7 +124,7 @@ class ToneFlower(ModalView):
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
 
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
-        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
+        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Game_of_Thrones_Easy_piano.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Ed_Sheeran_-_Perfect_-_Ed_Sheeran.mid'
 
@@ -138,7 +138,7 @@ class ToneFlower(ModalView):
 
 
 
-        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/preprocessed-eerste-wals.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/preprocessed-eerste-wals.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/preprocessed-melodie-met-kwartnoten.mid'
 
 
@@ -158,20 +158,19 @@ class ToneFlower(ModalView):
         self._block_close = False
         self._playlist = playlist
 
-
         self._former_primary_palette, self._former_accent_palette = ToneFlower.app.theme_cls.primary_palette, ToneFlower.app.theme_cls.accent_palette
         self._former_context_menus = ToneFlower.app.context_menus
 
-        # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
-        self._list = list()  # ObservableList(None, object, list())
-
-
-    def get_list(self):
-        return self._list
-
-    def set_list(self, list):
-        list = CU.safe_cast(list, self._list.__class__, "")
-        self._list = list
+    #     # TODO: Can _list not refer directly to listproperty of the widget? self.ids.rv.data
+    #     self._list = list()  # ObservableList(None, object, list())
+    #
+    #
+    # def get_list(self):
+    #     return self._list
+    #
+    # def set_list(self, list):
+    #     list = CU.safe_cast(list, self._list.__class__, "")
+    #     self._list = list
 
     def get_context_menus(self):
         return self._context_menus
@@ -188,16 +187,17 @@ class ToneFlower(ModalView):
     def set_block_close(self, block_close):
         self._block_close = block_close
 
-    list = property(get_list, set_list)
+    # list = property(get_list, set_list)
     playlist = property(get_playlist, set_playlist)
     block_close = property(get_block_close, set_block_close)
 
     def prepare_toneflower_engine(self):
 
-        # Reset the note_number_to_pos dictionary:
-        self.note_number_to_pos = {}
-        self.note_number_to_size = {}
+        # Reset the note_number_to_pos_hint_x dictionary:
+        self.note_number_to_pos_hint_x = {}
+        self.note_number_to_width = {}
         self.note_number_to_color = {}
+        self.note_number_to_count = {}
 
         # Adjust low_pitch_limit and high_pitch_limit, in case the song does not need the entire range:
         low_pitch_limit = MTCU.note_name_to_number(CU.tfs.dic['low_pitch_limit'].value)
@@ -211,25 +211,43 @@ class ToneFlower(ModalView):
             low_pitch_limit_song = -1
             high_pitch_limit_song = -1
 
-            for i, track in enumerate(midi_file.tracks):
-                # sys.stdout.write('=== Track {}\n'.format(i))
+            for track in midi_file.tracks:
                 for message in track:
+
                     if message.type in ["note_on", "note_off"]:
+
                         # Then it's about notes:
                         if (message.note > high_pitch_limit_song) or (high_pitch_limit_song == -1):
                             high_pitch_limit_song = message.note
+
                         if ((message.note < low_pitch_limit_song) or (low_pitch_limit_song == -1)):
                             low_pitch_limit_song = message.note
+
+                        # Since some MIDI-files have note_on messages wit velocity==0 to indicate note_off, both events
+                        # are counted, will correct afterwards:
+                        if message.note in self.note_number_to_count:
+                            self.note_number_to_count[message.note] += 1
+
+                        else:
+                            self.note_number_to_count[message.note] = 1
 
             low_pitch_limit = low_pitch_limit_song if low_pitch_limit_song > low_pitch_limit else low_pitch_limit
             high_pitch_limit = high_pitch_limit_song if high_pitch_limit_song < high_pitch_limit else high_pitch_limit
 
+            # Normalize note_number occurrences to show it later in histogram with the color_strip bars
+            max_note_number_occurrence = max(self.note_number_to_count.values())
+
+            for note_number in self.note_number_to_count:
+                self.note_number_to_count[note_number] /= max_note_number_occurrence
+
+        # Calculate the amount, size and position of the background color_strips:
         amount_white_keys, amount_black_keys = MTCU.note_interval_to_key_range(low_pitch_limit, high_pitch_limit)
 
         rel_width_black_key = 1.0 / (amount_white_keys * 2 + amount_black_keys)
         rel_width_white_key = 2 * rel_width_black_key
 
         # Add the black_note_strips as rectangle in the background to the floatlayout:
+        # In an earlier version, white_note_strips were added, but it happened to be more efficient (i.e. less objects) if the black strips would be added
         note = low_pitch_limit
         rel_hor_pos = 0.0
 
@@ -238,7 +256,7 @@ class ToneFlower(ModalView):
             rel_width = 0.0
 
             if MTCU.is_white_note(note):
-                # A white note will be rendered with twice the white_strip_width of a black note.
+                # A white note will be rendered with twice the relative width of a black note.
                 rel_width = rel_width_white_key
 
             else:
@@ -255,15 +273,15 @@ class ToneFlower(ModalView):
                     self.black_note_strips.append(black_note_strip)
 
             # Before this increment of note, store correct rel_hor_pos, rel_width and color in resp. dicts:
-            self.note_number_to_pos[note] = rel_hor_pos
-            self.note_number_to_size[note] = rel_width
+            self.note_number_to_pos_hint_x[note] = rel_hor_pos
+            self.note_number_to_width[note] = rel_width
             self.note_number_to_color[note] = MTCU.NOTE_COLORS[MTCU.condense_note_pitch(note)]
 
             # Before the increment of note, create a color_strip for this note to indicate volume, waiting time etc:
             color_strip = ColorStrip()
             color_strip.strip_color = self.note_number_to_color[note]
-            color_strip.pos_hint = {'x': self.note_number_to_pos[note], 'y': 0.0}
-            color_strip.size_hint = (self.note_number_to_size[note], 0.25 + 0.5 * random.uniform(0, 1))
+            color_strip.pos_hint = {'x': self.note_number_to_pos_hint_x[note], 'y': 0.0}
+            color_strip.size_hint = (self.note_number_to_width[note], self.note_number_to_count.get(note, 0))
 
             self.ids.id_bottom_foreground.add_widget(color_strip)
             self.color_strips[note] = color_strip
@@ -280,7 +298,7 @@ class ToneFlower(ModalView):
         if self.tone_flower_engine is not None:
             # self.tone_flower_engine.cancel()
             # self.tone_flower_engine = None
-            self.infinte_loop_stop.set()
+            self.toneflower_engine_2.set()
             toast(f"ToneFlower engine paused")
         else:
 
@@ -288,7 +306,7 @@ class ToneFlower(ModalView):
             # self.tone_flower_engine = Clock.schedule_interval(self.calculate_frame, 1/60.0)
             self.pool = mp.Pool(processes=self.CPU_COUNT)
 
-            self.infinte_loop_stop.clear()
+            self.toneflower_engine_2.clear()
 
             self.tone_flower_engine = threading.Thread(target=self.infinite_loop())
             self.tone_flower_engine.daemon = True
@@ -303,7 +321,7 @@ class ToneFlower(ModalView):
 
     def infinite_loop(self):
         while True:
-            if self.infinte_loop_stop.is_set():
+            if self.toneflower_engine_2.is_set():
                 # Stop running this thread so the main Python process can exit.
                 return
 
@@ -327,10 +345,6 @@ class ToneFlower(ModalView):
         # Trigger the creation of the white note strips that try to enhance the readability of the flowing tones:
         instance.prepare_toneflower_engine()
 
-        # Override needed overscroll to refresh the screen to the bare minimum:
-        # refresh_layout.effect_cls.min_scroll_to_reload = -dp(1)
-
-
     @staticmethod
     def on_open_callback(instance):
         """
@@ -349,8 +363,9 @@ class ToneFlower(ModalView):
         ticks_per_beat = midi_file.ticks_per_beat
 
         sec_per_beat = 0
-
+        ns_sec_per_beat = 0
         sec_per_tick = 0
+        ns_sec_per_tick = 0
 
         # type 0 (single track): all messages are saved in one track
         # type 1 (synchronous): all tracks start at the same time
@@ -358,15 +373,14 @@ class ToneFlower(ModalView):
 
         print(f"The file type is {midi_file_type} and ticks_per_beat {ticks_per_beat} (=480), length {length} sec")
 
+        # TODO PDP: Revisit this: what if two notes of same note_number simultaneously & how to make link to next note
         note_number_to_start = {}
-        elapsed_time = 0
+        elapsed_ticks = 0
         start_time_offset = 0
         start_time_offset_known = False
 
-        for i, track in enumerate(midi_file.tracks):
-            # sys.stdout.write('=== Track {}\n'.format(i))
+        for track in midi_file.tracks:
             for message in track:
-                # if (elapsed_time < 15): #This clipping is only intended for testing purposes:
                 if message.is_meta:
 
                     if message.type == "time_signature":
@@ -383,11 +397,13 @@ class ToneFlower(ModalView):
 
                     elif message.type == "set_tempo":
                         sec_per_beat = message.tempo * 1e-6
+                        ns_sec_per_beat = sec_per_beat * 1e9
                         sec_per_tick = sec_per_beat / ticks_per_beat
+                        ns_sec_per_tick = ns_sec_per_beat / ticks_per_beat
 
                         if not start_time_offset_known:
                             start_time_offset = 8 * sec_per_beat # 8 beats
-                            elapsed_time += start_time_offset
+                            # elapsed_ticks += start_time_offset
                             start_time_offset = True
 
 
@@ -395,22 +411,21 @@ class ToneFlower(ModalView):
                 elif message.type in ["note_on", "note_off"]:
                     # Then it's about notes:
 
-                    elapsed_time += message.time * sec_per_tick
+                    elapsed_ticks += message.time
 
                     if message.type == "note_on" and message.velocity > 0:
                         # A genuine note_on event:
 
                         if message.note in note_number_to_start:
 
-
                             if note_number_to_start[message.note] == -1:
                                 # In this case a note_off event (prior to the currently processed note_one-event) has reset the note:
                                 # Store the beginning of the note in dict:
 
-                                note_number_to_start[message.note] = elapsed_time
+                                note_number_to_start[message.note] = elapsed_ticks
 
                         else:
-                            note_number_to_start[message.note] = elapsed_time
+                            note_number_to_start[message.note] = elapsed_ticks
 
 
                     else:
@@ -418,20 +433,24 @@ class ToneFlower(ModalView):
 
                         tone = ColorTone()
                         tone.tone_color = instance.note_number_to_color[message.note]
-                        # tone.pos_hint = {'x': instance.note_number_to_pos[message.note],
+                        # tone.pos_hint = {'x': instance.note_number_to_pos_hint_x[message.note],
                         #                  'y': (note_number_to_start[message.note] + start_time_offset)}
                         tone.pos_hint_x = instance.note_number_to_pos[message.note]
                         tone.pos_hint_y = (note_number_to_start[message.note])
 
                         # tone.pos[1] = note_number_to_start[message.note] * instance.note_scale_factor + start_time_offset
 
-                        tone.size_hint = (instance.note_number_to_size[message.note], elapsed_time - note_number_to_start[message.note])
-                        # tone.size[1] = (elapsed_time - note_number_to_start[message.note]) * instance.note_scale_factor
+                        tone.size_hint = (instance.note_number_to_size[message.note], elapsed_ticks - note_number_to_start[message.note])
+                        # tone.size[1] = (elapsed_ticks - note_number_to_start[message.note]) * instance.note_scale_factor
 
                         # Reset the start for this note_number:
                         note_number_to_start[message.note] = -1
 
-                        instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
+                        # Add ColorTone to collection of song
+                        instance.color_tones_song.append(tone)
+
+                        # TODO PDP: move this to thread
+                        # instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
 
 
                     # sys.stdout.write('  {!r}\n'.format(message))
@@ -516,7 +535,7 @@ class ToneFlower(ModalView):
         # for child in self.ids.id_top_foreground.children:
         #     child.y -= time_passed * 50.0
 
-        # for key, value in self.color_tones.items():
+        # for key, value in self.color_tones_song.items():
             # for tone in value:
             #     tone.y -= time_passed *50.0
                 # tone.pos_hint['y'] -= time_passed/10.0
@@ -551,4 +570,12 @@ class ColorStrip(Widget):
 class ColorTone(Widget):
     pos_hint_x = NumericProperty(0)
     pos_hint_y = NumericProperty(0)
-    # pass
+
+    def __init__(self, **kwargs):
+        super(ColorTone, self).__init__(**kwargs)
+
+        self.note_number = -1
+        self.start_tick = -1
+        self.volume = 1.0
+        self.toneflower_engine = None
+        self.next_note_link = -1
