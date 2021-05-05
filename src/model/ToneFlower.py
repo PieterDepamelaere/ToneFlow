@@ -373,8 +373,8 @@ class ToneFlower(ModalView):
 
         print(f"The file type is {midi_file_type} and ticks_per_beat {ticks_per_beat} (=480), length {length} sec")
 
-        # TODO PDP: Revisit this: what if two notes of same note_number simultaneously & how to make link to next note
-        note_number_to_start = {}
+        # TODO PDP: use (ns)_perf_counter for elapsed timer +  Revisit this: what if two notes of same note_number simultaneously & how to make link to next note
+        note_number_to_index_of_latest = {}
         elapsed_ticks = 0
         start_time_offset = 0
         start_time_offset_known = False
@@ -407,47 +407,61 @@ class ToneFlower(ModalView):
                             start_time_offset = True
 
 
-
                 elif message.type in ["note_on", "note_off"]:
                     # Then it's about notes:
 
                     elapsed_ticks += message.time
 
+                    latest_index_of_note_number = note_number_to_index_of_latest.get(message.note, -1)
+
+                    latest_tone_of_note_number = None
+
+                    if latest_index_of_note_number > -1:
+                        latest_tone_of_note_number = instance.color_tones_song.get(latest_index_of_note_number, None)
+
                     if message.type == "note_on" and message.velocity > 0:
                         # A genuine note_on event:
 
-                        if message.note in note_number_to_start:
+                        tone = ColorTone()
+                        tone.tone_color = instance.note_number_to_color[message.note]
+                        tone.pos_hint_x = instance.note_number_to_pos[message.note]
+                        tone.start_tick = elapsed_ticks
+                        # tone.pos_hint_y = elapsed_ticks
 
-                            if note_number_to_start[message.note] == -1:
-                                # In this case a note_off event (prior to the currently processed note_one-event) has reset the note:
-                                # Store the beginning of the note in dict:
+                        # tone.size_hint = (instance.note_number_to_size[message.note],
+                        #                   elapsed_ticks - note_number_to_index_of_latest[message.note])
 
-                                note_number_to_start[message.note] = elapsed_ticks
+                        tone.volume = message.velocity / 127
 
-                        else:
-                            note_number_to_start[message.note] = elapsed_ticks
+                        # Add ColorTone to collection of song
+                        instance.color_tones_song.append(tone)
+
+                        current_index_of_note_number = len(instance.color_tones_song) - 1
+
+                        if latest_tone_of_note_number is not None:
+
+                            tone.index_previous_note = latest_index_of_note_number
+
+                            # Notify latest color tone of current index:
+                            latest_tone_of_note_number.index_next_note = current_index_of_note_number
+
+                            if latest_tone_of_note_number.length_ticks == -1:
+                                # This means that the latest_tone_of_note_number has not seen a note_off event yet
+                                # Not allowing it to overshadow the current note, it gets trimmed by a 'virtual' note_off event
+
+                                latest_tone_of_note_number.length_ticks = elapsed_ticks - latest_tone_of_note_number.start_tick
+
+                        # Reset the start for this note_number:
+                        note_number_to_index_of_latest[message.note] = current_index_of_note_number
 
 
                     else:
                         # A note_off event:
 
-                        tone = ColorTone()
-                        tone.tone_color = instance.note_number_to_color[message.note]
-                        # tone.pos_hint = {'x': instance.note_number_to_pos_hint_x[message.note],
-                        #                  'y': (note_number_to_start[message.note] + start_time_offset)}
-                        tone.pos_hint_x = instance.note_number_to_pos[message.note]
-                        tone.pos_hint_y = (note_number_to_start[message.note])
+                        if latest_tone_of_note_number is not None:
+                            latest_tone_of_note_number.length_ticks = elapsed_ticks - latest_tone_of_note_number.start_tick
 
-                        # tone.pos[1] = note_number_to_start[message.note] * instance.note_scale_factor + start_time_offset
 
-                        tone.size_hint = (instance.note_number_to_size[message.note], elapsed_ticks - note_number_to_start[message.note])
-                        # tone.size[1] = (elapsed_ticks - note_number_to_start[message.note]) * instance.note_scale_factor
-
-                        # Reset the start for this note_number:
-                        note_number_to_start[message.note] = -1
-
-                        # Add ColorTone to collection of song
-                        instance.color_tones_song.append(tone)
 
                         # TODO PDP: move this to thread
                         # instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
@@ -576,6 +590,12 @@ class ColorTone(Widget):
 
         self.note_number = -1
         self.start_tick = -1
+        self.length_ticks = -1
         self.volume = 1.0
         self.toneflower_engine = None
-        self.next_note_link = -1
+
+        """Index of next note with same note_number"""
+        self.index_next_note = -1
+
+        """Index of previous note with same note_number"""
+        self.index_previous_note = -1
