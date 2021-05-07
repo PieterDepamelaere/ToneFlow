@@ -182,7 +182,7 @@ class TFSettings(Screen):
         """
         # Add non-user editable ones:
         self._dic['APP_NAME'] = TFSetting("Name of Application", None, str("ToneFlow" + u"\u00AE"), None, False, None)
-        self._dic['MAJOR_MINOR_VERSION'] = TFSetting(f"{self._dic['APP_NAME'].value} Version MAJOR.MINOR", None, "0.5", "In theory, an update of the minor version alone shouldn't induce breaking changes.", False, None)
+        self._dic['MAJOR_MINOR_VERSION'] = TFSetting(f"{self._dic['APP_NAME'].value} Version MAJOR.MINOR", None, "1.0", "In theory, an update of the minor version alone shouldn't induce breaking changes.", False, None)
         self._dic['CONFIG_FILE_PATH'] = TFSetting("Path to Config File", None, curr_file.parents[2] / "Config_TF.json", None, False, None)
         self._dic['IMG_DIR_PATH'] = TFSetting("Internal Directory of Images", None, curr_file.parents[2] / "img", None, False, None)
         self._dic['WORKSPACE_NAME'] = TFSetting("Name of Workspace", None, "Workspace_TF", None, False, None)

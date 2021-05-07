@@ -3,6 +3,8 @@ import sys
 import random
 import re
 import threading
+import time
+
 
 import aiofiles
 import pathlib as pl
@@ -93,10 +95,12 @@ class ToneFlower(ModalView):
         self.note_number_to_width = {}
         self.note_number_to_color = {}
         self.note_number_to_count = {}
-        self.tone_flower_engine = None
+        self.elapsed_timer = None
+        self.elapsed_ticks = 0
         self.black_note_strips = []
         self.color_strips = {}
         self.note_scale_factor = 1
+        self.min_note_duration_ticks = -1
 
         self.song_position = 1
 
@@ -289,35 +293,168 @@ class ToneFlower(ModalView):
             rel_hor_pos += rel_width
             note += 1
 
+    def prepare_song(self):
+
+        # Remove previous ColorTones if any:
+        self.ids.id_top_foreground.clear_widgets()
+
+        # clip makes sure that no notes would be louder than 127
+        midi_file = MidiFile(self.filename, clip=True)
+        midi_file_type = midi_file.type
+        length = midi_file.length  # In sec
+        ticks_per_beat = midi_file.ticks_per_beat
+
+        sec_per_beat = 0
+        ns_sec_per_beat = 0
+        sec_per_tick = 0
+        ns_sec_per_tick = 0
+
+        # type 0 (single track): all messages are saved in one track
+        # type 1 (synchronous): all tracks start at the same time
+        # type 2 (asynchronous): each track is independent of the others
+
+        print(f"The file type is {midi_file_type} and ticks_per_beat {ticks_per_beat} (=480), length {length} sec")
+
+        # TODO PDP: use (ns)_perf_counter for elapsed timer +  Revisit this: what if two notes of same note_number simultaneously & how to make link to next note
+        note_number_to_index_of_latest = {}
+        accumulated_ticks = 0
+        start_time_offset = 0
+        start_time_offset_known = False
+
+        for track in midi_file.tracks:
+            for message in track:
+                if message.is_meta:
+
+                    if message.type == "time_signature":
+                        # < meta
+                        # message
+                        # time_signature
+                        # numerator = 1
+                        # denominator = 4
+                        # clocks_per_click = 24
+                        # notated_32nd_notes_per_beat = 8
+                        # time = 0 >
+
+                        pass
+
+                    elif message.type == "set_tempo":
+                        sec_per_beat = message.tempo * 1e-6
+                        ns_sec_per_beat = sec_per_beat * 1e9
+                        sec_per_tick = sec_per_beat / ticks_per_beat
+                        ns_sec_per_tick = ns_sec_per_beat / ticks_per_beat
+
+                        if not start_time_offset_known:
+                            start_time_offset = 8 * sec_per_beat  # 8 beats
+                            # accumulated_ticks += start_time_offset
+                            start_time_offset = True
+
+
+                elif message.type in ["note_on", "note_off"]:
+                    # Then it's about notes:
+
+                    accumulated_ticks += message.time
+
+                    latest_index_of_note_number = note_number_to_index_of_latest.get(message.note, -1)
+
+                    latest_tone_of_note_number = None
+
+                    if latest_index_of_note_number > -1:
+                        latest_tone_of_note_number = self.color_tones_song.get(latest_index_of_note_number, None)
+
+                    if message.type == "note_on" and message.velocity > 0:
+                        # A genuine note_on event:
+
+                        tone = ColorTone()
+                        tone.tone_color = self.note_number_to_color[message.note]
+                        tone.pos_hint_x = self.note_number_to_pos_hint_x[message.note]
+                        tone.start_tick = accumulated_ticks
+                        # tone.pos_hint_y = accumulated_ticks
+
+                        # tone.size_hint = (instance.note_number_to_size[message.note],
+                        #                   accumulated_ticks - note_number_to_index_of_latest[message.note])
+
+                        tone.volume = message.velocity / 127
+
+                        # Add ColorTone to collection of song
+                        self.color_tones_song.append(tone)
+
+                        current_index_of_note_number = len(self.color_tones_song) - 1
+
+                        if latest_tone_of_note_number is not None:
+
+                            tone.index_previous_note = latest_index_of_note_number
+
+                            # Notify latest color tone of current index:
+                            latest_tone_of_note_number.index_next_note = current_index_of_note_number
+
+                            if latest_tone_of_note_number.length_ticks == -1:
+                                # This means that the latest_tone_of_note_number has not seen a note_off event yet
+                                # Not allowing it to overshadow the current note, it gets trimmed by a 'virtual' note_off event
+
+                                latest_tone_of_note_number.length_ticks = accumulated_ticks - latest_tone_of_note_number.start_tick
+
+                                if self.min_note_duration_ticks == -1 or latest_tone_of_note_number.length_ticks < self.min_note_duration_ticks:
+                                    self.min_note_duration_ticks = latest_tone_of_note_number.length_ticks
+
+                        # Reset the start for this note_number:
+                        note_number_to_index_of_latest[message.note] = current_index_of_note_number
+
+
+                    else:
+                        # A note_off event:
+
+                        if latest_tone_of_note_number is not None:
+                            latest_tone_of_note_number.length_ticks = accumulated_ticks - latest_tone_of_note_number.start_tick
+
+                            if self.min_note_duration_ticks == -1 or latest_tone_of_note_number.length_ticks < self.min_note_duration_ticks:
+                                self.min_note_duration_ticks = latest_tone_of_note_number.length_ticks
+
+                        # TODO PDP: move this to thread
+                        # instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
+
+                    # sys.stdout.write('  {!r}\n'.format(message))
+
+        print(f"the intial size of is {self.ids.id_top_foreground.size}")
+        self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
+
+        toast(f"ToneFlower engine ready...{os.linesep}"
+              f"         Enjoy playing!")
+
     def start_stop_toneflower_engine(self):
         """
         Can start, pause and resume the toneflower_engine
         :return:
         """
 
-        if self.tone_flower_engine is not None:
-            # self.tone_flower_engine.cancel()
-            # self.tone_flower_engine = None
-            self.toneflower_engine_2.set()
+        if self.elapsed_timer is not None:
+
+            self.elapsed_timer.cancel()
+            self.elapsed_timer = None
+
+
+            # self.toneflower_engine_2.set()
+
             toast(f"ToneFlower engine paused")
         else:
 
+            self.elapsed_timer = Clock.schedule_interval(self.increment_elapsed_ticks, 0)
 
-            # self.tone_flower_engine = Clock.schedule_interval(self.calculate_frame, 1/60.0)
-            self.pool = mp.Pool(processes=self.CPU_COUNT)
+            # self.pool = mp.Pool(processes=self.CPU_COUNT)
+            #
+            # self.toneflower_engine_2.clear()
 
-            self.toneflower_engine_2.clear()
+            self.elapsed_timer = threading.Thread(target=self.infinite_loop())
+            self.elapsed_timer.daemon = True
 
-            self.tone_flower_engine = threading.Thread(target=self.infinite_loop())
-            self.tone_flower_engine.daemon = True
-
-            self.tone_flower_engine.start()
-
+            self.elapsed_timer.start()
 
 
             toast(f"ToneFlower engine started")
 
         # TODO PDP: FPS!!! https://stackoverflow.com/questions/40952038/kivy-animation-works-slowly
+
+    def increment_elapsed_ticks(self):
+        self.elapsed_ticks += time.perf_counter
 
     def infinite_loop(self):
         while True:
@@ -353,130 +490,7 @@ class ToneFlower(ModalView):
         :return:
         """
 
-        # Remove previous ColorTones if any:
-        instance.ids.id_top_foreground.clear_widgets()
-
-        # clip makes sure that no notes would be louder than 127
-        midi_file = MidiFile(instance.filename, clip=True)
-        midi_file_type = midi_file.type
-        length = midi_file.length #In sec
-        ticks_per_beat = midi_file.ticks_per_beat
-
-        sec_per_beat = 0
-        ns_sec_per_beat = 0
-        sec_per_tick = 0
-        ns_sec_per_tick = 0
-
-        # type 0 (single track): all messages are saved in one track
-        # type 1 (synchronous): all tracks start at the same time
-        # type 2 (asynchronous): each track is independent of the others
-
-        print(f"The file type is {midi_file_type} and ticks_per_beat {ticks_per_beat} (=480), length {length} sec")
-
-        # TODO PDP: use (ns)_perf_counter for elapsed timer +  Revisit this: what if two notes of same note_number simultaneously & how to make link to next note
-        note_number_to_index_of_latest = {}
-        elapsed_ticks = 0
-        start_time_offset = 0
-        start_time_offset_known = False
-
-        for track in midi_file.tracks:
-            for message in track:
-                if message.is_meta:
-
-                    if message.type == "time_signature":
-                        # < meta
-                        # message
-                        # time_signature
-                        # numerator = 1
-                        # denominator = 4
-                        # clocks_per_click = 24
-                        # notated_32nd_notes_per_beat = 8
-                        # time = 0 >
-
-                        pass
-
-                    elif message.type == "set_tempo":
-                        sec_per_beat = message.tempo * 1e-6
-                        ns_sec_per_beat = sec_per_beat * 1e9
-                        sec_per_tick = sec_per_beat / ticks_per_beat
-                        ns_sec_per_tick = ns_sec_per_beat / ticks_per_beat
-
-                        if not start_time_offset_known:
-                            start_time_offset = 8 * sec_per_beat # 8 beats
-                            # elapsed_ticks += start_time_offset
-                            start_time_offset = True
-
-
-                elif message.type in ["note_on", "note_off"]:
-                    # Then it's about notes:
-
-                    elapsed_ticks += message.time
-
-                    latest_index_of_note_number = note_number_to_index_of_latest.get(message.note, -1)
-
-                    latest_tone_of_note_number = None
-
-                    if latest_index_of_note_number > -1:
-                        latest_tone_of_note_number = instance.color_tones_song.get(latest_index_of_note_number, None)
-
-                    if message.type == "note_on" and message.velocity > 0:
-                        # A genuine note_on event:
-
-                        tone = ColorTone()
-                        tone.tone_color = instance.note_number_to_color[message.note]
-                        tone.pos_hint_x = instance.note_number_to_pos[message.note]
-                        tone.start_tick = elapsed_ticks
-                        # tone.pos_hint_y = elapsed_ticks
-
-                        # tone.size_hint = (instance.note_number_to_size[message.note],
-                        #                   elapsed_ticks - note_number_to_index_of_latest[message.note])
-
-                        tone.volume = message.velocity / 127
-
-                        # Add ColorTone to collection of song
-                        instance.color_tones_song.append(tone)
-
-                        current_index_of_note_number = len(instance.color_tones_song) - 1
-
-                        if latest_tone_of_note_number is not None:
-
-                            tone.index_previous_note = latest_index_of_note_number
-
-                            # Notify latest color tone of current index:
-                            latest_tone_of_note_number.index_next_note = current_index_of_note_number
-
-                            if latest_tone_of_note_number.length_ticks == -1:
-                                # This means that the latest_tone_of_note_number has not seen a note_off event yet
-                                # Not allowing it to overshadow the current note, it gets trimmed by a 'virtual' note_off event
-
-                                latest_tone_of_note_number.length_ticks = elapsed_ticks - latest_tone_of_note_number.start_tick
-
-                        # Reset the start for this note_number:
-                        note_number_to_index_of_latest[message.note] = current_index_of_note_number
-
-
-                    else:
-                        # A note_off event:
-
-                        if latest_tone_of_note_number is not None:
-                            latest_tone_of_note_number.length_ticks = elapsed_ticks - latest_tone_of_note_number.start_tick
-
-
-
-                        # TODO PDP: move this to thread
-                        # instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
-
-
-                    # sys.stdout.write('  {!r}\n'.format(message))
-
-        # instance.ids.id_top_foreground.pos_hint["y"] = 0.5
-
-        print(f"the intial size is {instance.ids.id_top_foreground.size}")
-        instance.ids.id_top_foreground.size[1] = instance.note_scale_factor * 100
-
-        toast(f"ToneFlower engine ready...{os.linesep}"
-              f"         Enjoy playing!")
-
+        instance.prepare_song()
 
     def calculate_frame(self, time_passed):
         # print(time_passed)
@@ -561,9 +575,9 @@ class ToneFlower(ModalView):
         :param instance: the instance of the ModalView itself, a non-static implementation would have passed 'self'
         :return:
         """
-        if instance.tone_flower_engine is not None:
-            instance.tone_flower_engine.cancel()
-            instance.tone_flower_engine = None
+        if instance.elapsed_timer is not None:
+            instance.elapsed_timer.cancel()
+            instance.elapsed_timer = None
 
     @staticmethod
     def on_dismiss_callback(instance):
@@ -590,7 +604,7 @@ class ColorTone(Widget):
 
         self.note_number = -1
         self.start_tick = -1
-        self.length_ticks = -1
+        self.duration_ticks = -1
         self.volume = 1.0
         self.toneflower_engine = None
 
