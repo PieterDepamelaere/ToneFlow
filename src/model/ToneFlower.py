@@ -76,6 +76,10 @@ from src.model.MusicTheoryCoreUtils import MusicTheoryCoreUtils as MTCU
 class ToneFlower(ModalView):
     app = None
     is_kv_loaded = False
+
+    # The min_size_sint_y metric imposes an underbound to how small a ColorTone can be depicted while staying visible:
+    min_size_hint_y = 0.01
+
     # CPU_COUNT = mp.cpu_count()
 
     def __init__(self, playlist, **kwargs):
@@ -95,12 +99,19 @@ class ToneFlower(ModalView):
         self.note_number_to_width = {}
         self.note_number_to_color = {}
         self.note_number_to_count = {}
-        self.elapsed_timer = None
-        self.elapsed_ticks = 0
+        self.toneflower_time_engine = None
+        self.toneflower_schedule_engine = None
+        self.elapsed_timer_offset_ns = 0
+        self.playback_resume_abs_ns = 0
+        self.elapsed_time_ns = 0
+        self.elapsed_pos = 0
+        self.start_time_offset = -1
+        self.tone_scale_factor = 1
+        self.tone_speed_factor = 1
         self.black_note_strips = []
         self.color_strips = {}
         self.note_scale_factor = 1
-        self.min_note_duration_ticks = -1
+        self.min_tone_duration_ns = -1
 
         self.song_position = 1
 
@@ -115,12 +126,10 @@ class ToneFlower(ModalView):
         # # The number of notated 32nds in 24 MIDI clocks. The default value is 8.
         # 32nds_integer
 
-        self.ppq = 0
-
         self.color_tones_song = []
 
-        self.pool = None
-        self.toneflower_engine_2 = threading.Event()
+        # self.pool = None
+        # self.toneflower_engine_2 = threading.Event()
 
         # TODO: Playalong platform independently https://stackoverflow.com/questions/8299303/generating-sine-wave-sound-in-python/27978895#27978895
         # TODO: note to freq: https://pages.mtu.edu/~suits/notefreqs.html
@@ -176,6 +185,26 @@ class ToneFlower(ModalView):
     #     list = CU.safe_cast(list, self._list.__class__, "")
     #     self._list = list
 
+    @staticmethod
+    def on_pre_open_callback(instance):
+        """
+        Callback fired just before the ToneFlower ModalView is opened
+        :param instance:
+        :return:
+        """
+        # Trigger the creation of the white note strips that try to enhance the readability of the flowing tones:
+        instance.prepare_toneflower()
+
+    @staticmethod
+    def on_open_callback(instance):
+        """
+        Callback fired after the ToneFlower ModalView is opened
+        :param instance:
+        :return:
+        """
+
+        instance.prepare_song()
+
     def get_context_menus(self):
         return self._context_menus
 
@@ -195,7 +224,7 @@ class ToneFlower(ModalView):
     playlist = property(get_playlist, set_playlist)
     block_close = property(get_block_close, set_block_close)
 
-    def prepare_toneflower_engine(self):
+    def prepare_toneflower(self):
 
         # Reset the note_number_to_pos_hint_x dictionary:
         self.note_number_to_pos_hint_x = {}
@@ -304,22 +333,19 @@ class ToneFlower(ModalView):
         length = midi_file.length  # In sec
         ticks_per_beat = midi_file.ticks_per_beat
 
+        note_number_to_index_of_latest = {}
+        accumulated_ticks = 0
+
         sec_per_beat = 0
-        ns_sec_per_beat = 0
+        sec_per_beat_ns = 0
         sec_per_tick = 0
-        ns_sec_per_tick = 0
+        sec_per_tick_ns = 0
 
         # type 0 (single track): all messages are saved in one track
         # type 1 (synchronous): all tracks start at the same time
         # type 2 (asynchronous): each track is independent of the others
 
-        print(f"The file type is {midi_file_type} and ticks_per_beat {ticks_per_beat} (=480), length {length} sec")
-
-        # TODO PDP: use (ns)_perf_counter for elapsed timer +  Revisit this: what if two notes of same note_number simultaneously & how to make link to next note
-        note_number_to_index_of_latest = {}
-        accumulated_ticks = 0
-        start_time_offset = 0
-        start_time_offset_known = False
+        print(f"The file type is \"{midi_file_type}\", has \"{ticks_per_beat} (=480)\" ticks_per_beat and a length of \"{length}\" sec.")
 
         for track in midi_file.tracks:
             for message in track:
@@ -338,16 +364,11 @@ class ToneFlower(ModalView):
                         pass
 
                     elif message.type == "set_tempo":
-                        sec_per_beat = message.tempo * 1e-6
-                        ns_sec_per_beat = sec_per_beat * 1e9
+                        sec_per_beat_ns = message.tempo * 1e3
+                        sec_per_beat = sec_per_beat_ns * 1e-9
+
+                        sec_per_tick_ns = round(sec_per_beat_ns / ticks_per_beat)
                         sec_per_tick = sec_per_beat / ticks_per_beat
-                        ns_sec_per_tick = ns_sec_per_beat / ticks_per_beat
-
-                        if not start_time_offset_known:
-                            start_time_offset = 8 * sec_per_beat  # 8 beats
-                            # accumulated_ticks += start_time_offset
-                            start_time_offset = True
-
 
                 elif message.type in ["note_on", "note_off"]:
                     # Then it's about notes:
@@ -359,7 +380,7 @@ class ToneFlower(ModalView):
                     latest_tone_of_note_number = None
 
                     if latest_index_of_note_number > -1:
-                        latest_tone_of_note_number = self.color_tones_song.get(latest_index_of_note_number, None)
+                        latest_tone_of_note_number = self.color_tones_song[latest_index_of_note_number]
 
                     if message.type == "note_on" and message.velocity > 0:
                         # A genuine note_on event:
@@ -367,7 +388,7 @@ class ToneFlower(ModalView):
                         tone = ColorTone()
                         tone.tone_color = self.note_number_to_color[message.note]
                         tone.pos_hint_x = self.note_number_to_pos_hint_x[message.note]
-                        tone.start_tick = accumulated_ticks
+                        tone.start_offset_ns = accumulated_ticks * sec_per_tick_ns
                         # tone.pos_hint_y = accumulated_ticks
 
                         # tone.size_hint = (instance.note_number_to_size[message.note],
@@ -387,32 +408,37 @@ class ToneFlower(ModalView):
                             # Notify latest color tone of current index:
                             latest_tone_of_note_number.index_next_note = current_index_of_note_number
 
-                            if latest_tone_of_note_number.length_ticks == -1:
+                            if latest_tone_of_note_number.duration_ns == -1:
                                 # This means that the latest_tone_of_note_number has not seen a note_off event yet
                                 # Not allowing it to overshadow the current note, it gets trimmed by a 'virtual' note_off event
 
-                                latest_tone_of_note_number.length_ticks = accumulated_ticks - latest_tone_of_note_number.start_tick
+                                latest_tone_of_note_number.duration_ns = accumulated_ticks - latest_tone_of_note_number.start_tick
 
-                                if self.min_note_duration_ticks == -1 or latest_tone_of_note_number.length_ticks < self.min_note_duration_ticks:
-                                    self.min_note_duration_ticks = latest_tone_of_note_number.length_ticks
+                                if self.min_tone_duration_ns == -1 or latest_tone_of_note_number.duration_ns < self.min_tone_duration_ns:
+                                    self.min_tone_duration_ns = latest_tone_of_note_number.duration_ns
 
                         # Reset the start for this note_number:
                         note_number_to_index_of_latest[message.note] = current_index_of_note_number
-
 
                     else:
                         # A note_off event:
 
                         if latest_tone_of_note_number is not None:
-                            latest_tone_of_note_number.length_ticks = accumulated_ticks - latest_tone_of_note_number.start_tick
+                            latest_tone_of_note_number.duration_ns = accumulated_ticks - latest_tone_of_note_number.start_tick
 
-                            if self.min_note_duration_ticks == -1 or latest_tone_of_note_number.length_ticks < self.min_note_duration_ticks:
-                                self.min_note_duration_ticks = latest_tone_of_note_number.length_ticks
+                            if self.min_tone_duration_ns == -1 or latest_tone_of_note_number.duration_ns < self.min_tone_duration_ns:
+                                self.min_tone_duration_ns = latest_tone_of_note_number.duration_ns
 
                         # TODO PDP: move this to thread
                         # instance.ids.id_top_foreground.add_widget(tone, len(instance.ids.id_background.children))
 
                     # sys.stdout.write('  {!r}\n'.format(message))
+
+        # Initialize the playback speed and scale factors:
+        self.tone_speed_factor = CU.tfs.dic['overall_tone_speed_factor'].value
+        self.tone_scale_factor = CU.tfs.dic['overall_tone_scale_factor'].value
+
+
 
         print(f"the intial size of is {self.ids.id_top_foreground.size}")
         self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
@@ -426,35 +452,62 @@ class ToneFlower(ModalView):
         :return:
         """
 
-        if self.elapsed_timer is not None:
+        if (self.toneflower_time_engine is not None) or (self.toneflower_schedule_engine is not None):
 
-            self.elapsed_timer.cancel()
-            self.elapsed_timer = None
+            self.toneflower_time_engine.cancel()
+            self.toneflower_time_engine = None
 
+            self.toneflower_schedule_engine.cancel()
+            self.toneflower_schedule_engine = None
 
             # self.toneflower_engine_2.set()
 
             toast(f"ToneFlower engine paused")
+
         else:
 
-            self.elapsed_timer = Clock.schedule_interval(self.increment_elapsed_ticks, 0)
+            if self.start_time_offset > -1:
+                self.elapsed_time_ns -= self.start_time_offset
+
+                # In case of starting with offset somewhere, it's probably better not to show previous notes:
+                self.ids.id_top_foreground.clear_widgets()
+
+
+
+
+                # start_time_offset = 8 * sec_per_beat  # 8 beats
+                # accumulated_ticks += start_time_offset
+                # start_time_offset = True
+
+            self.playback_resume_abs_ns = time.perf_counter_ns()
+
+            self.toneflower_time_engine = Clock.schedule_interval(self.tf_time_engine_cycle, 0)
 
             # self.pool = mp.Pool(processes=self.CPU_COUNT)
             #
             # self.toneflower_engine_2.clear()
 
-            self.elapsed_timer = threading.Thread(target=self.infinite_loop())
-            self.elapsed_timer.daemon = True
-
-            self.elapsed_timer.start()
+            # self.toneflower_time_engine = threading.Thread(target=self.infinite_loop())
+            # self.toneflower_time_engine.daemon = True
+            #
+            # self.toneflower_time_engine.start()
 
 
             toast(f"ToneFlower engine started")
 
         # TODO PDP: FPS!!! https://stackoverflow.com/questions/40952038/kivy-animation-works-slowly
 
-    def increment_elapsed_ticks(self):
-        self.elapsed_ticks += time.perf_counter
+    def tf_time_engine_cycle(self):
+        """
+
+        :return:
+        """
+
+        self.elapsed_time_ns += (time.perf_counter_ns() - self.playback_resume_abs_ns) * self.tone_speed_factor
+        self.elapsed_pos = self.elapsed_time_ns * self.tone_scale_factor
+
+    def tf_schedule_engine_cycle(self):
+
 
     def infinite_loop(self):
         while True:
@@ -464,33 +517,6 @@ class ToneFlower(ModalView):
 
             self.calculate_frame(0.016667)
 
-    def load_from_json(self):
-        # TODO
-        pass
-
-    def save_to_json(self):
-        # TODO
-        pass
-
-    @staticmethod
-    def on_pre_open_callback(instance):
-        """
-        Callback fired just before the ToneFlower ModalView is opened
-        :param instance:
-        :return:
-        """
-        # Trigger the creation of the white note strips that try to enhance the readability of the flowing tones:
-        instance.prepare_toneflower_engine()
-
-    @staticmethod
-    def on_open_callback(instance):
-        """
-        Callback fired after the ToneFlower ModalView is opened
-        :param instance:
-        :return:
-        """
-
-        instance.prepare_song()
 
     def calculate_frame(self, time_passed):
         # print(time_passed)
@@ -575,9 +601,9 @@ class ToneFlower(ModalView):
         :param instance: the instance of the ModalView itself, a non-static implementation would have passed 'self'
         :return:
         """
-        if instance.elapsed_timer is not None:
-            instance.elapsed_timer.cancel()
-            instance.elapsed_timer = None
+        if instance.toneflower_time_engine is not None:
+            instance.toneflower_time_engine.cancel()
+            instance.toneflower_time_engine = None
 
     @staticmethod
     def on_dismiss_callback(instance):
@@ -603,10 +629,11 @@ class ColorTone(Widget):
         super(ColorTone, self).__init__(**kwargs)
 
         self.note_number = -1
-        self.start_tick = -1
-        self.duration_ticks = -1
+        self.start_offset_ns = -1
+        self.start_offset_pos = 1
+        self.duration_ns = -1
         self.volume = 1.0
-        self.toneflower_engine = None
+        self.toneflower_flow_engine = None
 
         """Index of next note with same note_number"""
         self.index_next_note = -1

@@ -204,7 +204,8 @@ class TFSettings(Screen):
 
         # Add user editable ones:
         self._dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self._dic['WORKSPACE_NAME'].value}", f"???{os.sep}{self._dic['WORKSPACE_NAME'].value}", True, lambda value: self.create_load_tf_workspace(value))
-        self._dic['overall_speedfactor'] = TFSetting("Overall Speedfactor", None, 1.0, f"Premultiplied speedfactor that affects the overall speed of the flowing tones.", True, None)
+        self._dic['overall_tone_speed_factor'] = TFSetting("Overall tone speed factor", None, 1.0, f"Premultiplied factor that affects the speed of the flowing tones.", True, None)
+        self._dic['overall_tone_scale_factor'] = TFSetting("Overall tone scale factor", None, 1.0, f"Premultiplied factor that affects the size of the flowing tones.", True, None)
         # TODO: Provide callback that pushes changes in low/high_pitch_limit to toneflower for example.
         self._dic['low_pitch_limit'] = TFSetting("Low Pitch Limit", None, "G4", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)
         self._dic['high_pitch_limit'] = TFSetting("High Pitch Limit", None, "A6", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)
@@ -212,7 +213,7 @@ class TFSettings(Screen):
         self._dic['tone_color_scheme'] = TFSetting("ColorTone Color Scheme", None, {'C': [255, 0, 0, 255], 'C#/Db': [255, 64, 0, 255], 'D': [255, 128, 0, 255], 'D#/Eb': [255, 191, 0, 255], 'E': [255, 255, 0, 255], 'F': [153, 204, 0, 255], 'F#/Gb': [32, 128, 0, 255], 'G': [0, 89, 45, 255], 'G#/Ab': [0, 96, 191, 255], 'A': [96, 0, 191, 255], 'A#/Bb': [128, 0, 64, 255], 'B': [191, 0, 48, 255]}, f"The color scheme maps every tone to a 4-channel color [R, G, B, Alpha], each channel is a number [0 .. 255].", True, lambda value: self.update_color_sheme(value))
         self._dic['toggle_white_note_strips'] = TFSetting("White Note Strips", None, True, f"Toggle white note background strips.", True, None)
 
-        # TODO: This setting is probably way to difficult to implement, and not even useful:
+        # TODO: This setting is probably way too difficult to implement, and not even useful:
         self._dic['tone_flow_orientation'] = TFSetting("Flowing Direction", None, "Vertical", f"Flowing direction of the tones, either \'Vertical\' or \'Horizontal\'.", True, None)
         self._dic['overall_mute_play_along'] = TFSetting("Mute Play Along", None, True, f"Mute the song's audio while performing", True, None)
 
