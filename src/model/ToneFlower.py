@@ -459,7 +459,6 @@ class ToneFlower(ModalView):
         self.note_speed_factor = CU.tfs.dic['overall_note_speed_factor'].value
         self.note_scale_factor = CU.tfs.dic['overall_note_scale_factor'].value * (ToneFlower.min_size_hint_y / self.min_tone_duration_ns)
 
-
         print(f"the initial size of the foreground is {self.ids.id_top_foreground.size}")
         # self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
 
