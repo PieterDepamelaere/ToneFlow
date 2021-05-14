@@ -181,19 +181,19 @@ class TFSettings(Screen):
         :return:
         """
         # Add non-user editable ones:
-        self._dic['APP_NAME'] = TFSetting("Name of Application", None, str("ToneFlow" + u"\u00AE"), None, False, None)
+        self._dic['APP_NAME'] = TFSetting("Name of application", None, str("ToneFlow" + u"\u00AE"), None, False, None)
         self._dic['MAJOR_MINOR_VERSION'] = TFSetting(f"{self._dic['APP_NAME'].value} Version MAJOR.MINOR", None, "1.0", "In theory, an update of the minor version alone shouldn't induce breaking changes.", False, None)
-        self._dic['CONFIG_FILE_PATH'] = TFSetting("Path to Config File", None, curr_file.parents[2] / "Config_TF.json", None, False, None)
-        self._dic['IMG_DIR_PATH'] = TFSetting("Internal Directory of Images", None, curr_file.parents[2] / "img", None, False, None)
-        self._dic['WORKSPACE_NAME'] = TFSetting("Name of Workspace", None, "Workspace_TF", None, False, None)
-        self._dic['EXPLANATION_PLAYLIST_SONG_NAME'] = TFSetting("Explanation Playlist Song Name", None, f"No spaces, only alphanumeric characters & \"_-\".", None, False, None)
-        self._dic['EXPLANATION_WORKSPACE_PATH'] = TFSetting("Explanation Workspace Name", None, f"Preferably choose path on external device like USB flash drive.", None, False, None)
-        self._dic['FILE_SEP_TEXT'] = TFSetting("Exportable File Separator", None, "/FS/", None, False, None)
-        self._dic['IMAGES_VIDEOS_DIR_NAME'] = TFSetting("Name of Images_Videos Folder in Workspace", None, "Images_Videos", None, False, None)
-        self._dic['PLAYLISTS_DIR_NAME'] = TFSetting("Name of Playlists Folder in Workspace", None, "Playlists", None, False, None)
-        self._dic['PREP_MIDI_DIR_NAME'] = TFSetting("Name of Prep_MIDI Folder in Workspace", None, "Songs_Prep_MIDI", None, False, None)
-        self._dic['RAW_MIDI_DIR_NAME'] = TFSetting("Name of Raw_MIDI Folder in Workspace", None, "Songs_Raw_MIDI", None, False, None)
-        self._dic['MIDI_FILE_EXTENSIONS'] = TFSetting("Supported MIDI File Extensions", None, [".mid", ".midi"], None, False, None)
+        self._dic['CONFIG_FILE_PATH'] = TFSetting("Path to config file", None, curr_file.parents[2] / "Config_TF.json", None, False, None)
+        self._dic['IMG_DIR_PATH'] = TFSetting("Internal directory of images", None, curr_file.parents[2] / "img", None, False, None)
+        self._dic['WORKSPACE_NAME'] = TFSetting("Name of workspace", None, "Workspace_TF", None, False, None)
+        self._dic['EXPLANATION_PLAYLIST_SONG_NAME'] = TFSetting("Explanation playlist song name", None, f"No spaces, only alphanumeric characters & \"_-\".", None, False, None)
+        self._dic['EXPLANATION_WORKSPACE_PATH'] = TFSetting("Explanation workspace name", None, f"Preferably choose path on external device like USB flash drive.", None, False, None)
+        self._dic['FILE_SEP_TEXT'] = TFSetting("Exportable file separator", None, "/FS/", None, False, None)
+        self._dic['IMAGES_VIDEOS_DIR_NAME'] = TFSetting("Name of \"Images_Videos\" folder in workspace", None, "Images_Videos", None, False, None)
+        self._dic['PLAYLISTS_DIR_NAME'] = TFSetting("Name of \"Playlists\" folder in workspace", None, "Playlists", None, False, None)
+        self._dic['PREP_MIDI_DIR_NAME'] = TFSetting("Name of \"Songs_Prep_MIDI\" folder in workspace", None, "Songs_Prep_MIDI", None, False, None)
+        self._dic['RAW_MIDI_DIR_NAME'] = TFSetting("Name of \"Songs_Raw_MIDI\" folder in workspace", None, "Songs_Raw_MIDI", None, False, None)
+        self._dic['MIDI_FILE_EXTENSIONS'] = TFSetting("Supported MIDI file extensions", None, [".mid", ".midi"], None, False, None)
         self._dic['SCREEN_HELP_CLASS'] = TFSetting("Help", None, Help, False, None)
         self._dic['SCREEN_PLAYLIST_CLASS'] = TFSetting("Lineup", None, PlayList, False, None)
         self._dic['SCREEN_PLAYLISTS_CLASS'] = TFSetting("Playlists", None, PlayLists, False, None)
@@ -203,19 +203,19 @@ class TFSettings(Screen):
         self._dic['THEME_BACKGROUND_HUE'] = TFSetting("Background hue influencing text color", None, '500', False, None)
 
         # Add user editable ones:
-        self._dic['tf_workspace_path'] = TFSetting("Path to ToneFlow Workspace", None, curr_file.parents[3] / f"{self._dic['WORKSPACE_NAME'].value}", f"???{os.sep}{self._dic['WORKSPACE_NAME'].value}", True, lambda value: self.create_load_tf_workspace(value))
-        self._dic['overall_tone_speed_factor'] = TFSetting("Overall tone speed factor", None, 1.0, f"Premultiplied factor that affects the speed of the flowing tones.", True, None)
-        self._dic['overall_tone_scale_factor'] = TFSetting("Overall tone scale factor", None, 1.0, f"Premultiplied factor that affects the size of the flowing tones.", True, None)
+        self._dic['tf_workspace_path'] = TFSetting("Path to ToneFlow workspace", None, curr_file.parents[3] / f"{self._dic['WORKSPACE_NAME'].value}", f"???{os.sep}{self._dic['WORKSPACE_NAME'].value}", True, lambda value: self.create_load_tf_workspace(value))
+        self._dic['overall_note_speed_factor'] = TFSetting("Overall note speed factor", None, 1.0, f"Premultiplied factor that affects the speed of the flowing tones.", True, None)
+        self._dic['overall_note_scale_factor'] = TFSetting("Overall note scale factor", None, 1.0, f"Premultiplied factor that affects the size of the flowing tones.", True, None)
         # TODO: Provide callback that pushes changes in low/high_pitch_limit to toneflower for example.
-        self._dic['low_pitch_limit'] = TFSetting("Low Pitch Limit", None, "G4", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)
-        self._dic['high_pitch_limit'] = TFSetting("High Pitch Limit", None, "A6", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)
+        self._dic['low_pitch_limit'] = TFSetting("Low pitch limit", None, "G4", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)
+        self._dic['high_pitch_limit'] = TFSetting("High pitch limit", None, "A6", f"Pitch-underbound of your instrument(s). Supported formats {{'C4', 'C#4', 'Db4', 'C#4/Db4', 'Db4/C#4', 'C#/Db4', 'Db/C#4'}} '4' = central octave.", True, None)
         # TODO: Invent a color_scheme object, try a dictionary for this?
-        self._dic['tone_color_scheme'] = TFSetting("ColorTone Color Scheme", None, {'C': [255, 0, 0, 255], 'C#/Db': [255, 64, 0, 255], 'D': [255, 128, 0, 255], 'D#/Eb': [255, 191, 0, 255], 'E': [255, 255, 0, 255], 'F': [153, 204, 0, 255], 'F#/Gb': [32, 128, 0, 255], 'G': [0, 89, 45, 255], 'G#/Ab': [0, 96, 191, 255], 'A': [96, 0, 191, 255], 'A#/Bb': [128, 0, 64, 255], 'B': [191, 0, 48, 255]}, f"The color scheme maps every tone to a 4-channel color [R, G, B, Alpha], each channel is a number [0 .. 255].", True, lambda value: self.update_color_sheme(value))
-        self._dic['toggle_white_note_strips'] = TFSetting("White Note Strips", None, True, f"Toggle white note background strips.", True, None)
+        self._dic['tone_color_scheme'] = TFSetting("ColorTone color scheme", None, {'C': [255, 0, 0, 255], 'C#/Db': [255, 64, 0, 255], 'D': [255, 128, 0, 255], 'D#/Eb': [255, 191, 0, 255], 'E': [255, 255, 0, 255], 'F': [153, 204, 0, 255], 'F#/Gb': [32, 128, 0, 255], 'G': [0, 89, 45, 255], 'G#/Ab': [0, 96, 191, 255], 'A': [96, 0, 191, 255], 'A#/Bb': [128, 0, 64, 255], 'B': [191, 0, 48, 255]}, f"The color scheme maps every tone to a 4-channel color [R, G, B, Alpha], each channel is a number [0 .. 255].", True, lambda value: self.update_color_sheme(value))
+        self._dic['toggle_white_note_strips'] = TFSetting("White note strips", None, True, f"Toggle white note background strips.", True, None)
 
         # TODO: This setting is probably way too difficult to implement, and not even useful:
-        self._dic['tone_flow_orientation'] = TFSetting("Flowing Direction", None, "Vertical", f"Flowing direction of the tones, either \'Vertical\' or \'Horizontal\'.", True, None)
-        self._dic['overall_mute_play_along'] = TFSetting("Mute Play Along", None, True, f"Mute the song's audio while performing", True, None)
+        self._dic['tone_flow_orientation'] = TFSetting("Flowing direction", None, "Vertical", f"Flowing direction of the tones, either \'Vertical\' or \'Horizontal\'.", True, None)
+        self._dic['overall_mute_play_along'] = TFSetting("Mute play along", None, True, f"Mute the song's audio while performing", True, None)
 
         # TODO: When saving a path to json make sure to do in platform indep fashion so that is is recoverable on other system, yet the config file is never meant to be ported across platform
         # TODO: Config file itself can not be saved to workspace, because one of it's props is the location of the workspace

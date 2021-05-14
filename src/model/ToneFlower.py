@@ -79,6 +79,7 @@ class ToneFlower(ModalView):
 
     # The min_size_sint_y metric imposes an underbound to how small a ColorTone can be depicted while staying visible:
     min_size_hint_y = 0.01
+    schedule_engine_freq = 0.1
 
     # CPU_COUNT = mp.cpu_count()
 
@@ -106,14 +107,13 @@ class ToneFlower(ModalView):
         self.elapsed_time_ns = 0
         self.elapsed_pos = 0
         self.start_time_offset = -1
-        self.tone_scale_factor = 1
-        self.tone_speed_factor = 1
+        self.note_scale_factor = 1
+        self.note_speed_factor = 1
         self.black_note_strips = []
         self.color_strips = {}
         self.note_scale_factor = 1
         self.min_tone_duration_ns = -1
-
-        self.song_position = 1
+        self.current_index_color_tones_song = -1
 
         # # The start time of the object.
         # time_number
@@ -204,6 +204,27 @@ class ToneFlower(ModalView):
         """
 
         instance.prepare_song()
+
+    @staticmethod
+    def on_pre_dismiss_callback(instance):
+        """
+        Callback fired on pre-dismissal of the ToneFlower ModalView
+        :param instance: the instance of the ModalView itself, a non-static implementation would have passed 'self'
+        :return:
+        """
+        instance.stop_toneflower_engine()
+
+    @staticmethod
+    def on_dismiss_callback(instance):
+        """
+        Callback fired on dismissal of the ToneFlower ModalView
+        :param instance: the instance of the ModalView itself, a non-static implementation would have passed 'self'
+        :return: True prevents the modal view from closing
+        """
+        if instance.block_close:
+            toast(f"Blocked closing")
+
+        return instance.block_close
 
     def get_context_menus(self):
         return self._context_menus
@@ -435,13 +456,12 @@ class ToneFlower(ModalView):
                     # sys.stdout.write('  {!r}\n'.format(message))
 
         # Initialize the playback speed and scale factors:
-        self.tone_speed_factor = CU.tfs.dic['overall_tone_speed_factor'].value
-        self.tone_scale_factor = CU.tfs.dic['overall_tone_scale_factor'].value
+        self.note_speed_factor = CU.tfs.dic['overall_note_speed_factor'].value
+        self.note_scale_factor = CU.tfs.dic['overall_note_scale_factor'].value * (ToneFlower.min_size_hint_y / self.min_tone_duration_ns)
 
 
-
-        print(f"the intial size of is {self.ids.id_top_foreground.size}")
-        self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
+        print(f"the initial size of the foreground is {self.ids.id_top_foreground.size}")
+        # self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
 
         toast(f"ToneFlower engine ready...{os.linesep}"
               f"         Enjoy playing!")
@@ -453,49 +473,53 @@ class ToneFlower(ModalView):
         """
 
         if (self.toneflower_time_engine is not None) or (self.toneflower_schedule_engine is not None):
+            self.stop_toneflower_engine()
 
+        else:
+            self.start_toneflower_engine()
+
+        # TODO PDP: FPS!!! https://stackoverflow.com/questions/40952038/kivy-animation-works-slowly
+
+    def start_toneflower_engine(self):
+
+        if self.start_time_offset > -1:
+            self.elapsed_time_ns -= self.start_time_offset
+
+            # In case of starting with offset somewhere, it's probably better not to show previous notes:
+            self.ids.id_top_foreground.clear_widgets()
+
+            # start_time_offset = 8 * sec_per_beat  # 8 beats
+            # accumulated_ticks += start_time_offset
+            # start_time_offset = True
+
+        self.playback_resume_abs_ns = time.perf_counter_ns()
+
+        self.toneflower_time_engine = Clock.schedule_interval(self.tf_time_engine_cycle, 0)
+
+        # self.pool = mp.Pool(processes=self.CPU_COUNT)
+        #
+        # self.toneflower_engine_2.clear()
+
+        # self.toneflower_time_engine = threading.Thread(target=self.infinite_loop())
+        # self.toneflower_time_engine.daemon = True
+        #
+        # self.toneflower_time_engine.start()
+
+        toast(f"ToneFlower engine started")
+
+    def stop_toneflower_engine(self):
+
+        if self.toneflower_time_engine is not None:
             self.toneflower_time_engine.cancel()
             self.toneflower_time_engine = None
 
+        if self.toneflower_schedule_engine is not None:
             self.toneflower_schedule_engine.cancel()
             self.toneflower_schedule_engine = None
 
-            # self.toneflower_engine_2.set()
+        # self.toneflower_engine_2.set()
 
-            toast(f"ToneFlower engine paused")
-
-        else:
-
-            if self.start_time_offset > -1:
-                self.elapsed_time_ns -= self.start_time_offset
-
-                # In case of starting with offset somewhere, it's probably better not to show previous notes:
-                self.ids.id_top_foreground.clear_widgets()
-
-
-
-
-                # start_time_offset = 8 * sec_per_beat  # 8 beats
-                # accumulated_ticks += start_time_offset
-                # start_time_offset = True
-
-            self.playback_resume_abs_ns = time.perf_counter_ns()
-
-            self.toneflower_time_engine = Clock.schedule_interval(self.tf_time_engine_cycle, 0)
-
-            # self.pool = mp.Pool(processes=self.CPU_COUNT)
-            #
-            # self.toneflower_engine_2.clear()
-
-            # self.toneflower_time_engine = threading.Thread(target=self.infinite_loop())
-            # self.toneflower_time_engine.daemon = True
-            #
-            # self.toneflower_time_engine.start()
-
-
-            toast(f"ToneFlower engine started")
-
-        # TODO PDP: FPS!!! https://stackoverflow.com/questions/40952038/kivy-animation-works-slowly
+        toast(f"ToneFlower engine stopped")
 
     def tf_time_engine_cycle(self):
         """
@@ -503,10 +527,15 @@ class ToneFlower(ModalView):
         :return:
         """
 
-        self.elapsed_time_ns += (time.perf_counter_ns() - self.playback_resume_abs_ns) * self.tone_speed_factor
-        self.elapsed_pos = self.elapsed_time_ns * self.tone_scale_factor
+        self.elapsed_time_ns += (time.perf_counter_ns() - self.playback_resume_abs_ns) * self.note_speed_factor
+        self.elapsed_pos = self.elapsed_time_ns * self.note_scale_factor
 
     def tf_schedule_engine_cycle(self):
+        elapsed_pos_on_top = self.elapsed_pos + 1 + (self.note_scale_factor/ToneFlower.schedule_engine_freq)
+
+        current_index_color_tones_song
+
+        # elapsed_time_ns_on_top = self.elapsed_time_ns + (1 + ToneFlower.schedule_engine_freq)/self.note_scale_factor
 
 
     def infinite_loop(self):
@@ -593,29 +622,6 @@ class ToneFlower(ModalView):
             # for tone in value:
             #     tone.y -= time_passed *50.0
                 # tone.pos_hint['y'] -= time_passed/10.0
-
-    @staticmethod
-    def on_pre_dismiss_callback(instance):
-        """
-        Callback fired on pre-dismissal of the ToneFlower ModalView
-        :param instance: the instance of the ModalView itself, a non-static implementation would have passed 'self'
-        :return:
-        """
-        if instance.toneflower_time_engine is not None:
-            instance.toneflower_time_engine.cancel()
-            instance.toneflower_time_engine = None
-
-    @staticmethod
-    def on_dismiss_callback(instance):
-        """
-        Callback fired on dismissal of the ToneFlower ModalView
-        :param instance: the instance of the ModalView itself, a non-static implementation would have passed 'self'
-        :return: True prevents the modal view from closing
-        """
-        if instance.block_close:
-            toast(f"Blocked closing")
-
-        return instance.block_close
 
 
 class ColorStrip(Widget):
