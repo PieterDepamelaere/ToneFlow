@@ -77,7 +77,7 @@ class ToneFlower(ModalView):
     app = None
     is_kv_loaded = False
 
-    # The min_size_sint_y metric imposes an underbound to how small a ColorTone can be depicted while staying visible:
+    # The min_size_hint_y metric imposes an underbound to how small a ColorTone can be depicted while staying visible:
     min_size_hint_y = 0.01
     schedule_engine_freq = 1/15
 
@@ -97,7 +97,7 @@ class ToneFlower(ModalView):
         self.background_color = (0, 0, 0, 0)
         self.color_white_note_strips = get_color_from_hex('#161616FF') if (CU.tfs.dic['toggle_white_note_strips'].value) else get_color_from_hex('#000000FF')
         self.note_number_to_pos_hint_x = {}
-        self.note_number_to_width = {}
+        self.note_number_to_size_hint_x = {}
         self.note_number_to_color = {}
         self.note_number_to_count = {}
         self.toneflower_time_engine = None
@@ -250,7 +250,7 @@ class ToneFlower(ModalView):
 
         # Reset the note_number_to_pos_hint_x dictionary:
         self.note_number_to_pos_hint_x = {}
-        self.note_number_to_width = {}
+        self.note_number_to_size_hint_x = {}
         self.note_number_to_color = {}
         self.note_number_to_count = {}
 
@@ -329,14 +329,14 @@ class ToneFlower(ModalView):
 
             # Before this increment of note, store correct rel_hor_pos, rel_width and color in resp. dicts:
             self.note_number_to_pos_hint_x[note] = rel_hor_pos
-            self.note_number_to_width[note] = rel_width
+            self.note_number_to_size_hint_x[note] = rel_width
             self.note_number_to_color[note] = MTCU.NOTE_COLORS[MTCU.condense_note_pitch(note)]
 
             # Before the increment of note, create a color_strip for this note to indicate volume, waiting time etc:
             color_strip = ColorStrip()
             color_strip.strip_color = self.note_number_to_color[note]
             color_strip.pos_hint = {'x': self.note_number_to_pos_hint_x[note], 'y': 0.0}
-            color_strip.size_hint = (self.note_number_to_width[note], self.note_number_to_count.get(note, 0))
+            color_strip.size_hint = (self.note_number_to_size_hint_x[note], self.note_number_to_count.get(note, 0))
 
             self.ids.id_bottom_foreground.add_widget(color_strip)
             self.color_strips[note] = color_strip
@@ -412,11 +412,7 @@ class ToneFlower(ModalView):
                         tone.tone_color = self.note_number_to_color[message.note]
                         tone.pos_hint_x = self.note_number_to_pos_hint_x[message.note]
                         tone.start_offset_ns = accumulated_ticks * sec_per_tick_ns
-                        # tone.pos_hint_y = accumulated_ticks
-
-                        # tone.size_hint = (instance.note_number_to_size[message.note],
-                        #                   accumulated_ticks - note_number_to_index_of_latest[message.note])
-
+                        tone.size_hint_x = self.note_number_to_size_hint_x[message.note]
                         tone.volume = message.velocity / 127
 
                         # Add ColorTone to collection of song
@@ -435,7 +431,7 @@ class ToneFlower(ModalView):
                                 # This means that the latest_tone_of_note_number has not seen a note_off event yet
                                 # Not allowing it to overshadow the current note, it gets trimmed by a 'virtual' note_off event
 
-                                latest_tone_of_note_number.duration_ns = accumulated_ticks - latest_tone_of_note_number.start_tick
+                                latest_tone_of_note_number.duration_ns = accumulated_ticks - latest_tone_of_note_number.start_offset_ns
 
                                 if self.min_tone_duration_ns == -1 or latest_tone_of_note_number.duration_ns < self.min_tone_duration_ns:
                                     self.min_tone_duration_ns = latest_tone_of_note_number.duration_ns
@@ -447,7 +443,7 @@ class ToneFlower(ModalView):
                         # A note_off event:
 
                         if latest_tone_of_note_number is not None:
-                            latest_tone_of_note_number.duration_ns = accumulated_ticks - latest_tone_of_note_number.start_tick
+                            latest_tone_of_note_number.duration_ns = accumulated_ticks - latest_tone_of_note_number.start_offset_ns
 
                             if self.min_tone_duration_ns == -1 or latest_tone_of_note_number.duration_ns < self.min_tone_duration_ns:
                                 self.min_tone_duration_ns = latest_tone_of_note_number.duration_ns
@@ -462,9 +458,11 @@ class ToneFlower(ModalView):
         # All ColorTone objects have been created for this song, store the amount for easy reuse by the toneflower_schedule_engine:
         self.amount_color_tones_song = len(self.color_tones_song)
 
-        # Initialize the start_offset_pos of all the notes now that the initial note_scale_factor is known:
+        # Initialize the start_offset_pos and size_hint_y of all the notes now that the initial note_scale_factor is known:
         for color_tone in self.color_tones_song:
             color_tone.start_offset_pos = color_tone.start_offset_ns * self.note_scale_factor
+            color_tone.size_hint_y = color_tone.duration_ns * self.note_scale_factor
+
 
         print(f"the initial size of the foreground is {self.ids.id_top_foreground.size}")
         # self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
@@ -557,9 +555,6 @@ class ToneFlower(ModalView):
 
 
 
-
-
-
     def infinite_loop(self):
         while True:
             if self.toneflower_engine_2.is_set():
@@ -601,7 +596,7 @@ class ToneFlower(ModalView):
         # print(f"delta {time_passed * 0.5 * self.note_scale_factor}")
         # print(f"song_position {self.song_position}")
 
-        delta = time_passed * CU.tfs.dic['overall_speedfactor'].value
+        delta = time_passed * CU.tfs.dic['overall_note_speed_factor'].value
 
         # for child in self.ids.id_top_foreground.children:
         child = self.ids.id_top_foreground.children[0]
@@ -620,7 +615,7 @@ class ToneFlower(ModalView):
         #############################
         # Original working code with kivy clock:
 
-        # delta = time_passed * CU.tfs.dic['overall_speedfactor'].value
+        # delta = time_passed * CU.tfs.dic['overall_note_speed_factor'].value
         #
         # # Is this parallellizible?
         # for child in self.ids.id_top_foreground.children:
@@ -680,3 +675,4 @@ class ColorTone(Widget):
 
     def ct_flow_engine_cycle(self):
         self.pos_hint_y = self.start_offset_pos - self.tf.elapsed_pos
+        print(f"note {(self.index_previous_note + self.index_next_note)*0.5} has position: {self.pos_hint_y}")
