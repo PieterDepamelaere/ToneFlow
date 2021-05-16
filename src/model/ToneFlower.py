@@ -79,7 +79,7 @@ class ToneFlower(ModalView):
 
     # The min_size_hint_y metric imposes an underbound to how small a ColorTone can be depicted while staying visible:
     min_size_hint_y = 0.01
-    schedule_engine_freq = 1/15
+    schedule_engine_freq = 4
 
     # CPU_COUNT = mp.cpu_count()
 
@@ -496,7 +496,7 @@ class ToneFlower(ModalView):
             # accumulated_ticks += start_time_offset
             # start_time_offset = True
 
-        self.toneflower_schedule_engine = Clock.schedule_interval(self.tf_schedule_engine_cycle(), self.schedule_engine_freq)
+        self.toneflower_schedule_engine = Clock.schedule_interval(self.tf_schedule_engine_cycle, 1/self.schedule_engine_freq)
 
         self.playback_resume_abs_ns = time.perf_counter_ns()
         self.toneflower_time_engine = Clock.schedule_interval(self.tf_time_engine_cycle, 0)
@@ -526,7 +526,7 @@ class ToneFlower(ModalView):
 
         toast(f"ToneFlower engine stopped")
 
-    def tf_time_engine_cycle(self):
+    def tf_time_engine_cycle(self, *largs, **kwargs):
         """
 
         :return:
@@ -535,13 +535,16 @@ class ToneFlower(ModalView):
         self.elapsed_time_ns += (time.perf_counter_ns() - self.playback_resume_abs_ns) * self.note_speed_factor
         self.elapsed_pos = self.elapsed_time_ns * self.note_scale_factor
 
-    def tf_schedule_engine_cycle(self):
+    def tf_schedule_engine_cycle(self, *largs, **kwargs):
         elapsed_pos_on_top = self.elapsed_pos + 1 + (self.note_scale_factor/ToneFlower.schedule_engine_freq)
         # elapsed_time_ns_on_top = self.elapsed_time_ns + (1 + ToneFlower.schedule_engine_freq)/self.note_scale_factor
 
-        color_tone = self.color_tones_song[self.current_index_color_tones_song]
+        # Initialize color_tone by using a default:
+        color_tone = ColorTone()
 
         while (color_tone.start_offset_pos <= elapsed_pos_on_top) and (self.current_index_color_tones_song < self.amount_color_tones_song):
+
+            color_tone = self.color_tones_song[self.current_index_color_tones_song]
 
             self.ids.id_top_foreground.add_widget(color_tone, len(self.ids.id_background.children))
 
@@ -550,8 +553,6 @@ class ToneFlower(ModalView):
             color_tone.start_colortone_engine()
 
             self.current_index_color_tones_song += 1
-
-            color_tone = self.color_tones_song[self.current_index_color_tones_song]
 
 
 
@@ -673,6 +674,6 @@ class ColorTone(Widget):
             self.colortone_flow_engine.cancel()
             self.colortone_flow_engine = None
 
-    def ct_flow_engine_cycle(self):
+    def ct_flow_engine_cycle(self, *largs, **kwargs):
         self.pos_hint_y = self.start_offset_pos - self.tf.elapsed_pos
         print(f"note {(self.index_previous_note + self.index_next_note)*0.5} has position: {self.pos_hint_y}")
