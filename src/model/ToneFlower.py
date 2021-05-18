@@ -461,7 +461,7 @@ class ToneFlower(ModalView):
             color_tone.start_offset_pos = color_tone.start_offset_ns * self.note_scale_factor
             color_tone.size_hint_y = color_tone.duration_ns * self.note_scale_factor
 
-        self.elapsed_time_offset_ns = 4000 * 1e6
+        self.elapsed_time_offset_ns = 0 * 1e6
 
         print(f"the initial size of the foreground is {self.ids.id_top_foreground.size}")
         self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
@@ -523,12 +523,14 @@ class ToneFlower(ModalView):
 
         toast(f"ToneFlower engine stopped")
 
-    def tf_time_engine_cycle(self, *largs, **kwargs):
+    def tf_time_engine_cycle(self, deltaTime, *largs, **kwargs):
         """
 
         :return:
         """
-        self.elapsed_time_ns += (time.perf_counter_ns() - self.playback_resume_abs_ns) * self.note_speed_factor
+        # TODO PDP: += or = think!!
+        # self.elapsed_time_ns += round((time.perf_counter_ns() - self.playback_resume_abs_ns) * self.note_speed_factor)
+        self.elapsed_time_ns += round(deltaTime * 1e9 * self.note_speed_factor)
         self.elapsed_pos = self.elapsed_time_ns * self.note_scale_factor
 
         print(f"new elapsed time: {self.elapsed_time_ns}  * scale {self.note_scale_factor} = pos {self.elapsed_pos}")
@@ -536,29 +538,33 @@ class ToneFlower(ModalView):
     def tf_schedule_engine_cycle(self, *largs, **kwargs):
 
         # Determine the song's progress at the top of the foreground to know which notes have to be added next:
-        elapsed_pos_on_top = self.elapsed_pos + 1 + ((self.note_scale_factor * 1e9)/ToneFlower.schedule_engine_freq)
+        elapsed_pos_on_top = self.elapsed_pos - 1 - ((self.note_scale_factor * 1e9)/ToneFlower.schedule_engine_freq)
         # elapsed_time_ns_on_top = self.elapsed_time_ns + (1 + ToneFlower.schedule_engine_freq)/self.note_scale_factor
 
+
+        # print(f"elapsed_pos_on_top {elapsed_pos_on_top}")
+
         continue_note_scan = True
-        amount_of_added = 0
 
         while continue_note_scan and (self.current_index_color_tones_song < self.amount_color_tones_song):
 
+            print(f"idx {self.current_index_color_tones_song} in {self.amount_color_tones_song}")
+
             colortone = self.color_tones_song[self.current_index_color_tones_song]
 
-            if colortone.start_offset_pos <= elapsed_pos_on_top:
+            print(f"idx {colortone.start_offset_pos} in {elapsed_pos_on_top}")
 
+            if colortone.start_offset_pos <= elapsed_pos_on_top:
                 self.ids.id_top_foreground.add_widget(colortone, len(self.ids.id_background.children))
                 self.visible_colortones[self.current_index_color_tones_song] = colortone
+
                 colortone.start_colortone_engine()
-                amount_of_added += 1
+
+                print(f"Added note {self.current_index_color_tones_song} with pos {colortone.start_offset_pos} while top pos {elapsed_pos_on_top}")
+                self.current_index_color_tones_song += 1
 
             else:
                 continue_note_scan = False
-
-            self.current_index_color_tones_song += 1
-
-        print(f"amount of added: \"{amount_of_added}\"")
 
     def infinite_loop(self):
         while True:
@@ -680,7 +686,7 @@ class ColorTone(Widget):
 
     def ct_flow_engine_cycle(self, *largs, **kwargs):
         self.pos_hint_y = self.start_offset_pos - self.tf.elapsed_pos
-        # print(self.pos_hint_y)
+
         if (self.index_previous_note == 0):
 
             print(f"({self.start_offset_pos}) - ({self.tf.elapsed_pos}) = {self.pos_hint_y} and size {self.size_hint_y}")
