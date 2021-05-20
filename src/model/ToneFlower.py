@@ -78,7 +78,7 @@ class ToneFlower(ModalView):
     is_kv_loaded = False
 
     # The min_size_hint_y metric imposes an underbound to how small a ColorTone can be depicted while staying visible:
-    min_size_hint_y = 0.1
+    min_size_hint_y = 0.05
     schedule_engine_freq = 4
 
     # CPU_COUNT = mp.cpu_count()
@@ -346,6 +346,7 @@ class ToneFlower(ModalView):
 
         # Remove previous ColorTones if any:
         self.ids.id_top_foreground.clear_widgets()
+        self.elapsed_time_ns = 0
 
         # clip makes sure that no notes would be louder than 127
         midi_file = MidiFile(self.filename, clip=True)
@@ -450,7 +451,7 @@ class ToneFlower(ModalView):
                     # sys.stdout.write('  {!r}\n'.format(message))
 
         # Initialize the playback speed and scale factors:
-        self.note_speed_factor = 1.0 # CU.tfs.dic['overall_note_speed_factor'].value
+        self.note_speed_factor = CU.tfs.dic['overall_note_speed_factor'].value
         self.note_scale_factor = CU.tfs.dic['overall_note_scale_factor'].value * (ToneFlower.min_size_hint_y / self.min_tone_duration_ns)
 
         # All ColorTone objects have been created for this song, store the amount for easy reuse by the toneflower_schedule_engine:
@@ -461,10 +462,10 @@ class ToneFlower(ModalView):
             color_tone.start_offset_pos = color_tone.start_offset_ns * self.note_scale_factor
             color_tone.size_hint_y = color_tone.duration_ns * self.note_scale_factor
 
-        self.elapsed_time_offset_ns = 0 * 1e6
+        self.elapsed_time_offset_ns = 2000 * 1e6
 
         print(f"the initial size of the foreground is {self.ids.id_top_foreground.size}")
-        self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
+        # self.ids.id_top_foreground.size[1] = 1 #self.note_scale_factor * 100
         # print(f"the after size of the foreground is {self.ids.id_top_foreground.size}")
 
         toast(f"ToneFlower engine ready...{os.linesep}"
@@ -488,12 +489,15 @@ class ToneFlower(ModalView):
 
         if self.elapsed_time_offset_ns > 0:
             self.elapsed_time_ns -= self.elapsed_time_offset_ns
+            self.elapsed_time_offset_ns = -1
 
             # In case of starting with offset somewhere, it's probably better not to show previous notes:
             self.ids.id_top_foreground.clear_widgets()
 
-        self.toneflower_schedule_engine = Clock.schedule_interval(self.tf_schedule_engine_cycle, 1/self.schedule_engine_freq)
+        for colortone in self.visible_colortones.values():
+            colortone.start_colortone_engine()
 
+        self.toneflower_schedule_engine = Clock.schedule_interval(self.tf_schedule_engine_cycle, 1/self.schedule_engine_freq)
 
         self.playback_resume_abs_ns = time.perf_counter_ns()
         self.toneflower_time_engine = Clock.schedule_interval(self.tf_time_engine_cycle, 0)
@@ -521,6 +525,9 @@ class ToneFlower(ModalView):
 
         # self.toneflower_engine_2.set()
 
+        for colortone in self.visible_colortones.values():
+            colortone.stop_colortone_engine()
+
         toast(f"ToneFlower engine stopped")
 
     def tf_time_engine_cycle(self, deltaTime, *largs, **kwargs):
@@ -533,13 +540,15 @@ class ToneFlower(ModalView):
         self.elapsed_time_ns += round(deltaTime * 1e9 * self.note_speed_factor)
         self.elapsed_pos = self.elapsed_time_ns * self.note_scale_factor
 
-        print(f"new elapsed time: {self.elapsed_time_ns}  * scale {self.note_scale_factor} = pos {self.elapsed_pos}")
+        # print(f"new elapsed time: {self.elapsed_time_ns}  * scale {self.note_scale_factor} = pos {self.elapsed_pos}")
 
     def tf_schedule_engine_cycle(self, *largs, **kwargs):
 
         # Determine the song's progress at the top of the foreground to know which notes have to be added next:
-        elapsed_pos_on_top = self.elapsed_pos - 1 - ((self.note_scale_factor * 1e9)/ToneFlower.schedule_engine_freq)
+        # elapsed_pos_on_top = self.elapsed_pos - 1 #- ((self.note_scale_factor * 1e9)/ToneFlower.schedule_engine_freq)
         # elapsed_time_ns_on_top = self.elapsed_time_ns + (1 + ToneFlower.schedule_engine_freq)/self.note_scale_factor
+
+        top_pos_hint = 1 + ((self.note_scale_factor * 1e9)/ToneFlower.schedule_engine_freq)
 
 
         # print(f"elapsed_pos_on_top {elapsed_pos_on_top}")
@@ -548,19 +557,19 @@ class ToneFlower(ModalView):
 
         while continue_note_scan and (self.current_index_color_tones_song < self.amount_color_tones_song):
 
-            print(f"idx {self.current_index_color_tones_song} in {self.amount_color_tones_song}")
+            # print(f"idx {self.current_index_color_tones_song} in {self.amount_color_tones_song}")
 
             colortone = self.color_tones_song[self.current_index_color_tones_song]
 
-            print(f"idx {colortone.start_offset_pos} in {elapsed_pos_on_top}")
+            # print(f"actual note pos {(colortone.start_offset_pos - self.elapsed_pos)} is smaller than top?: {top_pos_hint}")
 
-            if colortone.start_offset_pos <= elapsed_pos_on_top:
+            if (colortone.start_offset_pos - self.elapsed_pos) <= top_pos_hint:
                 self.ids.id_top_foreground.add_widget(colortone, len(self.ids.id_background.children))
                 self.visible_colortones[self.current_index_color_tones_song] = colortone
 
                 colortone.start_colortone_engine()
 
-                print(f"Added note {self.current_index_color_tones_song} with pos {colortone.start_offset_pos} while top pos {elapsed_pos_on_top}")
+                # print(f"Added note {self.current_index_color_tones_song} with pos {colortone.start_offset_pos} with start {(colortone.start_offset_pos - self.elapsed_pos)}")
                 self.current_index_color_tones_song += 1
 
             else:
@@ -585,71 +594,71 @@ class ToneFlower(ModalView):
         color_strip.size_hint_y = random.gauss(0.5, 0.1666)
         print(color_strip.size_hint_y)
 
-    @mainthread
-    def shift_color_tone(self, arg):
-        child, delta = arg
-        child.pos_hint_y -= delta
-
-
-    @mainthread
-    def flow_tones(self, time_passed):
-
-        # Resize
-
-        # size is the pixel height of the part from the splitter to the top
-
-        # print(self.ids.id_top_foreground.size[1])
-        # Statement  below can resize, but better scheduled on less frequently polled thread.
-        # self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
-
-
-
-        # print(f"delta {time_passed * 0.5 * self.note_scale_factor}")
-        # print(f"song_position {self.song_position}")
-
-        delta = time_passed * CU.tfs.dic['overall_note_speed_factor'].value
-
-        # for child in self.ids.id_top_foreground.children:
-        child = self.ids.id_top_foreground.children[0]
-        child.pos_hint_y -= delta
-        print(f'done')
-
-        # self.pool = mp.Pool(mp.cpu_count())
-        # list_of_results = self.pool.map(self.shift_color_tone , ((child, delta) for child in self.ids.id_top_foreground.children))
-        # self.pool.close()
-        # self.pool.join()
-
-        # The statement to update the relative layout as a whole does not work together with the note_scale_factor
-        # self.ids.id_top_foreground.pos_hint["y"] -= 1
-
-
-        #############################
-        # Original working code with kivy clock:
-
-        # delta = time_passed * CU.tfs.dic['overall_note_speed_factor'].value
-        #
-        # # Is this parallellizible?
-        # for child in self.ids.id_top_foreground.children:
-        #     child.pos_hint_y -= delta
-
-        ###############################"
-
-        # self.ids.id_top_foreground.pos_hint['x'] += 0.01
-
-        # print(f"size {self.ids.id_top_foreground.size[1]}")
-        # print(f"pos {self.ids.id_top_foreground.pos[1]}")
-
-
-
-        # self.ids.id_top_foreground.size_hint['y'] -= 0.0001
-
-        # for child in self.ids.id_top_foreground.children:
-        #     child.y -= time_passed * 50.0
-
-        # for key, value in self.color_tones_song.items():
-            # for tone in value:
-            #     tone.y -= time_passed *50.0
-                # tone.pos_hint['y'] -= time_passed/10.0
+    # @mainthread
+    # def shift_color_tone(self, arg):
+    #     child, delta = arg
+    #     child.pos_hint_y -= delta
+    #
+    #
+    # @mainthread
+    # def flow_tones(self, time_passed):
+    #
+    #     # Resize
+    #
+    #     # size is the pixel height of the part from the splitter to the top
+    #
+    #     # print(self.ids.id_top_foreground.size[1])
+    #     # Statement  below can resize, but better scheduled on less frequently polled thread.
+    #     # self.ids.id_top_foreground.size[1] = self.note_scale_factor * 100
+    #
+    #
+    #
+    #     # print(f"delta {time_passed * 0.5 * self.note_scale_factor}")
+    #     # print(f"song_position {self.song_position}")
+    #
+    #     delta = time_passed * CU.tfs.dic['overall_note_speed_factor'].value
+    #
+    #     # for child in self.ids.id_top_foreground.children:
+    #     child = self.ids.id_top_foreground.children[0]
+    #     child.pos_hint_y -= delta
+    #     print(f'done')
+    #
+    #     # self.pool = mp.Pool(mp.cpu_count())
+    #     # list_of_results = self.pool.map(self.shift_color_tone , ((child, delta) for child in self.ids.id_top_foreground.children))
+    #     # self.pool.close()
+    #     # self.pool.join()
+    #
+    #     # The statement to update the relative layout as a whole does not work together with the note_scale_factor
+    #     # self.ids.id_top_foreground.pos_hint["y"] -= 1
+    #
+    #
+    #     #############################
+    #     # Original working code with kivy clock:
+    #
+    #     # delta = time_passed * CU.tfs.dic['overall_note_speed_factor'].value
+    #     #
+    #     # # Is this parallellizible?
+    #     # for child in self.ids.id_top_foreground.children:
+    #     #     child.pos_hint_y -= delta
+    #
+    #     ###############################"
+    #
+    #     # self.ids.id_top_foreground.pos_hint['x'] += 0.01
+    #
+    #     # print(f"size {self.ids.id_top_foreground.size[1]}")
+    #     # print(f"pos {self.ids.id_top_foreground.pos[1]}")
+    #
+    #
+    #
+    #     # self.ids.id_top_foreground.size_hint['y'] -= 0.0001
+    #
+    #     # for child in self.ids.id_top_foreground.children:
+    #     #     child.y -= time_passed * 50.0
+    #
+    #     # for key, value in self.color_tones_song.items():
+    #         # for tone in value:
+    #         #     tone.y -= time_passed *50.0
+    #             # tone.pos_hint['y'] -= time_passed/10.0
 
 
 class ColorStrip(Widget):
@@ -687,6 +696,12 @@ class ColorTone(Widget):
     def ct_flow_engine_cycle(self, *largs, **kwargs):
         self.pos_hint_y = self.start_offset_pos - self.tf.elapsed_pos
 
-        if (self.index_previous_note == 0):
+        # if self.pos_hint_y <= 0:
 
-            print(f"({self.start_offset_pos}) - ({self.tf.elapsed_pos}) = {self.pos_hint_y} and size {self.size_hint_y}")
+        # TODO PDP: https://pypi.org/project/pysinewave/
+
+        # TODO PDP http://bspaans.github.io/python-mingus/doc/wiki/tutorialFluidsynth.html
+
+        # if (self.index_previous_note == 0):
+        #
+        #     print(f"({self.start_offset_pos}) - ({self.tf.elapsed_pos}) = {self.pos_hint_y} and size {self.size_hint_y}")
