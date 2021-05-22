@@ -145,7 +145,8 @@ class ToneFlower(ModalView):
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Movie_Themes_-_2001_-_Also_Sprach_Zarathustra_Richard_Strauss.mid'
 
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
-        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
+        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Leave_A_Light_On.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Marble Sounds - Leave a light on.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Game_of_Thrones_Easy_piano.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Ed_Sheeran_-_Perfect_-_Ed_Sheeran.mid'
@@ -631,14 +632,14 @@ class ToneFlower(ModalView):
                 else:
                     break
 
-        sinewave = SineWave(pitch=9)
-
-        # Turn the sine wave on.
-        sinewave.play()
-
-        time.sleep(2)
-
-        sinewave.stop()
+        # sinewave = SineWave(pitch=9)
+        #
+        # # Turn the sine wave on.
+        # sinewave.play()
+        #
+        # time.sleep(2)
+        #
+        # sinewave.stop()
 
     def infinite_loop(self):
         while True:
@@ -731,7 +732,7 @@ class ColorStrip(Widget):
 
 class ColorTone(Widget):
     pos_hint_x = NumericProperty(0)
-    pos_hint_y = NumericProperty(0)
+    pos_hint_y = NumericProperty(1)
 
     def __init__(self, **kwargs):
         super(ColorTone, self).__init__(**kwargs)
@@ -772,7 +773,14 @@ class ColorTone(Widget):
         self.sinewave.stop()
 
     def ct_flow_engine_cycle(self, *largs, **kwargs):
+
         self.pos_hint_y = self.start_offset_pos - self.tf.elapsed_pos
+
+        # if new_pos_hint_y < self.pos_hint_y:
+        #     self.pos_hint_y = new_pos_hint_y
+        # else:
+        #
+        #     print(f"{new_pos_hint_y} >? {self.pos_hint_y}")
 
         if self.pos_hint_y <= 0 and not self.has_played:
             if not self.is_playing:
@@ -788,6 +796,6 @@ class ColorTone(Widget):
         # TODO PDP: https://pypi.org/project/pysinewave/
         # TODO PDP http://bspaans.github.io/python-mingus/doc/wiki/tutorialFluidsynth.html
 
-        if (self.index_previous_note == 0):
-
-            print(f"({self.start_offset_pos}) - ({self.tf.elapsed_pos}) = {self.pos_hint_y} and size {self.size_hint_y}")
+        # if (self.index_previous_note == 0):
+        #
+        #     print(f"({self.start_offset_pos}) - ({self.tf.elapsed_pos}) = {self.pos_hint_y} and size {self.size_hint_y}")
