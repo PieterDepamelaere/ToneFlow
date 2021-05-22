@@ -432,6 +432,7 @@ class ToneFlower(ModalView):
 
                         tone = ColorTone()
                         tone.tf = self
+                        tone.note_number = message_note
                         tone.tone_color = self.note_number_to_color[message_note]
                         tone.pos_hint_x = self.note_number_to_pos_hint_x[message_note]
                         tone.start_offset_ns = accumulated_ticks * sec_per_tick_ns
@@ -523,8 +524,11 @@ class ToneFlower(ModalView):
             # In case of starting with offset somewhere, it's probably better not to show previous notes:
             self.ids.id_top_foreground.clear_widgets()
 
-        for colortone in self.visible_colortones.values():
-            colortone.start_colortone_engine()
+
+        # TODO: Make something that the volume of first notes is preset
+        # for colortone in self.visible_colortones.values():
+        #     self.change_height_color_strip(colortone.note_number, )
+        #     colortone.start_colortone_engine()
 
         self.toneflower_schedule_engine = Clock.schedule_interval(self.tf_schedule_engine_cycle, 1/self.schedule_engine_freq)
 
@@ -656,9 +660,12 @@ class ToneFlower(ModalView):
 
         # results = self.pool.starmap_async(self.change_height_color_strip, [color_strip for color_strip in self.color_strips.values()]).get()
 
-    def change_height_color_strip(self, color_strip):
-        color_strip.size_hint_y = random.gauss(0.5, 0.1666)
-        print(color_strip.size_hint_y)
+    def change_height_color_strip(self, note_number, new_value):
+
+        colorstrip = self.color_strips.get(note_number, None)
+
+        if colorstrip is not None:
+            colorstrip.size_hint_y = new_value
 
     # @mainthread
     # def shift_color_tone(self, arg):
@@ -790,6 +797,8 @@ class ColorTone(Widget):
                 if self.pos_hint_y < -self.size_hint_y:
                     self.has_played = True
                     self.is_playing = False
+
+                    self.tf.change_height_color_strip(self.note_number, self.tf.color_tones_song[self.index_next_note].volume)
                     # self.stop_play()
                     self.stop_colortone_engine()
 
