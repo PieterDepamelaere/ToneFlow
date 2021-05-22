@@ -39,6 +39,9 @@ curr_file = pl.Path(os.path.realpath(__file__))
 from src.model.CommonUtils import CommonUtils as CU
 from src.model.MusicTheoryCoreUtils import MusicTheoryCoreUtils as MTCU
 
+# from mingus.midi import fluidsynth
+from pysinewave import SineWave
+
 
 # class ToneFlowerProvider:
 #
@@ -81,6 +84,8 @@ class ToneFlower(ModalView):
     min_size_hint_y = 0.05
     schedule_engine_freq = 4
 
+    # fluidsynth.init("/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Essential Keys-sfzBanks-v9.6.sf2")
+
     # CPU_COUNT = mp.cpu_count()
 
     def __init__(self, playlist, **kwargs):
@@ -92,6 +97,7 @@ class ToneFlower(ModalView):
         super(ToneFlower, self).__init__(**kwargs)
 
         # Initializing properties of ModalView:
+        # fluidsynth.play_Note(60, 1, 80)
         self.size_hint = (1, 1)
         self.pos_hint = {'x': 0, 'y': 0}
         self.background_color = (0, 0, 0, 0)
@@ -588,7 +594,7 @@ class ToneFlower(ModalView):
         # elapsed_pos_on_top = self.elapsed_pos - 1 #- ((self.note_scale_factor * 1e9)/ToneFlower.schedule_engine_freq)
         # elapsed_time_ns_on_top = self.elapsed_time_ns + (1 + ToneFlower.schedule_engine_freq)/self.note_scale_factor
 
-        top_pos_hint = 1 + ((self.note_scale_factor * 1e9)/ToneFlower.schedule_engine_freq)
+        top_pos_hint = 1 #+ ((self.note_scale_factor * 1e9)/ToneFlower.schedule_engine_freq)
 
 
         # print(f"elapsed_pos_on_top {elapsed_pos_on_top}")
@@ -614,6 +620,25 @@ class ToneFlower(ModalView):
 
             else:
                 continue_note_scan = False
+
+            # Clean up already played notes:
+            for index_colortone in self.visible_colortones:
+
+                colortone = self.visible_colortones[index_colortone]
+
+                if(colortone.has_played):
+                    self.ids.id_top_foreground.remove_widget(colortone)
+                else:
+                    break
+
+        sinewave = SineWave(pitch=9)
+
+        # Turn the sine wave on.
+        sinewave.play()
+
+        time.sleep(2)
+
+        sinewave.stop()
 
     def infinite_loop(self):
         while True:
@@ -726,6 +751,7 @@ class ColorTone(Widget):
 
         """Index of previous note with same note_number"""
         self.index_previous_note = -1
+        self.sinewave = None
 
     def start_colortone_engine(self):
         self.colortone_flow_engine = Clock.schedule_interval(self.ct_flow_engine_cycle, 0)
@@ -735,20 +761,31 @@ class ColorTone(Widget):
             self.colortone_flow_engine.cancel()
             self.colortone_flow_engine = None
 
+    def start_play(self):
+        # Create a sine wave, with a starting pitch of 12, and a pitch change speed of 10/second.
+        self.sinewave = SineWave(pitch=self.note_number-60)
+
+        # Turn the sine wave on.
+        self.sinewave.play()
+
+    def stop_play(self):
+        self.sinewave.stop()
+
     def ct_flow_engine_cycle(self, *largs, **kwargs):
         self.pos_hint_y = self.start_offset_pos - self.tf.elapsed_pos
 
         if self.pos_hint_y <= 0 and not self.has_played:
             if not self.is_playing:
                 self.is_playing = True
+                # self.start_play()
             else:
                 if self.pos_hint_y < -self.size_hint_y:
                     self.has_played = True
                     self.is_playing = False
+                    # self.stop_play()
                     self.stop_colortone_engine()
 
         # TODO PDP: https://pypi.org/project/pysinewave/
-
         # TODO PDP http://bspaans.github.io/python-mingus/doc/wiki/tutorialFluidsynth.html
 
         if (self.index_previous_note == 0):
