@@ -39,7 +39,7 @@ curr_file = pl.Path(os.path.realpath(__file__))
 from src.model.CommonUtils import CommonUtils as CU
 from src.model.MusicTheoryCoreUtils import MusicTheoryCoreUtils as MTCU
 
-# from mingus.midi import fluidsynth
+from mingus.midi import fluidsynth
 from pysinewave import SineWave
 
 
@@ -84,9 +84,12 @@ class ToneFlower(ModalView):
     min_size_hint_y = 0.05
     schedule_engine_freq = 4
 
-    # fluidsynth.init("/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Essential Keys-sfzBanks-v9.6.sf2")
 
+    # fluidsynth.init("/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Essential Keys-sfzBanks-v9.6.sf2")
+    #
     # CPU_COUNT = mp.cpu_count()
+
+
 
     def __init__(self, playlist, **kwargs):
         if (not ToneFlower.is_kv_loaded):
@@ -194,6 +197,8 @@ class ToneFlower(ModalView):
     # def set_list(self, list):
     #     list = CU.safe_cast(list, self._list.__class__, "")
     #     self._list = list
+
+
 
     @staticmethod
     def on_pre_open_callback(instance):
@@ -560,8 +565,6 @@ class ToneFlower(ModalView):
             self.toneflower_schedule_engine.cancel()
             self.toneflower_schedule_engine = None
 
-
-
         for colortone in self.visible_colortones.values():
             colortone.stop_colortone_engine()
 
@@ -636,14 +639,6 @@ class ToneFlower(ModalView):
                 else:
                     break
 
-        # sinewave = SineWave(pitch=9)
-        #
-        # # Turn the sine wave on.
-        # sinewave.play()
-        #
-        # time.sleep(2)
-        #
-        # sinewave.stop()
 
     def infinite_loop(self):
         while True:
@@ -771,7 +766,7 @@ class ColorTone(Widget):
 
     def start_play(self):
         # Create a sine wave, with a starting pitch of 12, and a pitch change speed of 10/second.
-        self.sinewave = SineWave(pitch=self.note_number-60)
+        self.sinewave = SineWave(pitch=self.note_number-60, pitch_per_second=10)
 
         # Turn the sine wave on.
         self.sinewave.play()
@@ -792,14 +787,14 @@ class ColorTone(Widget):
         if self.pos_hint_y <= 0 and not self.has_played:
             if not self.is_playing:
                 self.is_playing = True
-                # self.start_play()
+                self.start_play()
             else:
                 if self.pos_hint_y < -self.size_hint_y:
                     self.has_played = True
                     self.is_playing = False
 
                     self.tf.change_height_color_strip(self.note_number, self.tf.color_tones_song[self.index_next_note].volume)
-                    # self.stop_play()
+                    self.stop_play()
                     self.stop_colortone_engine()
 
         # TODO PDP: https://pypi.org/project/pysinewave/
