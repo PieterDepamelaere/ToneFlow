@@ -526,9 +526,9 @@ class ToneFlower(ModalView):
 
 
         # TODO: Make something that the volume of first notes is preset
-        # for colortone in self.visible_colortones.values():
+        for colortone in self.visible_colortones.values():
         #     self.change_height_color_strip(colortone.note_number, )
-        #     colortone.start_colortone_engine()
+            colortone.start_colortone_engine()
 
         self.toneflower_schedule_engine = Clock.schedule_interval(self.tf_schedule_engine_cycle, 1/self.schedule_engine_freq)
 
