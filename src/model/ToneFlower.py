@@ -39,7 +39,7 @@ curr_file = pl.Path(os.path.realpath(__file__))
 from src.model.CommonUtils import CommonUtils as CU
 from src.model.MusicTheoryCoreUtils import MusicTheoryCoreUtils as MTCU
 
-from mingus.midi import fluidsynth
+from mingus.midi import fluidsynth, pyfluidsynth
 from pysinewave import SineWave
 
 
@@ -84,12 +84,16 @@ class ToneFlower(ModalView):
     min_size_hint_y = 0.05
     schedule_engine_freq = 4
 
+    toneFlowerSynthesizer = pyfluidsynth.Synth(gain=5, samplerate=44100)
 
-    # fluidsynth.init("/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Essential Keys-sfzBanks-v9.6.sf2")
+
+    toneFlowerSynthesizer.start('alsa')
+    sfid = toneFlowerSynthesizer.sfload('/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/MuseScore_General.sf2')
+    toneFlowerSynthesizer.program_select(0, sfid, 0, 0)
+
+    # fluidsynth.set_instrument(0, 14, 1)
     #
     # CPU_COUNT = mp.cpu_count()
-
-
 
     def __init__(self, playlist, **kwargs):
         if (not ToneFlower.is_kv_loaded):
@@ -100,7 +104,6 @@ class ToneFlower(ModalView):
         super(ToneFlower, self).__init__(**kwargs)
 
         # Initializing properties of ModalView:
-        # fluidsynth.play_Note(60, 1, 80)
         self.size_hint = (1, 1)
         self.pos_hint = {'x': 0, 'y': 0}
         self.background_color = (0, 0, 0, 0)
@@ -149,7 +152,7 @@ class ToneFlower(ModalView):
 
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/ChromaticBasics2.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/InDitHuisje.mid'
-        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Leave_A_Light_On.mid'
+        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Leave_A_Light_On.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Marble Sounds - Leave a light on.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Game_of_Thrones_Easy_piano.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/Ed_Sheeran_-_Perfect_-_Ed_Sheeran.mid'
@@ -160,7 +163,7 @@ class ToneFlower(ModalView):
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go1Octavev1.mid'
         # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/How_Far_Ill_Go1Octavev2.mid'
 
-        # self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/LittleSubmarine_TheStarlings1Octave_Preprocessed.mid'
+        self.filename = '/home/pieter/THUIS/Programmeren/PYTHON/Projects/ToneFlowProject/MIDI_Files/LittleSubmarine_TheStarlings1Octave_Preprocessed.mid'
 
 
 
@@ -765,14 +768,22 @@ class ColorTone(Widget):
             self.colortone_flow_engine = None
 
     def start_play(self):
-        # Create a sine wave, with a starting pitch of 12, and a pitch change speed of 10/second.
-        self.sinewave = SineWave(pitch=self.note_number-60, pitch_per_second=10)
+        # # Create a sine wave, with a starting pitch of 12, and a pitch change speed of 10/second.
+        # self.sinewave = SineWave(pitch=self.note_number-60, pitch_per_second=10)
+        #
+        # # Turn the sine wave on.
+        # self.sinewave.play()
 
-        # Turn the sine wave on.
-        self.sinewave.play()
+        ToneFlower.toneFlowerSynthesizer.noteon(0, self.note_number, int(self.volume * 127))
+
+        # fluidsynth.play_Note(self.note_number, 0, 200)
+        # time.sleep(0.00001)
 
     def stop_play(self):
-        self.sinewave.stop()
+        # if self.sinewave is not None:
+        #     self.sinewave.stop()
+        # fluidsynth.stop_Note(self.note_number, 0)
+        ToneFlower.toneFlowerSynthesizer.noteoff(0, self.note_number)
 
     def ct_flow_engine_cycle(self, *largs, **kwargs):
 
