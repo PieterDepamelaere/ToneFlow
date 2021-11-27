@@ -18,6 +18,7 @@
 
 <ColorStrip>:
     strip_color: (1, 1, 1, 1)
+    #size_hint: (root.size_hint_x, root.size_hint_y)
     canvas:
         Color:
             rgba: self.strip_color
@@ -121,7 +122,7 @@
 
                     RelativeLayout:
                         id: id_top_foreground
-                        size_hint: 1.0, None
+                        size_hint: 1.0, 1.0
 #                        text: 'Projected score'
 
 

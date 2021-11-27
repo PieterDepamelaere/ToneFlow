@@ -63,6 +63,7 @@ class MainApp(MDApp):
     """
 
     # TODO: In Pycharm Click Menu Code > Inspect Code... and fix (weak)warnings
+    # TODO: maybe foresee a transposing option at song level, while preprocessing?
 
     # Foresee custom handling of errors, user can bypass them (maybe own mistake) or quit the app, but he sees pop up of the error:
     ExceptionManager.add_handler(TFExceptionHandler())
